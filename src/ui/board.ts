@@ -203,6 +203,9 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
   }
 
   function applyStatuses(statuses: readonly NodeStatus[], displayedState: GameState): void {
+    // Read focus before touching attributes: Chrome blurs a hidden element as soon as its
+    // tabindex changes, so afterwards the focused person would already be lost.
+    const focusedNode = nodeElements.findIndex(({ group }) => group === document.activeElement);
     statuses.forEach((status, node) => {
       const { group, body } = elementsOf(node);
       const isRemoved = status === 'vaccinated' || status === 'quarantined';
@@ -218,6 +221,7 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
       group.setAttribute('tabindex', isRemoved ? '-1' : '0');
       body.removeAttribute('transform');
     });
+    if (focusedNode !== -1) keepFocusOnAPresentNode(focusedNode, statuses);
     graph.edges.forEach(({ lowerNode, higherNode }, edgeIndex) => {
       const line = edgeElements[edgeIndex] as SVGLineElement;
       const isRemoved =
@@ -226,6 +230,18 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
       line.style.removeProperty('opacity');
     });
     updateHover(hoveredNode);
+  }
+
+  /** A keyboard player whose focused person just left the network moves on to the next person. */
+  function keepFocusOnAPresentNode(focusedNode: number, statuses: readonly NodeStatus[]): void {
+    if (!isRemovedStatus(statuses[focusedNode])) return;
+    for (let offset = 1; offset < statuses.length; offset++) {
+      const candidate = (focusedNode + offset) % statuses.length;
+      if (!isRemovedStatus(statuses[candidate])) {
+        elementsOf(candidate).group.focus();
+        return;
+      }
+    }
   }
 
   function describeNode(node: number, status: NodeStatus): string {

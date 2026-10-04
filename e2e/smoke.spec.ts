@@ -83,3 +83,14 @@ test.describe('with a fixed clock', () => {
     await expect(page.getByText('A new Germle is ready.')).toBeVisible();
   });
 });
+
+test('can be played with the keyboard alone', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('heading', { name: 'How to play' })).not.toBeVisible();
+  await page.locator('.node[data-tappable="true"]').first().focus();
+  for (let vaccine = 0; vaccine < 4; vaccine++) await page.keyboard.press('Enter');
+  await expect(page.locator('#phase-label')).toHaveText('Quarantine');
+  await expect(page.locator('.node:focus')).toHaveCount(1);
+});
