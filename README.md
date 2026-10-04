@@ -11,8 +11,8 @@ Salathé Group at Penn State. It shares none of Vax!'s code or artwork.
 
 ## Status
 
-Milestone M1: the game engine (`src/engine/`) is complete and tested; the site still shows a
-placeholder. See `TODO.md` for what comes next.
+Milestone M2: the daily game is playable at `/`, with stats, sharing and an About page at
+`/about`. See `TODO.md` for what comes next.
 
 ## Prerequisites
 
@@ -21,16 +21,20 @@ placeholder. See `TODO.md` for what comes next.
 
 ## Commands
 
-| Command           | What it does                                                |
-| ----------------- | ----------------------------------------------------------- |
-| `npm ci`          | Install exact dev dependencies                              |
-| `npm run dev`     | Vite dev server with hot reload                             |
-| `npm run check`   | Typecheck + lint + format check + unit tests + build (gate) |
-| `npm run build`   | Production build into `dist/`                               |
-| `npm run preview` | Serve the built `dist/` locally                             |
-| `npm run format`  | Rewrite files with Prettier                                 |
+| Command                   | What it does                                                |
+| ------------------------- | ----------------------------------------------------------- |
+| `npm ci`                  | Install exact dev dependencies                              |
+| `npm run dev`             | Vite dev server with hot reload                             |
+| `npm run check`           | Typecheck + lint + format check + unit tests + build (gate) |
+| `npm run build`           | Production build into `dist/`                               |
+| `npm run preview`         | Serve the built `dist/` locally                             |
+| `npm run format`          | Rewrite files with Prettier                                 |
+| `npm run e2e`             | Playwright smoke tests against `dist/` (build first)        |
+| `npm run generate:images` | Re-render favicons, app icons and `og.png` into `public/`   |
 
-`npm run check` must pass before every commit; CI runs the same script on every push and PR.
+`npm run check` must pass before every commit; CI runs the same script on every push and PR, plus
+the Playwright smoke tests in a second job. Playwright needs a Chromium build: run
+`npx playwright install chromium` once (the version is pinned in `package.json`).
 
 ## Architecture
 
@@ -41,6 +45,11 @@ placeholder. See `TODO.md` for what comes next.
 - **Engine:** `src/engine/` is pure TypeScript with no DOM access: seeded streams, the
   Watts–Strogatz network, layout, game rules and scoring. Its rules are specified in
   `docs/ENGINE.md`; unit tests sit next to each module (`*.test.ts`).
+- **UI:** `src/pages/` holds one entry per page; `src/ui/` the SVG board (rendering, hit
+  testing, drag, animations), dialogs and toolbar; `src/share.ts`, `src/stats.ts` and
+  `src/storage.ts` are pure, tested modules for the share card, statistics and validated
+  `localStorage` access. Page shells are plain HTML (`index.html`, `about.html`) so nothing shifts
+  while scripts load.
 - **Docs:** `AGENTS.md` (engineering rules), `DECISIONS.md` (why things are the way they are),
   `TODO.md` (backlog), `DEPLOY.md` (Cloudflare and DNS setup).
 
