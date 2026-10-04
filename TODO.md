@@ -10,7 +10,7 @@ External memory for the project: what is pending, constraints to remember, defer
 
 ## Needs the owner
 
-- [ ] Cloudflare Pages + DNS setup: follow `DEPLOY.md`.
+- [ ] Cloudflare Workers + DNS setup: follow `DEPLOY.md`.
 - [ ] GitHub default branch is `claude/ecstatic-volta-wr90cz` (the first branch pushed); switch it
       to `main` in GitHub → Settings → General → Default branch, then delete the old branch.
 

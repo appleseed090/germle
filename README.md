@@ -41,7 +41,8 @@ viewport, plus a check that par solves in under 300 ms with the CPU throttled 4Ã
 
 - **Stack:** Vite + TypeScript (`strict`, `noUncheckedIndexedAccess`,
   `exactOptionalPropertyTypes`), vanilla DOM and inline SVG. No runtime dependencies.
-- **Hosting:** Cloudflare Pages, static files only, built from `main`. No backend, no accounts;
+- **Hosting:** Cloudflare Workers static assets (an assets-only Worker, no script), built from
+  `main` by Workers Builds; config in `wrangler.jsonc`. No backend, no accounts;
   player state lives in `localStorage`. Security and cache headers are in `public/_headers`.
 - **Engine:** `src/engine/` is pure TypeScript with no DOM access: seeded streams, the
   Wattsâ€“Strogatz network, layout, game rules and scoring. Its rules are specified in
@@ -57,7 +58,7 @@ viewport, plus a check that par solves in under 300 ms with the CPU throttled 4Ã
 
 ## Deployment
 
-Push to `main`; Cloudflare Pages runs `npm run build` and publishes `dist/`. First-time setup is a
+Push to `main`; Workers Builds runs `npm run build`, then `npx wrangler deploy` publishes `dist/`. First-time setup is a
 checklist in `DEPLOY.md`.
 
 Â© 2026 Jonathan Liu

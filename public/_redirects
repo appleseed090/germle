@@ -1,5 +1,5 @@
-# Cloudflare Pages path redirects.
+# Cloudflare static-asset path redirects.
 #
 # The www -> apex redirect (https://www.germle.com/* -> https://germle.com/:splat, 301)
-# cannot live here: Pages _redirects only matches paths, not hostnames, and ignores
+# cannot live here: _redirects only matches paths, not hostnames, and ignores
 # domain-level rules. It is a zone Redirect Rule instead; see DEPLOY.md step 4.

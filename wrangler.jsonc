@@ -1,0 +1,13 @@
+// Cloudflare Workers static assets: an assets-only Worker (no script) that serves dist/.
+// The Worker name must match the project name chosen in the Cloudflare dashboard.
+{
+  "name": "germle",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    // /about serves about.html; /about.html redirects to /about.
+    "html_handling": "auto-trailing-slash",
+    // Unknown paths get a plain 404 rather than the game page.
+    "not_found_handling": "none",
+  },
+}

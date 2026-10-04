@@ -5,3 +5,4 @@ test-results
 package-lock.json
 public/*.png
 public/*.ico
+.wrangler

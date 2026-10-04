@@ -18,7 +18,16 @@ brief are not repeated here.
 
 ## Hosting
 
-- **www → apex is a Cloudflare zone Redirect Rule, not a `_redirects` line.** Pages `_redirects`
+- **Workers static assets instead of Cloudflare Pages.** The dashboard no longer offers creating a
+  Pages project on this account (Cloudflare now steers new projects to Workers), so the site is an
+  assets-only Worker: no script, still static and free, configured in `wrangler.jsonc`.
+  `_headers` and `_redirects` keep working unchanged; `html_handling: auto-trailing-slash` keeps
+  `/about` and `/practice` clean; unknown paths return 404. Verified under `wrangler dev`.
+- **Deploy with `npx wrangler deploy`, not a pinned devDependency.** Wrangler pulls in the workerd
+  runtime (tens of MB) and is only needed on Cloudflare's build machine; the brief keeps dev
+  dependencies to the listed tools.
+
+- **www → apex is a Cloudflare zone Redirect Rule, not a `_redirects` line.** Cloudflare `_redirects`
   matches paths only and does not support domain-level redirects, so the line in the brief would
   be ignored. `public/_redirects` explains this; `DEPLOY.md` step 4 has the rule.
 - **CSP allows Cloudflare Web Analytics hosts.** `static.cloudflareinsights.com` (script) and
@@ -59,7 +68,7 @@ brief are not repeated here.
 
 - **`LAUNCH_DATE` is 2026-10-04**, the day M2 shipped. Puzzle numbers below 1 (a device clock set
   before launch) clamp to #1.
-- **Static multi-page build.** `index.html` is `/`, `about.html` is served by Pages at `/about`.
+- **Static multi-page build.** `index.html` is `/`, `about.html` is served at `/about`.
   No client-side router.
 - **Taps hit the nearest person within max(22 CSS px, radius + 6).** Overlapping 44 px circles
   would make the drawing order decide; nearest-centre gives Voronoi-like targets of at least
