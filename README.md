@@ -11,8 +11,8 @@ Salathé Group at Penn State. It shares none of Vax!'s code or artwork.
 
 ## Status
 
-Milestone M2: the daily game is playable at `/`, with stats, sharing and an About page at
-`/about`. See `TODO.md` for what comes next.
+Milestone M3: the daily game at `/` (with par, stats and sharing), practice mode at `/practice`
+and the About page at `/about`. See `TODO.md` for the backlog.
 
 ## Prerequisites
 
@@ -33,7 +33,8 @@ Milestone M2: the daily game is playable at `/`, with stats, sharing and an Abou
 | `npm run generate:images` | Re-render favicons, app icons and `og.png` into `public/`   |
 
 `npm run check` must pass before every commit; CI runs the same script on every push and PR, plus
-the Playwright smoke tests in a second job. Playwright needs a Chromium build: run
+the Playwright tests in a second job (daily and practice smoke tests on a phone and a desktop
+viewport, plus a check that par solves in under 300 ms with the CPU throttled 4×). Playwright needs a Chromium build: run
 `npx playwright install chromium` once (the version is pinned in `package.json`).
 
 ## Architecture
@@ -44,11 +45,12 @@ the Playwright smoke tests in a second job. Playwright needs a Chromium build: r
   player state lives in `localStorage`. Security and cache headers are in `public/_headers`.
 - **Engine:** `src/engine/` is pure TypeScript with no DOM access: seeded streams, the
   Watts–Strogatz network, layout, game rules and scoring. Its rules are specified in
-  `docs/ENGINE.md`; unit tests sit next to each module (`*.test.ts`).
+  `docs/ENGINE.md`; unit tests sit next to each module (`*.test.ts`). `solver.ts` computes each
+  puzzle's par (also specified in `docs/ENGINE.md`).
 - **UI:** `src/pages/` holds one entry per page; `src/ui/` the SVG board (rendering, hit
-  testing, drag, animations), dialogs and toolbar; `src/share.ts`, `src/stats.ts` and
-  `src/storage.ts` are pure, tested modules for the share card, statistics and validated
-  `localStorage` access. Page shells are plain HTML (`index.html`, `about.html`) so nothing shifts
+  testing, drag, animations), dialogs and toolbar; `src/share.ts`, `src/stats.ts`,
+  `src/storage.ts` and `src/practice-setup.ts` are pure, tested modules for the share card,
+  statistics, validated `localStorage` access and practice links. Page shells are plain HTML (`index.html`, `about.html`) so nothing shifts
   while scripts load.
 - **Docs:** `AGENTS.md` (engineering rules), `DECISIONS.md` (why things are the way they are),
   `TODO.md` (backlog), `DEPLOY.md` (Cloudflare and DNS setup).

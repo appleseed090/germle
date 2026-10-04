@@ -103,6 +103,56 @@ brief are not repeated here.
   committed.** All artwork is original and drawn in code; no third-party assets, so no
   `CREDITS.md` yet.
 
+## Par and practice (M3)
+
+- **Par solver: centrality-pooled vaccine sets ranked by fragmentation, then a beam search over
+  quarantines with exact simulation.** Budget: pool 14, 24 sets played, beam 6. Bigger budgets
+  bought little: 6× the work raised mean par from 83.3% to 85.2% over 100 puzzles. Ranking
+  heuristics (lexicographic or several linear mixes) all landed within 0.2 points, so the simple
+  lexicographic one stays.
+- **Solver speed, measured.** Node on the dev container: 11 ms mean, 45 ms worst over puzzles
+  1–365. Chromium with the CPU throttled 4× (Lighthouse's mid-range-phone setting), in the real
+  page: 38–135 ms over today's puzzle and 7 practice seeds with the daily settings. The
+  `e2e/par-timing.spec.ts` test enforces < 300 ms. Not measured on a physical phone.
+- **Constants left unchanged after calibration.** With the shipped budget over puzzles 1–365:
+  mean par 83.8%, p10 78%, median 85%, p90 88%, and 69% of days within 75–85%. β from 0.35 to
+  0.45 moved the median by only 2 points (the clairvoyant solver dodges bad rolls) while making
+  the game much harder for players, who cannot; refusers 2→4 and rewiring 0.1→0.2 changed
+  nothing measurable. A unit test keeps mean par over puzzles 1–60 in 78–88%.
+
+  | Change from daily constants | Mean par | Median | Days in 75–85% |
+  | --------------------------- | -------- | ------ | -------------- |
+  | none (β 0.35)               | 83.8     | 85     | 69%            |
+  | β 0.40                      | 83.0     | 83     | 71%            |
+  | β 0.45                      | 82.3     | 83     | 67%            |
+  | 3 refusers                  | 83.7     | 85     | 67%            |
+  | rewiring 0.2                | 84.1     | 85     | 63%            |
+
+- **Par is solved 0.9 s after the outbreak starts, cached, and stored with the day's result.** Not
+  at page load, so Lighthouse's blocking time stays near zero; stored so a reload never re-solves.
+  Results saved before par existed get it computed once when shown.
+- **Share line 1 becomes `Germle #12 · 78% saved · par 83%`.** The brief wrote `· par <p>`; the
+  percent sign matches "78% saved". The existing `/^Germle #\d+ · \d+% saved/` contract still
+  matches.
+- **The About page says the solver knows the rolls.** Honest framing for a par players may not
+  reach.
+- **Practice links are the state.** `/practice?people=&neighbours=&vaccines=&outbreaks=&refusers=&contagion=&seed=`
+  is parsed defensively (clamped to slider ranges, vaccines and outbreaks reduced to fit the
+  network, seed reduced to `[a-z0-9-]{1,24}`), and the address bar always shows the game being
+  played. Restarting navigates to a new link instead of tearing down the board: no teardown code,
+  and every game is shareable and replayable.
+- **Practice seed key is `practice-<seed>`; rewiring stays at the daily 0.1.** The brief's slider
+  list does not include rewiring.
+- **"Neighbours" slider is the ring degree: 2, 4 or 6.**
+- **Practice never touches stats or progress, and has no share card.** The brief says practice is
+  not counted; settings are shared with the daily page.
+- **A bare `/practice` visit opens the setup dialog over a playable random game.** A link with a
+  seed goes straight to the game.
+- **Throttled timing test uses practice seeds, not faked dates.** Playwright's fake clock replaces
+  `performance`, which drops User Timing entries.
+- **Page shells repeat the header, toolbar and settings markup.** No templating step for three
+  static pages; listed in `TODO.md` as a possible cleanup.
+
 ## Credits
 
 - **Footer name is "Jonathan Liu".** The brief says to use the git author name; in this

@@ -78,3 +78,25 @@ left a choice open, the choice made is stated here and logged in `DECISIONS.md`.
   an infected and a susceptible person.
 - Score = `round(100 × (untouched + quarantined + vaccinated) / people)`, rounding halves up. The
   four counts (vaccinated, quarantined, untouched, infected) are reported with it.
+
+## Par (`src/engine/solver.ts`)
+
+Par is the score of the best game a deterministic solver finds with a fixed search budget. Rolls
+are fixed per puzzle, so the solver evaluates every candidate exactly; it is clairvoyant, which
+players are not.
+
+1. **Vaccine sets.** Rank non-refusers by betweenness centrality (ties: degree, then node
+   number) and take the top 14 (fewer if the number of combinations would exceed 3,000). Score
+   every combination by the sum of squared component sizes after removing it (lower is more
+   even fragmentation) and keep the best 24.
+2. **Outbreak.** For each set, choose index patients exactly as the engine does.
+3. **Quarantines.** Beam search, width 6. Candidates are susceptible people within two healthy
+   steps of the infection. Children are simulated exactly (quarantine, then one turn), ranked by
+   healthy people already cut off from the infection, then healthy people still exposed, then the
+   negated frontier size; duplicates are dropped. A branch is pruned when even saving every
+   exposed person could not beat the best finished game.
+4. **Verification.** The winning move list is replayed through the engine; the reported score is
+   the engine's. The solver throws if its fast simulation ever disagrees with the engine.
+
+Practice networks above 40 people use a smaller budget (`solverBudgetFor`) so solve time stays
+roughly constant.
