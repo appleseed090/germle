@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>About Germle — a daily outbreak puzzle</title>
+    <meta
+      name="description"
+      content="How Germle works: vaccinate to break up a social network, quarantine to contain an outbreak, and save as many people as you can."
+    />
+    <link rel="canonical" href="https://germle.com/about" />
+    <meta name="theme-color" content="#f7f5f0" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Germle" />
+    <meta property="og:title" content="About Germle" />
+    <meta
+      property="og:description"
+      content="A daily outbreak puzzle. How it works, where it came from, and your privacy."
+    />
+    <meta property="og:url" content="https://germle.com/about" />
+    <meta property="og:image" content="https://germle.com/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://germle.com/og.png" />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body class="page-content">
+    <header class="app-header">
+      <a class="wordmark" href="/" aria-label="Germle home">
+        <svg class="wordmark-mark" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 7L17 5M6 7L8 18M17 5L18 16M8 18L18 16M6 7L18 16" />
+          <circle cx="6" cy="7" r="3" />
+          <circle cx="17" cy="5" r="3" />
+          <circle cx="8" cy="18" r="3" />
+          <circle class="wordmark-mark-infected" cx="18" cy="16" r="3.4" />
+        </svg>
+        <span>Germle</span>
+      </a>
+      <a class="play-link" href="/">Play today's puzzle</a>
+    </header>
+    <main class="content">
+      <h1>About Germle</h1>
+      <p>
+        A daily outbreak puzzle. Everyone gets the same small social network each day. It takes
+        about two minutes.
+      </p>
+
+      <h2>How to play</h2>
+      <ol>
+        <li>
+          You have 4 vaccines. Tap people to vaccinate them; they leave the network. Break it into
+          pieces.
+        </li>
+        <li>
+          Then an outbreak starts. Tap a healthy person to quarantine them — but every quarantine
+          passes a day, and the infection spreads.
+        </li>
+        <li>
+          The game ends when the outbreak has nowhere left to go. Save as many people as you can.
+        </li>
+      </ol>
+
+      <h2>The rules in detail</h2>
+      <ul>
+        <li>
+          The network has 40 people. Lines are contacts. You can drag people around to see the
+          network better; it changes nothing in the game.
+        </li>
+        <li>
+          Orange people with a cross refuse vaccines. They can still catch the infection, and you
+          can still quarantine them.
+        </li>
+        <li>
+          When your last vaccine is used, two people fall ill, never next to each other if that can
+          be avoided. Infected people are red with a white centre and cannot be quarantined.
+        </li>
+        <li>
+          Each day, every contact between an infected and a healthy person passes the infection with
+          a 35% chance. Even if every one of those chances misses, at least one person who can be
+          reached falls ill that day. People infected today start spreading tomorrow.
+        </li>
+        <li>Nobody recovers. Vaccinated and quarantined people are safe for good.</li>
+        <li>
+          Your score is the share of the 40 people who never got infected: vaccinated, quarantined
+          and untouched people all count as saved.
+        </li>
+        <li>
+          Chance is fixed for the day: two players who make the same moves see exactly the same
+          outbreak. A new puzzle starts at midnight your local time.
+        </li>
+      </ul>
+
+      <h2>Inspiration</h2>
+      <p>
+        Germle is an original game inspired by Vax! (2014) by Ellsworth Campbell and Isaac Bromley
+        of the Salathé Group at Penn State. Germle shares none of its code or artwork.
+      </p>
+
+      <h2>Privacy</h2>
+      <p>No accounts, no tracking in the game; progress is stored in your browser.</p>
+
+      <footer class="content-footer">© 2026 Jonathan Liu</footer>
+    </main>
+  </body>
+</html>
