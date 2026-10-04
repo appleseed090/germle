@@ -482,6 +482,10 @@ button {
   font-size: 1.35rem;
 }
 
+.dialog h2:focus {
+  outline: none;
+}
+
 .dialog h3 {
   margin: 18px 0 8px;
   font-size: 0.85rem;
@@ -498,7 +502,8 @@ button {
 }
 
 .primary-button {
-  display: block;
+  display: grid;
+  place-items: center;
   width: 100%;
   min-height: 48px;
   margin-top: 16px;
@@ -508,7 +513,113 @@ button {
   color: var(--color-on-accent);
   font-size: 1.05rem;
   font-weight: 700;
+  text-decoration: none;
   cursor: pointer;
+}
+
+.secondary-button {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  padding: 0 8px;
+  white-space: nowrap;
+  border: 1.5px solid var(--color-accent);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-accent);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font-size: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.header-text-button {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.header-text-button:hover {
+  background: rgb(0 0 0 / 0.05);
+}
+
+.dialog-intro {
+  margin: 0 0 8px;
+  color: var(--color-text-muted);
+}
+
+.slider-field {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 2px 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.slider-field label {
+  font-weight: 600;
+}
+
+.slider-field output {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.slider-field input[type='range'] {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  accent-color: var(--color-accent);
+}
+
+.seed-field {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0 0;
+}
+
+.seed-field label {
+  font-weight: 600;
+}
+
+.seed-field input {
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.practice-summary {
+  margin: 12px 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
 }
 
 .primary-button:hover {
@@ -633,6 +744,11 @@ button {
   font-size: 2.6rem;
   font-weight: 800;
   line-height: 1;
+}
+
+.result-par {
+  margin: -6px 0 12px;
+  font-weight: 600;
 }
 
 .breakdown-bar {

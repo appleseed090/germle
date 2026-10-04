@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Germle practice — any network, any outbreak</title>
+    <meta
+      name="description"
+      content="Practise Germle on networks of your choice: set the people, contacts, vaccines, outbreaks, refusers and contagiousness, and replay any seed."
+    />
+    <link rel="canonical" href="https://germle.com/practice" />
+    <meta name="theme-color" content="#f7f5f0" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Germle" />
+    <meta property="og:title" content="Germle practice" />
+    <meta property="og:description" content="Practise Germle on any network and replay any seed." />
+    <meta property="og:url" content="https://germle.com/practice" />
+    <meta property="og:image" content="https://germle.com/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://germle.com/og.png" />
+    <script type="module" src="/src/pages/practice.ts"></script>
+  </head>
+  <body class="page-game">
+    <div class="app">
+      <header class="app-header">
+        <a class="wordmark" href="/" aria-label="Germle home">
+          <svg class="wordmark-mark" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 7L17 5M6 7L8 18M17 5L18 16M8 18L18 16M6 7L18 16" />
+            <circle cx="6" cy="7" r="3" />
+            <circle cx="17" cy="5" r="3" />
+            <circle cx="8" cy="18" r="3" />
+            <circle class="wordmark-mark-infected" cx="18" cy="16" r="3.4" />
+          </svg>
+          <span>Germle</span>
+        </a>
+        <span class="puzzle-label">Practice</span>
+        <nav class="header-actions" aria-label="Practice menu">
+          <button class="header-text-button" type="button" id="open-setup">Setup</button>
+          <button class="icon-button" type="button" id="open-settings" aria-label="Settings">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 7h16M4 17h16" />
+              <circle class="icon-knob" cx="9" cy="7" r="2.5" />
+              <circle class="icon-knob" cx="15" cy="17" r="2.5" />
+            </svg>
+          </button>
+        </nav>
+      </header>
+
+      <main class="board" id="board">
+        <p class="outbreak-banner" id="outbreak-banner" hidden>Outbreak!</p>
+        <noscript><p class="noscript">Germle needs JavaScript to run.</p></noscript>
+      </main>
+
+      <section class="toolbar" aria-label="Game status">
+        <div class="toolbar-row">
+          <span class="phase-pill" id="phase-label" data-phase="vaccinate">Vaccinate</span>
+          <span class="counter" id="counter">4 vaccines left</span>
+          <span class="counter-secondary" id="counter-secondary"></span>
+          <button class="text-button" type="button" id="toolbar-results" hidden>See results</button>
+        </div>
+        <p class="instruction" id="instruction">Vaccinate 4 people to break up the network</p>
+      </section>
+    </div>
+
+    <p class="visually-hidden" id="announcer" aria-live="polite"></p>
+    <p class="toast" id="toast" role="status" hidden></p>
+
+    <dialog class="dialog" id="setup-dialog" aria-labelledby="setup-title">
+      <div class="dialog-header">
+        <h2 id="setup-title" tabindex="-1" autofocus>Practice setup</h2>
+        <button class="icon-button" type="button" data-close-dialog aria-label="Close">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </div>
+      <p class="dialog-intro">
+        Build any network you like. Practice games never count toward your stats.
+      </p>
+      <div class="slider-field">
+        <label for="setup-people">People</label
+        ><output id="setup-people-value" for="setup-people"></output>
+        <input type="range" id="setup-people" />
+      </div>
+      <div class="slider-field">
+        <label for="setup-neighbours">Neighbours</label
+        ><output id="setup-neighbours-value" for="setup-neighbours"></output>
+        <input type="range" id="setup-neighbours" />
+      </div>
+      <div class="slider-field">
+        <label for="setup-vaccines">Vaccines</label
+        ><output id="setup-vaccines-value" for="setup-vaccines"></output>
+        <input type="range" id="setup-vaccines" />
+      </div>
+      <div class="slider-field">
+        <label for="setup-outbreaks">Outbreaks</label
+        ><output id="setup-outbreaks-value" for="setup-outbreaks"></output>
+        <input type="range" id="setup-outbreaks" />
+      </div>
+      <div class="slider-field">
+        <label for="setup-refusers">Refusers</label
+        ><output id="setup-refusers-value" for="setup-refusers"></output>
+        <input type="range" id="setup-refusers" />
+      </div>
+      <div class="slider-field">
+        <label for="setup-contagion">Contagiousness</label
+        ><output id="setup-contagion-value" for="setup-contagion"></output>
+        <input type="range" id="setup-contagion" />
+      </div>
+      <div class="seed-field">
+        <label for="setup-seed">Seed</label>
+        <input
+          type="text"
+          id="setup-seed"
+          maxlength="24"
+          autocomplete="off"
+          spellcheck="false"
+          autocapitalize="off"
+        />
+        <button class="secondary-button" type="button" id="setup-random-seed">Random</button>
+      </div>
+      <button class="primary-button" type="button" id="setup-start">Start</button>
+      <p class="dialog-footnote">
+        <button class="link-button" type="button" id="setup-daily-defaults">
+          Reset to daily settings
+        </button>
+        ·
+        <a href="/">Today's puzzle</a>
+      </p>
+    </dialog>
+
+    <dialog class="dialog" id="results-dialog" aria-labelledby="results-title">
+      <div class="dialog-header">
+        <h2 id="results-title">Practice result</h2>
+        <button class="icon-button" type="button" data-close-dialog aria-label="Close">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </div>
+      <p class="result-score"><span id="result-score"></span> saved</p>
+      <p class="result-par" id="result-par"></p>
+      <div class="breakdown-bar" id="breakdown-bar" aria-hidden="true">
+        <span class="breakdown-segment breakdown-segment--vaccinated"></span>
+        <span class="breakdown-segment breakdown-segment--quarantined"></span>
+        <span class="breakdown-segment breakdown-segment--untouched"></span>
+        <span class="breakdown-segment breakdown-segment--infected"></span>
+      </div>
+      <ul class="breakdown-legend" id="breakdown-legend">
+        <li><span class="swatch swatch--vaccinated"></span>Vaccinated <strong></strong></li>
+        <li><span class="swatch swatch--quarantined"></span>Quarantined <strong></strong></li>
+        <li><span class="swatch swatch--untouched"></span>Untouched <strong></strong></li>
+        <li><span class="swatch swatch--infected"></span>Infected <strong></strong></li>
+      </ul>
+      <p class="practice-summary" id="practice-summary"></p>
+      <a class="primary-button" id="play-again" href="/practice" autofocus>Play again</a>
+      <div class="button-row">
+        <a class="secondary-button" id="new-network" href="/practice">New network</a>
+        <button class="secondary-button" type="button" id="change-setup">Change setup</button>
+      </div>
+      <p class="dialog-footnote">
+        Practice games don't count toward your stats. <a href="/">Today's puzzle</a>
+      </p>
+    </dialog>
+
+    <dialog class="dialog" id="settings-dialog" aria-labelledby="settings-title">
+      <div class="dialog-header">
+        <h2 id="settings-title">Settings</h2>
+        <button class="icon-button" type="button" data-close-dialog aria-label="Close">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </div>
+      <label class="setting">
+        <span>
+          <span class="setting-name">Size people by contacts</span>
+          <span class="setting-hint">Better-connected people are drawn a little larger.</span>
+        </span>
+        <input type="checkbox" class="switch" id="setting-size-by-degree" />
+      </label>
+      <label class="setting">
+        <span>
+          <span class="setting-name">Reduce motion</span>
+          <span class="setting-hint"
+            >Skip animations. Follows your device setting until you change it.</span
+          >
+        </span>
+        <input type="checkbox" class="switch" id="setting-reduce-motion" />
+      </label>
+      <p class="dialog-footnote">
+        <a href="/">Today's puzzle</a> · <a href="/about">About Germle</a> · © 2026 Jonathan Liu
+      </p>
+    </dialog>
+  </body>
+</html>
