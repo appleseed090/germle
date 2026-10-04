@@ -21,6 +21,8 @@ export interface DailyProgress {
 export interface DailyResult {
   readonly score: number;
   readonly counts: OutcomeCounts;
+  /** Par for that puzzle; absent in results saved before par existed. */
+  readonly par?: number;
 }
 
 export const DEFAULT_SETTINGS: Settings = Object.freeze({
@@ -160,6 +162,7 @@ function parseResults(value: unknown): Map<number, DailyResult> {
 function parseResult(value: unknown): DailyResult | undefined {
   if (!isRecord(value) || !isRecord(value['counts'])) return undefined;
   const score = value['score'];
+  const par = value['par'];
   const { vaccinated, quarantined, untouched, infected } = value['counts'];
   if (!isNonNegativeInteger(score) || score > 100) return undefined;
   if (
@@ -170,5 +173,6 @@ function parseResult(value: unknown): DailyResult | undefined {
   ) {
     return undefined;
   }
-  return { score, counts: { vaccinated, quarantined, untouched, infected } };
+  const counts = { vaccinated, quarantined, untouched, infected };
+  return isNonNegativeInteger(par) && par <= 100 ? { score, counts, par } : { score, counts };
 }

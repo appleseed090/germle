@@ -5,6 +5,8 @@ export interface ShareableResult {
   readonly puzzleNumber: number;
   readonly score: number;
   readonly counts: OutcomeCounts;
+  /** The solver's score for the same puzzle, when known. */
+  readonly par?: number;
 }
 
 /**
@@ -25,17 +27,18 @@ const SHARE_DOMAIN = 'germle.com';
  * The three-line share text:
  *
  * ```
- * Germle #12 · 78% saved
+ * Germle #12 · 78% saved · par 83%
  * ▣▨▨□□□□□■■
  * germle.com
  * ```
  *
- * The first line's format is a public contract (people paste it, tests match it); change it
- * deliberately.
+ * The par suffix is left out when par is unknown. The first line's format is a public contract
+ * (people paste it, tests match it); change it deliberately.
  */
 export function buildShareText(result: ShareableResult): string {
+  const parSuffix = result.par === undefined ? '' : ` · par ${result.par}%`;
   return [
-    `Germle #${result.puzzleNumber} · ${result.score}% saved`,
+    `Germle #${result.puzzleNumber} · ${result.score}% saved${parSuffix}`,
     buildShareBar(result.counts),
     SHARE_DOMAIN,
   ].join('\n');

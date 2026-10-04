@@ -8,6 +8,7 @@ import {
 import { histogramBand, type PlayerStats } from '../stats';
 import { openDialog, wireDialog } from './dialogs';
 import { requireElement } from './dom';
+import { describeParComparison, renderOutcomeBreakdown } from './outcome-breakdown';
 import type { Toast } from './toast';
 
 /** The results and statistics dialog of the daily page. */
@@ -16,8 +17,6 @@ export interface ResultsDialog {
   /** Shows today's result (or the "finish first" note when `undefined`) and the stats. */
   update(result: ShareableResult | undefined, stats: PlayerStats): void;
 }
-
-const OUTCOME_ORDER = ['vaccinated', 'quarantined', 'untouched', 'infected'] as const;
 
 /**
  * Binds the dialog markup in the page shell.
@@ -31,6 +30,7 @@ export function createResultsDialog(toast: Toast, nextPuzzleAt: Date): ResultsDi
   const summary = requireElement('result-summary', HTMLElement);
   const pending = requireElement('result-pending', HTMLElement);
   const score = requireElement('result-score', HTMLElement);
+  const parLine = requireElement('result-par', HTMLElement);
   const breakdownBar = requireElement('breakdown-bar', HTMLElement);
   const breakdownLegend = requireElement('breakdown-legend', HTMLElement);
   const sharePreview = requireElement('share-preview', HTMLElement);
@@ -87,14 +87,10 @@ export function createResultsDialog(toast: Toast, nextPuzzleAt: Date): ResultsDi
       if (result !== undefined) {
         title.textContent = `Germle #${result.puzzleNumber}`;
         score.textContent = `${result.score}%`;
-        const total = OUTCOME_ORDER.reduce((sum, outcome) => sum + result.counts[outcome], 0);
-        OUTCOME_ORDER.forEach((outcome, index) => {
-          const segment = breakdownBar.children[index];
-          if (segment instanceof HTMLElement)
-            segment.style.flexGrow = String(result.counts[outcome] / total);
-          const count = breakdownLegend.children[index]?.querySelector('strong');
-          if (count) count.textContent = String(result.counts[outcome]);
-        });
+        parLine.hidden = result.par === undefined;
+        if (result.par !== undefined)
+          parLine.textContent = describeParComparison(result.score, result.par);
+        renderOutcomeBreakdown(breakdownBar, breakdownLegend, result.counts);
         shareText = buildShareText(result);
         sharePreview.textContent = shareText;
       }

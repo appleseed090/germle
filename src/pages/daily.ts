@@ -14,12 +14,13 @@ import {
 } from '../engine';
 import type { ShareableResult } from '../share';
 import { computePlayerStats } from '../stats';
-import { browserLocalStorage, createGameStorage, type Settings } from '../storage';
+import { browserLocalStorage, createGameStorage } from '../storage';
 import { openDialog, wireDialog } from '../ui/dialogs';
-import { prefersReducedMotion, requireElement } from '../ui/dom';
-import { mountGameSession, type GameDisplayOptions } from '../ui/game-session';
+import { requireElement } from '../ui/dom';
+import { mountGameSession } from '../ui/game-session';
 import { createResultsDialog } from '../ui/results-dialog';
-import { bindSettingsDialog } from '../ui/settings-dialog';
+import { connectSettingsDialog, displayOptionsFor } from '../ui/settings-dialog';
+import { PAR_SOLVE_DELAY_MILLISECONDS, createParSolver } from '../ui/par';
 import { createToast } from '../ui/toast';
 
 const RESULTS_DELAY_AFTER_END = 700;
@@ -35,6 +36,7 @@ const restoredState =
     ? replayMoves(puzzle, savedProgress.moves)
     : undefined;
 const initialState = restoredState ?? startGame(puzzle).state;
+const solveParOnce = createParSolver(puzzle);
 
 const toast = createToast(requireElement('toast', HTMLElement));
 const resultsDialog = createResultsDialog(toast, nextPuzzleStart(today));
@@ -42,16 +44,10 @@ const howToPlayDialog = requireElement('how-to-play-dialog', HTMLDialogElement);
 wireDialog(howToPlayDialog);
 requireElement('puzzle-label', HTMLElement).textContent = `#${puzzleNumber}`;
 
-let settings = storage.loadSettings();
-const displayOptionsFor = (current: Settings): GameDisplayOptions => ({
-  sizeNodesByDegree: current.sizeNodesByDegree,
-  reduceMotion: current.reduceMotion ?? prefersReducedMotion(),
-});
-
 const session = mountGameSession({
   puzzle,
   initialState,
-  display: displayOptionsFor(settings),
+  display: displayOptionsFor(storage.loadSettings()),
   toast,
   elements: {
     boardContainer: requireElement('board', HTMLElement),
@@ -67,7 +63,13 @@ const session = mountGameSession({
     storage.saveDailyProgress({ puzzleNumber, moves: step.state.moves });
     if (step.state.phase === 'ended') {
       const counts = countOutcomes(step.state);
-      storage.saveResult(puzzleNumber, { score: scorePercent(counts), counts });
+      storage.saveResult(puzzleNumber, {
+        score: scorePercent(counts),
+        counts,
+        par: solveParOnce().score,
+      });
+    } else if (step.events.some((event) => event.kind === 'outbreak-started')) {
+      window.setTimeout(solveParOnce, PAR_SOLVE_DELAY_MILLISECONDS);
     }
   },
   onGameEnded: (state) => {
@@ -85,20 +87,13 @@ function refreshResults(state: GameState): void {
   let result: ShareableResult | undefined;
   if (state.phase === 'ended') {
     const counts = countOutcomes(state);
-    result = { puzzleNumber, score: scorePercent(counts), counts };
+    const par = storage.loadResults().get(puzzleNumber)?.par ?? solveParOnce().score;
+    result = { puzzleNumber, score: scorePercent(counts), counts, par };
   }
   resultsDialog.update(result, computePlayerStats(storage.loadResults(), puzzleNumber));
 }
 
-const settingsDialog = bindSettingsDialog(settings, prefersReducedMotion, (updated) => {
-  settings = updated;
-  storage.saveSettings(settings);
-  session.setDisplayOptions(displayOptionsFor(settings));
-});
-session.setDisplayOptions(displayOptionsFor(settings));
-window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => {
-  session.setDisplayOptions(displayOptionsFor(settings));
-});
+const settingsDialog = connectSettingsDialog(storage, session);
 
 requireElement('open-how-to-play', HTMLButtonElement).addEventListener('click', () => {
   openDialog(howToPlayDialog);
