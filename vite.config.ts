@@ -5,6 +5,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         daily: 'index.html',
+        about: 'about.html',
       },
     },
   },

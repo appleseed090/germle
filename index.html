@@ -2,16 +2,267 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Germle — a daily outbreak puzzle</title>
-    <meta name="description" content="Germle is a daily outbreak puzzle. Coming soon." />
-    <meta name="theme-color" content="#f6f4ef" />
-    <link rel="stylesheet" href="/src/placeholder.css" />
+    <meta
+      name="description"
+      content="A daily outbreak puzzle. Vaccinate a few people to break up a social network, then quarantine to contain the outbreak. Two minutes a day, no login."
+    />
+    <link rel="canonical" href="https://germle.com/" />
+    <meta name="theme-color" content="#f7f5f0" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Germle" />
+    <meta property="og:title" content="Germle — a daily outbreak puzzle" />
+    <meta
+      property="og:description"
+      content="Vaccinate a few people to break up the network, then contain the outbreak. A new puzzle every day."
+    />
+    <meta property="og:url" content="https://germle.com/" />
+    <meta property="og:image" content="https://germle.com/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Germle: a social network of grey dots with a red outbreak spreading through it."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Germle — a daily outbreak puzzle" />
+    <meta
+      name="twitter:description"
+      content="Vaccinate a few people to break up the network, then contain the outbreak. A new puzzle every day."
+    />
+    <meta name="twitter:image" content="https://germle.com/og.png" />
+    <script type="module" src="/src/pages/daily.ts"></script>
   </head>
-  <body>
-    <main>
-      <h1>Germle — coming soon.</h1>
-      <p>A daily outbreak puzzle.</p>
-    </main>
+  <body class="page-game">
+    <div class="app">
+      <header class="app-header">
+        <a class="wordmark" href="/" aria-label="Germle home">
+          <svg class="wordmark-mark" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 7L17 5M6 7L8 18M17 5L18 16M8 18L18 16M6 7L18 16" />
+            <circle cx="6" cy="7" r="3" />
+            <circle cx="17" cy="5" r="3" />
+            <circle cx="8" cy="18" r="3" />
+            <circle class="wordmark-mark-infected" cx="18" cy="16" r="3.4" />
+          </svg>
+          <span>Germle</span>
+        </a>
+        <span class="puzzle-label" id="puzzle-label"></span>
+        <nav class="header-actions" aria-label="Game menu">
+          <button class="icon-button" type="button" id="open-how-to-play" aria-label="How to play">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14" />
+              <circle class="icon-dot" cx="12" cy="17.2" r="1.1" />
+            </svg>
+          </button>
+          <button
+            class="icon-button"
+            type="button"
+            id="open-results"
+            aria-label="Results and statistics"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 20V12M12 20V5M19 20V9" />
+            </svg>
+          </button>
+          <button class="icon-button" type="button" id="open-settings" aria-label="Settings">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 7h16M4 17h16" />
+              <circle class="icon-knob" cx="9" cy="7" r="2.5" />
+              <circle class="icon-knob" cx="15" cy="17" r="2.5" />
+            </svg>
+          </button>
+        </nav>
+      </header>
+
+      <main class="board" id="board">
+        <p class="outbreak-banner" id="outbreak-banner" hidden>Outbreak!</p>
+        <noscript><p class="noscript">Germle needs JavaScript to run.</p></noscript>
+      </main>
+
+      <section class="toolbar" aria-label="Game status">
+        <div class="toolbar-row">
+          <span class="phase-pill" id="phase-label" data-phase="vaccinate">Vaccinate</span>
+          <span class="counter" id="counter">4 vaccines left</span>
+          <span class="counter-secondary" id="counter-secondary"></span>
+          <button class="text-button" type="button" id="toolbar-results" hidden>See results</button>
+        </div>
+        <p class="instruction" id="instruction">Vaccinate 4 people to break up the network</p>
+      </section>
+    </div>
+
+    <p class="visually-hidden" id="announcer" aria-live="polite"></p>
+    <p class="toast" id="toast" role="status" hidden></p>
+
+    <dialog class="dialog" id="how-to-play-dialog" aria-labelledby="how-to-play-title">
+      <div class="dialog-header">
+        <h2 id="how-to-play-title">How to play</h2>
+        <button class="icon-button" type="button" data-close-dialog aria-label="Close">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </div>
+      <ol class="how-to-steps">
+        <li>
+          <svg class="how-to-figure" viewBox="0 0 120 56" aria-hidden="true">
+            <path class="figure-edge" d="M16 28L44 14M16 28L44 42M76 14L104 28M76 42L104 28" />
+            <path
+              class="figure-edge figure-edge--gone"
+              d="M44 14L60 28M44 42L60 28M60 28L76 14M60 28L76 42"
+            />
+            <circle class="figure-node" cx="16" cy="28" r="8" />
+            <circle class="figure-node" cx="44" cy="14" r="8" />
+            <circle class="figure-node" cx="44" cy="42" r="8" />
+            <circle class="figure-node figure-node--vaccinated" cx="60" cy="28" r="8" />
+            <circle class="figure-node" cx="76" cy="14" r="8" />
+            <circle class="figure-node" cx="76" cy="42" r="8" />
+            <circle class="figure-node" cx="104" cy="28" r="8" />
+          </svg>
+          <p>
+            You have 4 vaccines. Tap people to vaccinate them; they leave the network. Break it into
+            pieces.
+          </p>
+        </li>
+        <li>
+          <svg class="how-to-figure" viewBox="0 0 120 56" aria-hidden="true">
+            <path class="figure-edge" d="M16 28L44 14M16 28L44 42M44 14L76 28M44 42L76 28" />
+            <path class="figure-edge figure-edge--gone" d="M76 28L104 28" />
+            <circle class="figure-node figure-node--infected" cx="16" cy="28" r="8" />
+            <circle class="figure-core" cx="16" cy="28" r="2.6" />
+            <circle class="figure-node figure-node--infected" cx="44" cy="14" r="8" />
+            <circle class="figure-core" cx="44" cy="14" r="2.6" />
+            <circle class="figure-node" cx="44" cy="42" r="8" />
+            <circle class="figure-node" cx="76" cy="28" r="8" />
+            <circle class="figure-node figure-node--quarantined" cx="104" cy="28" r="8" />
+          </svg>
+          <p>
+            Then an outbreak starts. Tap a healthy person to quarantine them — but every quarantine
+            passes a day, and the infection spreads.
+          </p>
+        </li>
+        <li>
+          <svg class="how-to-figure" viewBox="0 0 120 56" aria-hidden="true">
+            <path
+              class="figure-edge"
+              d="M16 28L40 14M16 28L40 42M80 14L104 28M80 42L104 28M80 14L80 42"
+            />
+            <circle class="figure-node figure-node--infected" cx="16" cy="28" r="8" />
+            <circle class="figure-core" cx="16" cy="28" r="2.6" />
+            <circle class="figure-node figure-node--infected" cx="40" cy="14" r="8" />
+            <circle class="figure-core" cx="40" cy="14" r="2.6" />
+            <circle class="figure-node figure-node--infected" cx="40" cy="42" r="8" />
+            <circle class="figure-core" cx="40" cy="42" r="2.6" />
+            <circle class="figure-node" cx="80" cy="14" r="8" />
+            <circle class="figure-node" cx="80" cy="42" r="8" />
+            <circle class="figure-node" cx="104" cy="28" r="8" />
+          </svg>
+          <p>
+            The game ends when the outbreak has nowhere left to go. Save as many people as you can.
+          </p>
+        </li>
+      </ol>
+      <p class="legend-line">
+        <span class="legend-item"><span class="legend-dot legend-dot--healthy"></span>Healthy</span>
+        <span class="legend-item"
+          ><span class="legend-dot legend-dot--refuser"></span>Refuses vaccines</span
+        >
+        <span class="legend-item"
+          ><span class="legend-dot legend-dot--infected"></span>Infected</span
+        >
+      </p>
+      <button class="primary-button" type="button" data-close-dialog autofocus>
+        Start playing
+      </button>
+      <p class="dialog-footnote">
+        A new puzzle every day at midnight. <a href="/about">About Germle</a>
+      </p>
+    </dialog>
+
+    <dialog class="dialog" id="results-dialog" aria-labelledby="results-title">
+      <div class="dialog-header">
+        <h2 id="results-title">Results</h2>
+        <button class="icon-button" type="button" data-close-dialog aria-label="Close">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </div>
+      <section class="result-summary" id="result-summary" hidden>
+        <p class="result-score"><span id="result-score"></span> saved</p>
+        <div class="breakdown-bar" id="breakdown-bar" aria-hidden="true">
+          <span class="breakdown-segment breakdown-segment--vaccinated"></span>
+          <span class="breakdown-segment breakdown-segment--quarantined"></span>
+          <span class="breakdown-segment breakdown-segment--untouched"></span>
+          <span class="breakdown-segment breakdown-segment--infected"></span>
+        </div>
+        <ul class="breakdown-legend" id="breakdown-legend">
+          <li><span class="swatch swatch--vaccinated"></span>Vaccinated <strong></strong></li>
+          <li><span class="swatch swatch--quarantined"></span>Quarantined <strong></strong></li>
+          <li><span class="swatch swatch--untouched"></span>Untouched <strong></strong></li>
+          <li><span class="swatch swatch--infected"></span>Infected <strong></strong></li>
+        </ul>
+        <pre class="share-preview" id="share-preview"></pre>
+        <button class="primary-button" type="button" id="share-button" autofocus>Share</button>
+        <div class="share-fallback" id="share-fallback" hidden>
+          <label for="share-fallback-text">Copy your result:</label>
+          <textarea id="share-fallback-text" rows="3" readonly></textarea>
+        </div>
+      </section>
+      <p class="result-pending" id="result-pending">Finish today's puzzle to see your score.</p>
+      <p class="countdown" id="countdown-line">
+        Next Germle in <time id="countdown">--:--:--</time>
+      </p>
+      <p class="countdown" id="new-puzzle-ready" hidden>
+        A new Germle is ready. <a href="/">Play it</a>
+      </p>
+      <section class="stats" aria-labelledby="stats-title">
+        <h3 id="stats-title">Statistics</h3>
+        <dl class="stats-grid">
+          <div>
+            <dt>Played</dt>
+            <dd id="stat-played">0</dd>
+          </div>
+          <div>
+            <dt>Current streak</dt>
+            <dd id="stat-streak">0</dd>
+          </div>
+          <div>
+            <dt>Best score</dt>
+            <dd id="stat-best">–</dd>
+          </div>
+        </dl>
+        <h3>Scores</h3>
+        <ol class="histogram" id="histogram"></ol>
+      </section>
+      <p class="dialog-footnote"><a href="/about">About Germle</a></p>
+    </dialog>
+
+    <dialog class="dialog" id="settings-dialog" aria-labelledby="settings-title">
+      <div class="dialog-header">
+        <h2 id="settings-title">Settings</h2>
+        <button class="icon-button" type="button" data-close-dialog aria-label="Close">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </div>
+      <label class="setting">
+        <span>
+          <span class="setting-name">Size people by contacts</span>
+          <span class="setting-hint">Better-connected people are drawn a little larger.</span>
+        </span>
+        <input type="checkbox" class="switch" id="setting-size-by-degree" />
+      </label>
+      <label class="setting">
+        <span>
+          <span class="setting-name">Reduce motion</span>
+          <span class="setting-hint"
+            >Skip animations. Follows your device setting until you change it.</span
+          >
+        </span>
+        <input type="checkbox" class="switch" id="setting-reduce-motion" />
+      </label>
+      <p class="dialog-footnote"><a href="/about">About Germle</a> · © 2026 Jonathan Liu</p>
+    </dialog>
   </body>
 </html>
