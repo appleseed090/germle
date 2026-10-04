@@ -24,8 +24,10 @@ about the production branch you pick in step 1, so this is housekeeping, not a b
 
 ## 1. Connect the repo
 
-Cloudflare dashboard → **Workers & Pages** → **Create** → **Pages** → **Connect to Git** →
-authorise GitHub → select `germle`.
+Cloudflare dashboard → **Workers & Pages** → **Create application** → **Pages** →
+**Connect to Git** → authorise GitHub (choose **Only select repositories** → `germle`) → select
+`germle`. If the create screen opens on a Workers setup, switch to the **Pages** tab (or follow the
+"Looking to deploy Pages?" link); a Worker is the wrong project type here.
 
 | Setting                | Value                     |
 | ---------------------- | ------------------------- |
@@ -44,11 +46,16 @@ Cloudflare appends a suffix such as `germle-abc.pages.dev`; use whatever it show
 This is the simplest route, and it is required for the apex domain to work with Pages without
 `ALIAS` records.
 
-Cloudflare → **Add a site** (or **Add a domain**) → `germle.com` → **Free** plan. When it offers
+Cloudflare → **Onboard a domain** (older dashboards: **Add a site**) → `germle.com` → **Free**
+plan. When it offers
 to import existing DNS records, **delete every imported record** (they are Porkbun's parking
 page). Note the two nameservers Cloudflare assigns (they look like `name.ns.cloudflare.com`).
 
 ## 3. Point Porkbun at Cloudflare
+
+First check DNSSEC is off: Porkbun → **Domain Management** → `germle.com` → **DNSSEC**. If it
+is on, turn it off and wait an hour before the nameserver change, or the domain stops resolving.
+You can turn DNSSEC back on later from Cloudflare (**DNS** → **Settings**).
 
 Porkbun → **Domain Management** → `germle.com` → **Nameservers** (pencil icon) → replace the four
 `*.ns.porkbun.com` entries with the two Cloudflare ones. Alternatively use Porkbun's
@@ -59,24 +66,23 @@ Domain lock and auto-renew can stay on; changing nameservers does not need the l
 
 ## 4. Attach the domain to Pages
 
-Pages project → **Custom domains** → **Set up a custom domain** → `germle.com`. Repeat for
-`www.germle.com`. Cloudflare creates the DNS records and certificates itself.
+Wait until the zone shows **Active** (step 3). Then Pages project → **Custom domains** →
+**Set up a custom domain** → `germle.com`. Repeat for `www.germle.com`. Cloudflare creates the
+DNS records and certificates itself; each domain shows **Active** after a few minutes.
 
 **www → apex redirect.** The brief planned this as a line in `public/_redirects`, but Cloudflare
 Pages `_redirects` only matches paths and does not support domain-level redirects, so it has to be
 a zone rule (one-time, no code):
 
-Cloudflare → `germle.com` zone → **Rules** → **Overview** → **Create rule** → **Redirect Rule**
-→ use the template **Redirect from WWW to Root** if offered, otherwise:
+Cloudflare → `germle.com` zone → **Rules** → **Overview** → **Templates** → **Redirect from WWW
+to Root** → **Create rule**. The template fills in:
 
-| Field                      | Value                                                 |
-| -------------------------- | ----------------------------------------------------- |
-| Rule name                  | `www to apex`                                         |
-| If incoming requests match | Custom filter: **Hostname** equals `www.germle.com`   |
-| Then: type                 | **Dynamic**                                           |
-| Expression                 | `concat("https://germle.com", http.request.uri.path)` |
-| Status code                | `301`                                                 |
-| Preserve query string      | on                                                    |
+| Field                      | Value                                         |
+| -------------------------- | --------------------------------------------- |
+| If incoming requests match | Wildcard pattern, request URL `https://www.*` |
+| Then: target URL           | `https://${1}`                                |
+| Status code                | `301`                                         |
+| Preserve query string      | on                                            |
 
 Deploy the rule. It only fires if the `www` DNS record is proxied (orange cloud), which it is when
 Pages created it in the step above.
