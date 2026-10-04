@@ -7,12 +7,20 @@ These steps need someone logged in to the Cloudflare and Porkbun accounts. Do th
 
 ## Checklist
 
+- [ ] 0. Make `main` the default branch on GitHub
 - [ ] 1. Connect the repo to Cloudflare Pages
 - [ ] 2. Move DNS for `germle.com` to Cloudflare
 - [ ] 3. Point Porkbun's nameservers at Cloudflare
 - [ ] 4. Attach `germle.com` and `www.germle.com` to Pages, and add the www → apex redirect rule
 - [ ] 5. Verify
 - [ ] 6. Optional: Web Analytics and preview deployments
+
+## 0. Make `main` the default branch
+
+The first branch pushed to the empty repo was the agent's working branch, so GitHub made it the
+default. GitHub → `germle` → **Settings** → **General** → **Default branch** → switch to `main`.
+Then delete `claude/ecstatic-volta-wr90cz` under **Branches** if you like. Cloudflare only cares
+about the production branch you pick in step 1, so this is housekeeping, not a blocker.
 
 ## 1. Connect the repo
 

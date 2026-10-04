@@ -11,7 +11,8 @@ Salathé Group at Penn State. It shares none of Vax!'s code or artwork.
 
 ## Status
 
-Milestone M0: scaffold and placeholder page. See `TODO.md` for what comes next.
+Milestone M1: the game engine (`src/engine/`) is complete and tested; the site still shows a
+placeholder. See `TODO.md` for what comes next.
 
 ## Prerequisites
 
@@ -37,6 +38,9 @@ Milestone M0: scaffold and placeholder page. See `TODO.md` for what comes next.
   `exactOptionalPropertyTypes`), vanilla DOM and inline SVG. No runtime dependencies.
 - **Hosting:** Cloudflare Pages, static files only, built from `main`. No backend, no accounts;
   player state lives in `localStorage`. Security and cache headers are in `public/_headers`.
+- **Engine:** `src/engine/` is pure TypeScript with no DOM access: seeded streams, the
+  Watts–Strogatz network, layout, game rules and scoring. Its rules are specified in
+  `docs/ENGINE.md`; unit tests sit next to each module (`*.test.ts`).
 - **Docs:** `AGENTS.md` (engineering rules), `DECISIONS.md` (why things are the way they are),
   `TODO.md` (backlog), `DEPLOY.md` (Cloudflare and DNS setup).
 
