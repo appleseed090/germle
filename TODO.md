@@ -9,13 +9,6 @@ External memory for the project: what is pending, constraints to remember, defer
 - [x] M3 — Practice mode. The par solver built for M3 was later dropped for a fixed
       Contained/Spread verdict (see `DECISIONS.md`).
 
-## Waiting on the owner's decision
-
-Recommendations were sent on 2026-10-05; build once decided.
-
-- **Daily settings in the game.** Recommended: one line in the how-to-play dialog built from
-  `DAILY_PUZZLE_CONFIG` with practice's summary formatter; not in the toolbar or results.
-
 ## Needs the owner
 
 - [x] GitHub default branch switched to `main`.
@@ -43,6 +36,12 @@ Recommendations were sent on 2026-10-05; build once decided.
   day's puzzle. Needs a small backend to collect daily scores; today there is none.
 - **Link from the Snackle hub:** add a Germle entry to the owner's Snackle hub so players can
   find it alongside the other games.
+
+## Known issues
+
+- On a 375 × 667 screen (iPhone SE) the how-to-play dialog is 47 px taller than the viewport, so
+  it opens scrolled to "Start playing" with step 1 out of view. It already overflowed by 41 px
+  before the daily-constants line was added; 360 × 740 and larger fit.
 
 ## Deferred cleanups
 

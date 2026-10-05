@@ -240,3 +240,13 @@ brief are not repeated here.
   Counts above 9 are vanishingly rare (one in 24,000 people at 80 people and 6 neighbours).
 - **Each person's screen-reader label uses the live count** (`Person 7: healthy, 3 contacts`), so
   it always says what the digit shows.
+
+## Daily constants in the game
+
+- **The how-to-play dialog states them in one line under the steps:** "Every daily puzzle: 40
+  people · 4 vaccines · 2 outbreaks · 2 refusers · 35% contagious". It is built from
+  `DAILY_PUZZLE_CONFIG` by `describePuzzleConfig`, the same formatter as practice's result
+  summary, so it cannot drift from the config. Not in the toolbar, a single line kept for the
+  numbers that change during play, with no room on a 360 px phone; not in the results, where
+  identical numbers every day say nothing about the game, and the share card is a public format.
+  The About page keeps its hand-written prose (see `TODO.md`).

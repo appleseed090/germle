@@ -52,9 +52,9 @@ Chromium build: run `npx playwright install chromium` once (the version is pinne
   `docs/ENGINE.md`; unit tests sit next to each module (`*.test.ts`).
 - **UI:** `src/pages/` holds one entry per page; `src/ui/` the SVG board (rendering, hit
   testing, drag, animations), dialogs, disclosure buttons and toolbar; `src/share.ts`, `src/stats.ts`,
-  `src/storage.ts`, `src/practice-setup.ts` and `src/verdict.ts` are pure, tested modules for the
-  share card, statistics, validated `localStorage` access, practice links and the
-  Contained/Spread verdict. Page shells are plain HTML (`index.html`, `about.html`) so nothing shifts
+  `src/storage.ts`, `src/practice-setup.ts`, `src/puzzle-summary.ts` and `src/verdict.ts` are
+  pure, tested modules for the share card, statistics, validated `localStorage` access, practice
+  links, the one-line puzzle summary and the Contained/Spread verdict. Page shells are plain HTML (`index.html`, `about.html`) so nothing shifts
   while scripts load.
 - **Themes:** every colour is a CSS token in `src/styles/main.css`. The dark theme overrides them
   when the device prefers dark, or when the player picks Dark in Settings (`src/theme.ts` sets

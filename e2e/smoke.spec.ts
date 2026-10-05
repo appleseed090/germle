@@ -20,6 +20,9 @@ test('plays a full daily game, shares the result and restores it on reload', asy
   await page.goto('/');
 
   await expect(page.getByRole('heading', { name: 'How to play' })).toBeVisible();
+  await expect(page.locator('#daily-constants')).toHaveText(
+    'Every daily puzzle: 40 people · 4 vaccines · 2 outbreaks · 2 refusers · 35% contagious',
+  );
   await page.getByRole('button', { name: 'Start playing' }).click();
   await expect(page.locator('#phase-label')).toHaveText('Vaccinate');
   await expect(page.locator('.node')).toHaveCount(40);

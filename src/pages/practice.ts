@@ -16,11 +16,12 @@ import {
   randomSeed,
   type PracticeSetup,
 } from '../practice-setup';
+import { describePuzzleConfig } from '../puzzle-summary';
 import { browserLocalStorage, createGameStorage } from '../storage';
 import { openDialog, wireDialog } from '../ui/dialogs';
 import { wireDisclosureButtons } from '../ui/disclosure';
 import { requireElement } from '../ui/dom';
-import { mountGameSession, pluralize } from '../ui/game-session';
+import { mountGameSession } from '../ui/game-session';
 import { renderOutcomeBreakdown, renderVerdict } from '../ui/outcome-breakdown';
 import { connectSettingsDialog, displayOptionsFor } from '../ui/settings-dialog';
 import { createToast } from '../ui/toast';
@@ -99,15 +100,7 @@ requireElement('change-setup', HTMLButtonElement).addEventListener('click', () =
 if (!pageParameters.has('seed')) openDialog(setupDialog);
 
 function describeSetup(practice: PracticeSetup): string {
-  const { config, seed } = practice;
-  return [
-    pluralize(config.nodeCount, 'person', 'people'),
-    pluralize(config.vaccineCount, 'vaccine', 'vaccines'),
-    pluralize(config.indexPatientCount, 'outbreak', 'outbreaks'),
-    pluralize(config.refuserCount, 'refuser', 'refusers'),
-    `${Math.round(config.transmissionProbability * 100)}% contagious`,
-    `seed ${seed}`,
-  ].join(' · ');
+  return `${describePuzzleConfig(practice.config)} · seed ${practice.seed}`;
 }
 
 interface SliderBinding {
