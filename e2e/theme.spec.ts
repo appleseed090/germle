@@ -35,6 +35,8 @@ test('follows the device colour scheme until a theme is chosen', async ({ page }
   await page.getByRole('button', { name: 'Start playing' }).click();
   await page.getByRole('button', { name: 'Settings' }).click();
   await expect(page.getByRole('radio', { name: 'System' })).toBeChecked();
+  await expect(page.getByRole('checkbox', { name: 'Skip animations' })).toBeAttached();
+  await expect(page.getByRole('checkbox', { name: 'Show contact numbers' })).toBeChecked();
 });
 
 test('applies a chosen theme at once, before the first paint on later visits, on every page', async ({
