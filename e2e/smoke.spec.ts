@@ -20,6 +20,11 @@ test('plays a full daily game, shares the result and restores it on reload', asy
   await page.goto('/');
 
   await expect(page.getByRole('heading', { name: 'How to play' })).toBeVisible();
+  await expect(page.locator('.how-to-steps p')).toHaveText([
+    'Tap people to vaccinate them. The outbreak starts when you have exhausted all vaccines.',
+    'Once the outbreak starts, you can quarantine one person per day.',
+    'The game ends when the outbreak has nowhere left to go. Save as many people as you can!',
+  ]);
   await expect(page.locator('#daily-constants')).toHaveText(
     'Every daily puzzle: 40 people · 4 vaccines · 2 outbreaks · 2 refusers · 35% contagious',
   );
