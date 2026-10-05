@@ -284,3 +284,15 @@ brief are not repeated here.
   focuses it with `preventScroll`, so Enter still starts the game. It then resets the scroll for
   browsers without `preventScroll`. Phones with browser toolbars often show less than 600 px of
   height, where how-to-play has to scroll.
+
+## Navigation
+
+- **Practice and About are icon links in the header, not links inside dialogs.** The owner's call.
+  The daily header reads How to play, Results, Practice (a dumbbell), About (an "i") and Settings;
+  the practice header reads Setup, About and Settings. The practice dialogs keep their "Today's
+  puzzle" links, and the wordmark still links home.
+- **On phones up to 420 px the header tightens to stay one row:** icon buttons 34 px wide (still
+  44 px tall), a 1.15rem wordmark, 6 px gaps. Below 340 px only the logo mark shows; its link is
+  still labelled "Germle home". Five buttons need about 406 px otherwise, which pushed the page
+  wider than the screen and cut off Settings. An e2e test fails if the page is wider than a
+  360 px phone.

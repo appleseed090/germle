@@ -81,6 +81,18 @@
               <path d="M5 20V12M12 20V5M19 20V9" />
             </svg>
           </button>
+          <a class="icon-button" href="/practice" aria-label="Practice">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 7v10M17 7v10M4 9.5v5M20 9.5v5M7 12h10" />
+            </svg>
+          </a>
+          <a class="icon-button" href="/about" aria-label="About Germle">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 11v6" />
+              <circle class="icon-dot" cx="12" cy="7.6" r="1.1" />
+            </svg>
+          </a>
           <button class="icon-button" type="button" id="open-settings" aria-label="Settings">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M4 7h16M4 17h16" />
@@ -177,9 +189,7 @@
       <button class="primary-button" type="button" data-close-dialog data-initial-focus>
         Start playing
       </button>
-      <p class="dialog-footnote">
-        A new puzzle every day at midnight. <a href="/about">About Germle</a>
-      </p>
+      <p class="dialog-footnote">A new puzzle every day at midnight.</p>
     </dialog>
 
     <dialog class="dialog" id="results-dialog" aria-labelledby="results-title">
@@ -239,9 +249,6 @@
         <h3>Scores</h3>
         <ol class="histogram" id="histogram"></ol>
       </section>
-      <p class="dialog-footnote">
-        <a href="/practice">Practice</a> · <a href="/about">About Germle</a>
-      </p>
     </dialog>
 
     <dialog class="dialog" id="settings-dialog" aria-labelledby="settings-title">
@@ -291,9 +298,7 @@
         </span>
         <input type="checkbox" class="switch" id="setting-reduce-motion" />
       </label>
-      <p class="dialog-footnote">
-        <a href="/practice">Practice</a> · <a href="/about">About Germle</a> · © 2026 Jonathan Liu
-      </p>
+      <p class="dialog-footnote">© 2026 Jonathan Liu</p>
     </dialog>
   </body>
 </html>
