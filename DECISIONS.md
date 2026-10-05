@@ -249,7 +249,6 @@ brief are not repeated here.
   summary, so it cannot drift from the config. Not in the toolbar, a single line kept for the
   numbers that change during play, with no room on a 360 px phone; not in the results, where
   identical numbers every day say nothing about the game, and the share card is a public format.
-  The About page keeps its hand-written prose (see `TODO.md`).
 
 ## How to play
 
@@ -259,3 +258,9 @@ brief are not repeated here.
   can!" Step 2 says "quarantine", the move the game offers once the vaccines are gone (the owner
   confirmed it over an earlier "vaccinate"). The shorter steps let the dialog fit 375 × 667
   without scrolling.
+- **The About page is only the Inspiration and Privacy sections, plus the footer.** The owner's
+  call. The how-to-play dialog is now the only place that explains the game. Rules the About page
+  used to state and nothing else on the site does: the 70% Contained/Spread threshold, that "35%
+  contagious" is per contact per day, at least one infection a day, refusers can still be
+  quarantined, nobody recovers, the same moves give everyone the same outbreak, and people can be
+  dragged around.

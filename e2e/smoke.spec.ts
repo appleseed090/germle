@@ -68,6 +68,7 @@ test('plays a full daily game, shares the result and restores it on reload', asy
 test('the about page credits the inspiration and states the privacy policy', async ({ page }) => {
   await page.goto('/about');
   await expect(page.getByRole('heading', { name: 'About Germle' })).toBeVisible();
+  await expect(page.locator('.content h2')).toHaveText(['Inspiration', 'Privacy']);
   await expect(
     page.getByText('inspired by Vax! (2014), created by Ellsworth Campbell and Isaac Bromley'),
   ).toBeVisible();

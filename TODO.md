@@ -48,12 +48,8 @@ External memory for the project: what is pending, constraints to remember, defer
 
 ## Remember
 
-- The About page states the daily constants (40 people, 4 vaccines, 35%). Update it whenever
-  `DAILY_PUZZLE_CONFIG` changes.
 - The share card's first line (`Germle #<n> · <score>% saved`) is matched by the e2e tests and by
   anyone parsing pasted results.
-- The About page states the 70% Contained/Spread threshold. Update it whenever
-  `CONTAINED_THRESHOLD_PERCENT` (`src/verdict.ts`) changes.
 - Practice link parameters are a public format (people save links); renaming one breaks them.
 - The dark theme's overrides are written twice in `src/styles/main.css` (under
   `prefers-color-scheme: dark` and under `[data-theme='dark']`), and each page's two `theme-color`
