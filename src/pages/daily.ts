@@ -22,6 +22,7 @@ import { mountGameSession } from '../ui/game-session';
 import { createResultsDialog } from '../ui/results-dialog';
 import { connectSettingsDialog, displayOptionsFor } from '../ui/settings-dialog';
 import { createToast } from '../ui/toast';
+import { CONTAINED_THRESHOLD_PERCENT } from '../verdict';
 
 const RESULTS_DELAY_AFTER_END = 700;
 
@@ -41,6 +42,9 @@ const toast = createToast(requireElement('toast', HTMLElement));
 const resultsDialog = createResultsDialog(toast, nextPuzzleStart(today));
 const howToPlayDialog = requireElement('how-to-play-dialog', HTMLDialogElement);
 wireDialog(howToPlayDialog);
+requireElement('contained-threshold', HTMLElement).textContent = String(
+  CONTAINED_THRESHOLD_PERCENT,
+);
 requireElement('daily-constants', HTMLElement).textContent =
   `Every daily puzzle: ${describePuzzleConfig(DAILY_PUZZLE_CONFIG)}`;
 requireElement('puzzle-label', HTMLElement).textContent = `#${puzzleNumber}`;
