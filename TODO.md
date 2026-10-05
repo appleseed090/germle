@@ -14,10 +14,11 @@ External memory for the project: what is pending, constraints to remember, defer
 - [x] Cloudflare Worker connected to the repo; builds and deploys from `main`.
 - [x] `germle.com` DNS on Cloudflare and attached to the Worker (verified 2026-10-05: valid
       certificate, security headers, routes, full game on a phone viewport).
-- [ ] Turn on **Always Use HTTPS** (SSL/TLS → Edge Certificates): `http://germle.com` still serves
-      the page instead of redirecting.
-- [ ] Confirm `https://www.germle.com/anything` redirects to `https://germle.com/anything` (the
-      agent sandbox cannot reach `www`, so this is unverified).
+- [x] **Always Use HTTPS** on: `http://germle.com/…` returns 301 to `https://`, query kept
+      (verified 2026-10-05).
+- [ ] www → apex Redirect Rule is deployed and both `germle.com` and `www` Worker records exist;
+      confirm in a browser that `https://www.germle.com/practice?seed=abc` lands on
+      `https://germle.com/practice?seed=abc` (the agent sandbox cannot reach `www`).
 
 ## M4 backlog (not scheduled)
 
