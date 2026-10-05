@@ -7,7 +7,8 @@ into pieces, then contain an outbreak by quarantining healthy people — every q
 day of spread. Your score is the share of people who never got infected.
 
 Germle is an original game inspired by Vax! (2014) by Ellsworth Campbell and Isaac Bromley of the
-Salathé Group at Penn State. It shares none of Vax!'s code or artwork.
+Salathé Group at Penn State. It shares none of Vax!'s code or artwork; see `CREDITS.md` for the
+licensing notice.
 
 ## Status
 
