@@ -59,8 +59,19 @@ test('the about page credits the inspiration and states the privacy policy', asy
   await page.goto('/about');
   await expect(page.getByRole('heading', { name: 'About Germle' })).toBeVisible();
   await expect(
-    page.getByText('inspired by Vax! (2014) by Ellsworth Campbell and Isaac Bromley'),
+    page.getByText('inspired by Vax! (2014), created by Ellsworth Campbell and Isaac Bromley'),
   ).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Vax!' })).toHaveAttribute(
+    'href',
+    'https://github.com/digitalepidemiologylab/VaxGame',
+  );
+  await expect(page.getByRole('link', { name: 'CC BY-SA 3.0' })).toHaveAttribute(
+    'href',
+    'https://creativecommons.org/licenses/by-sa/3.0/',
+  );
+  await expect(
+    page.locator('.content-footer').getByRole('link', { name: 'Credits' }),
+  ).toHaveAttribute('href', 'https://github.com/appleseed090/germle/blob/main/CREDITS.md');
   await expect(
     page.getByText('No accounts, no tracking in the game; progress is stored in your browser.'),
   ).toBeVisible();
