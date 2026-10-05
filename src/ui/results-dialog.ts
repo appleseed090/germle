@@ -1,15 +1,9 @@
 import { formatCountdown } from '../countdown';
-import {
-  buildShareText,
-  shareOrCopy,
-  type ShareCapabilities,
-  type ShareableResult,
-} from '../share';
+import { buildShareText, copyShareText, type ShareableResult } from '../share';
 import { histogramBand, type PlayerStats } from '../stats';
 import { openDialog, wireDialog } from './dialogs';
 import { requireElement } from './dom';
 import { renderOutcomeBreakdown, renderVerdict } from './outcome-breakdown';
-import type { Toast } from './toast';
 
 /** The results and statistics dialog of the daily page. */
 export interface ResultsDialog {
@@ -19,12 +13,13 @@ export interface ResultsDialog {
 }
 
 /**
- * Binds the dialog markup in the page shell.
+ * Binds the dialog markup in the page shell. Share copies the result to the clipboard and says so
+ * in the dialog's own status line: the page's toast would sit behind the modal dialog.
  *
  * @param nextPuzzleAt - When the next daily puzzle unlocks; after that the countdown is replaced
  *   by a link to it, for pages left open past midnight.
  */
-export function createResultsDialog(toast: Toast, nextPuzzleAt: Date): ResultsDialog {
+export function createResultsDialog(nextPuzzleAt: Date): ResultsDialog {
   const dialog = requireElement('results-dialog', HTMLDialogElement);
   const title = requireElement('results-title', HTMLElement);
   const summary = requireElement('result-summary', HTMLElement);
@@ -33,8 +28,8 @@ export function createResultsDialog(toast: Toast, nextPuzzleAt: Date): ResultsDi
   const verdict = requireElement('result-verdict', HTMLElement);
   const breakdownBar = requireElement('breakdown-bar', HTMLElement);
   const breakdownLegend = requireElement('breakdown-legend', HTMLElement);
-  const sharePreview = requireElement('share-preview', HTMLElement);
   const shareButton = requireElement('share-button', HTMLButtonElement);
+  const shareStatus = requireElement('share-status', HTMLElement);
   const shareFallback = requireElement('share-fallback', HTMLElement);
   const shareFallbackText = requireElement('share-fallback-text', HTMLTextAreaElement);
   const countdown = requireElement('countdown', HTMLElement);
@@ -52,8 +47,10 @@ export function createResultsDialog(toast: Toast, nextPuzzleAt: Date): ResultsDi
   shareButton.addEventListener('click', () => {
     if (shareText === undefined) return;
     const text = shareText;
-    void shareOrCopy(text, browserShareCapabilities()).then((outcome) => {
-      if (outcome === 'copied') toast.show('Copied to clipboard');
+    shareStatus.textContent = '';
+    const clipboard = 'clipboard' in navigator ? navigator.clipboard : undefined;
+    void copyShareText(text, clipboard).then((outcome) => {
+      shareStatus.textContent = outcome === 'copied' ? 'Copied to clipboard' : '';
       if (outcome === 'manual') {
         shareFallback.hidden = false;
         shareFallbackText.value = text;
@@ -84,13 +81,13 @@ export function createResultsDialog(toast: Toast, nextPuzzleAt: Date): ResultsDi
       summary.hidden = result === undefined;
       pending.hidden = result !== undefined;
       shareFallback.hidden = true;
+      shareStatus.textContent = '';
       if (result !== undefined) {
         title.textContent = `Germle #${result.puzzleNumber}`;
         score.textContent = `${result.score}%`;
         renderVerdict(verdict, result.score);
         renderOutcomeBreakdown(breakdownBar, breakdownLegend, result.counts);
         shareText = buildShareText(result);
-        sharePreview.textContent = shareText;
       }
       played.textContent = String(stats.played);
       streak.textContent = String(stats.currentStreak);
@@ -129,11 +126,4 @@ function renderHistogram(
     return row;
   });
   list.replaceChildren(...rows);
-}
-
-function browserShareCapabilities(): ShareCapabilities {
-  return {
-    ...('share' in navigator ? { share: (data: ShareData) => navigator.share(data) } : {}),
-    ...('clipboard' in navigator ? { clipboard: navigator.clipboard } : {}),
-  };
 }

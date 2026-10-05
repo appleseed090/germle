@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildShareBar, buildShareText, shareOrCopy } from './share';
+import { buildShareBar, buildShareText, copyShareText } from './share';
 
 describe('buildShareText', () => {
   it('produces the three-line card', () => {
@@ -50,48 +50,23 @@ describe('buildShareBar', () => {
   });
 });
 
-describe('shareOrCopy', () => {
-  it('uses the share sheet when available', async () => {
-    const shared: string[] = [];
-    const outcome = await shareOrCopy('hello', {
-      share: (data) => {
-        shared.push(data.text ?? '');
+describe('copyShareText', () => {
+  it('copies the text to the clipboard', async () => {
+    const copied: string[] = [];
+    const outcome = await copyShareText('hello', {
+      writeText: (text) => {
+        copied.push(text);
         return Promise.resolve();
       },
     });
-    expect(outcome).toBe('shared');
-    expect(shared).toEqual(['hello']);
+    expect(outcome).toBe('copied');
+    expect(copied).toEqual(['hello']);
   });
 
-  it('reports a dismissed share sheet without copying', async () => {
-    let copied = false;
-    const outcome = await shareOrCopy('hello', {
-      share: () => Promise.reject(new DOMException('dismissed', 'AbortError')),
-      clipboard: {
-        writeText: () => {
-          copied = true;
-          return Promise.resolve();
-        },
-      },
-    });
-    expect(outcome).toBe('cancelled');
-    expect(copied).toBe(false);
-  });
-
-  it('falls back to the clipboard when sharing fails, and to manual copy when that fails', async () => {
-    const failingShare = (): Promise<void> =>
-      Promise.reject(new DOMException('nope', 'NotAllowedError'));
-    expect(
-      await shareOrCopy('x', {
-        share: failingShare,
-        clipboard: { writeText: () => Promise.resolve() },
-      }),
-    ).toBe('copied');
-    expect(
-      await shareOrCopy('x', {
-        clipboard: { writeText: () => Promise.reject(new Error('denied')) },
-      }),
-    ).toBe('manual');
-    expect(await shareOrCopy('x', {})).toBe('manual');
+  it('asks for manual copying when the clipboard is missing or refuses', async () => {
+    expect(await copyShareText('x', undefined)).toBe('manual');
+    expect(await copyShareText('x', { writeText: () => Promise.reject(new Error('denied')) })).toBe(
+      'manual',
+    );
   });
 });

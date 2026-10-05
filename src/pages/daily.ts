@@ -39,7 +39,7 @@ const restoredState =
 const initialState = restoredState ?? startGame(puzzle).state;
 
 const toast = createToast(requireElement('toast', HTMLElement));
-const resultsDialog = createResultsDialog(toast, nextPuzzleStart(today));
+const resultsDialog = createResultsDialog(nextPuzzleStart(today));
 const howToPlayDialog = requireElement('how-to-play-dialog', HTMLDialogElement);
 wireDialog(howToPlayDialog);
 requireElement('contained-threshold', HTMLElement).textContent = String(

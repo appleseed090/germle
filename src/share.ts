@@ -83,39 +83,23 @@ function apportionByLargestRemainder(weights: readonly number[], seats: number):
   return allocation;
 }
 
-/** How the share text reached the player. `manual` means they must copy it themselves. */
-export type ShareOutcome = 'shared' | 'copied' | 'cancelled' | 'manual';
-
-/** The narrow slice of `navigator` that sharing needs, so tests can pass a fake. */
-export interface ShareCapabilities {
-  readonly share?: (data: ShareData) => Promise<void>;
-  readonly clipboard?: Pick<Clipboard, 'writeText'>;
-}
+/** Whether the share text reached the clipboard, or must be shown for the player to copy. */
+export type CopyOutcome = 'copied' | 'manual';
 
 /**
- * Offers the text on the native share sheet when one exists, otherwise copies it to the
- * clipboard. A share sheet that fails for any reason other than the player dismissing it falls
- * back to the clipboard. Never throws.
+ * Copies the share text to the clipboard. Where there is no clipboard (an insecure context, an
+ * old browser) or it refuses, reports `manual` so the page can show the text instead. Never
+ * throws.
  */
-export async function shareOrCopy(
+export async function copyShareText(
   text: string,
-  capabilities: ShareCapabilities,
-): Promise<ShareOutcome> {
-  if (capabilities.share !== undefined) {
-    try {
-      await capabilities.share({ text });
-      return 'shared';
-    } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') return 'cancelled';
-    }
+  clipboard: Pick<Clipboard, 'writeText'> | undefined,
+): Promise<CopyOutcome> {
+  if (clipboard === undefined) return 'manual';
+  try {
+    await clipboard.writeText(text);
+    return 'copied';
+  } catch {
+    return 'manual';
   }
-  if (capabilities.clipboard !== undefined) {
-    try {
-      await capabilities.clipboard.writeText(text);
-      return 'copied';
-    } catch {
-      return 'manual';
-    }
-  }
-  return 'manual';
 }
