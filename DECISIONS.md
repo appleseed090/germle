@@ -250,3 +250,12 @@ brief are not repeated here.
   numbers that change during play, with no room on a 360 px phone; not in the results, where
   identical numbers every day say nothing about the game, and the share card is a public format.
   The About page keeps its hand-written prose (see `TODO.md`).
+
+## How to play
+
+- **The three steps use the owner's wording:** "Tap people to vaccinate them. The outbreak starts
+  when you have exhausted all vaccines." / "Once the outbreak starts, you can quarantine one person
+  per day." / "The game ends when the outbreak has nowhere left to go. Save as many people as you
+  can!" Step 2 says "quarantine", the move the game offers once the vaccines are gone (the owner
+  confirmed it over an earlier "vaccinate"). The shorter steps let the dialog fit 375 × 667
+  without scrolling.

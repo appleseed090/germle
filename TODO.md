@@ -37,12 +37,6 @@ External memory for the project: what is pending, constraints to remember, defer
 - **Link from the Snackle hub:** add a Germle entry to the owner's Snackle hub so players can
   find it alongside the other games.
 
-## Known issues
-
-- On a 375 × 667 screen (iPhone SE) the how-to-play dialog is 47 px taller than the viewport, so
-  it opens scrolled to "Start playing" with step 1 out of view. It already overflowed by 41 px
-  before the daily-constants line was added; 360 × 740 and larger fit.
-
 ## Deferred cleanups
 
 - `og.png` and the app icons (`scripts/generate-images.ts`) still draw refusers with a cross and
