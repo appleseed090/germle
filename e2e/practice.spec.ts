@@ -49,7 +49,7 @@ test('explains every setup field on tap or keyboard, and to screen readers', asy
   const setup = page.locator('#setup-dialog');
   for (const field of [
     'People',
-    'Neighbours',
+    'Neighbors',
     'Vaccines',
     'Outbreaks',
     'Refusers',
@@ -83,6 +83,9 @@ test('explains every setup field on tap or keyboard, and to screen readers', asy
   await page.keyboard.press('Space');
   await expect(page.locator('#setup-seed-info')).toBeHidden();
 
+  await expect(setup.getByRole('slider', { name: 'Neighbors' })).toHaveAccessibleDescription(
+    'How many contacts each person starts with, on average.',
+  );
   await expect(setup.getByRole('slider', { name: 'People' })).toHaveAccessibleDescription(
     'How many people are in the network.',
   );
