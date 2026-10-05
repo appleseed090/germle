@@ -266,7 +266,9 @@ brief are not repeated here.
 - **The Contained threshold is stated under the steps:** "Save 70% or more and the outbreak is
   **Contained**; below that, it **Spread**." The number is filled in from
   `CONTAINED_THRESHOLD_PERCENT`, so the rule and the verdict cannot disagree.
-- **Dialogs open scrolled to their top.** `openDialog` resets the scroll after `showModal()`,
-  because the autofocus target (Start playing, Share) would otherwise pull a dialog taller than the
-  screen down past its heading. Focus stays on that target, so Enter still starts the game. Phones
-  with browser toolbars often show less than 600 px of height, where how-to-play has to scroll.
+- **Dialogs open at their top, then focus their main control without scrolling.** The owner saw
+  how-to-play open scrolled to the bottom on an iPhone: `autofocus` scrolls the dialog to Start
+  playing. The four dialogs now mark that control with `data-initial-focus`, and `openDialog`
+  focuses it with `preventScroll`, so Enter still starts the game. It then resets the scroll for
+  browsers without `preventScroll`. Phones with browser toolbars often show less than 600 px of
+  height, where how-to-play has to scroll.

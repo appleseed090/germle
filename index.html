@@ -178,7 +178,7 @@
         <span class="legend-dot legend-dot--infected"></span> infected. Each number counts that
         person's contacts still in the network.
       </p>
-      <button class="primary-button" type="button" data-close-dialog autofocus>
+      <button class="primary-button" type="button" data-close-dialog data-initial-focus>
         Start playing
       </button>
       <p class="dialog-footnote">
@@ -208,7 +208,9 @@
           <li><span class="swatch swatch--untouched"></span>Untouched <strong></strong></li>
           <li><span class="swatch swatch--infected"></span>Infected <strong></strong></li>
         </ul>
-        <button class="primary-button" type="button" id="share-button" autofocus>Share</button>
+        <button class="primary-button" type="button" id="share-button" data-initial-focus>
+          Share
+        </button>
         <p class="share-status" id="share-status" role="status"></p>
         <div class="share-fallback" id="share-fallback" hidden>
           <label for="share-fallback-text">Copy your result:</label>
