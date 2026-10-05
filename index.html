@@ -143,9 +143,7 @@
             <path class="figure-edge" d="M16 28L44 14M16 28L44 42M44 14L76 28M44 42L76 28" />
             <path class="figure-edge figure-edge--gone" d="M76 28L104 28" />
             <circle class="figure-node figure-node--infected" cx="16" cy="28" r="8" />
-            <circle class="figure-core" cx="16" cy="28" r="2.6" />
             <circle class="figure-node figure-node--infected" cx="44" cy="14" r="8" />
-            <circle class="figure-core" cx="44" cy="14" r="2.6" />
             <circle class="figure-node" cx="44" cy="42" r="8" />
             <circle class="figure-node" cx="76" cy="28" r="8" />
             <circle class="figure-node figure-node--quarantined" cx="104" cy="28" r="8" />
@@ -162,11 +160,8 @@
               d="M16 28L40 14M16 28L40 42M80 14L104 28M80 42L104 28M80 14L80 42"
             />
             <circle class="figure-node figure-node--infected" cx="16" cy="28" r="8" />
-            <circle class="figure-core" cx="16" cy="28" r="2.6" />
             <circle class="figure-node figure-node--infected" cx="40" cy="14" r="8" />
-            <circle class="figure-core" cx="40" cy="14" r="2.6" />
             <circle class="figure-node figure-node--infected" cx="40" cy="42" r="8" />
-            <circle class="figure-core" cx="40" cy="42" r="2.6" />
             <circle class="figure-node" cx="80" cy="14" r="8" />
             <circle class="figure-node" cx="80" cy="42" r="8" />
             <circle class="figure-node" cx="104" cy="28" r="8" />
@@ -176,14 +171,11 @@
           </p>
         </li>
       </ol>
-      <p class="legend-line">
-        <span class="legend-item"><span class="legend-dot legend-dot--healthy"></span>Healthy</span>
-        <span class="legend-item"
-          ><span class="legend-dot legend-dot--refuser"></span>Refuses vaccines</span
-        >
-        <span class="legend-item"
-          ><span class="legend-dot legend-dot--infected"></span>Infected</span
-        >
+      <p class="legend">
+        <span class="legend-dot legend-dot--healthy" aria-hidden="true">3</span> Healthy,
+        <span class="legend-dot legend-dot--refuser" aria-hidden="true">2</span> refuses vaccines,
+        <span class="legend-dot legend-dot--infected" aria-hidden="true">4</span> infected. Each
+        number counts that person's contacts still in the network.
       </p>
       <button class="primary-button" type="button" data-close-dialog autofocus>
         Start playing
@@ -282,13 +274,6 @@
           >
         </span>
       </div>
-      <label class="setting">
-        <span>
-          <span class="setting-name">Size people by contacts</span>
-          <span class="setting-hint">Better-connected people are drawn a little larger.</span>
-        </span>
-        <input type="checkbox" class="switch" id="setting-size-by-degree" />
-      </label>
       <label class="setting">
         <span>
           <span class="setting-name">Reduce motion</span>

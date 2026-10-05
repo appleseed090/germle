@@ -22,12 +22,13 @@
 
   --color-node-healthy: #dde2e7;
   --color-node-healthy-stroke: #828d99;
+  --color-node-healthy-count: #1d2329;
   --color-node-refuser: #f0892c;
   --color-node-refuser-stroke: #b05a0c;
-  --color-node-refuser-mark: #ffffff;
+  --color-node-refuser-count: #1d2329;
   --color-node-infected: #d63a3a;
   --color-node-infected-stroke: #962020;
-  --color-node-infected-core: #ffffff;
+  --color-node-infected-count: #ffffff;
   --color-edge: #b8bfc7;
   --color-pathogen: #b91c1c;
   --color-pathogen-outline: #ffffff;
@@ -37,6 +38,7 @@
   --color-quarantined-stripe: #f6e2ae;
   --color-untouched: #dde2e7;
   --color-infected: #d63a3a;
+  --color-infected-pattern: #ffffff;
 
   --color-histogram-bar: #c9ced4;
   --color-histogram-bar-empty: #e3e6ea;
@@ -68,6 +70,7 @@
 
     --color-node-healthy: #c3cad2;
     --color-node-healthy-stroke: #8d98a4;
+    --color-node-healthy-count: #16191d;
     --color-edge: #4f5862;
     --color-pathogen: #f05252;
     --color-pathogen-outline: #16191d;
@@ -100,6 +103,7 @@
 
   --color-node-healthy: #c3cad2;
   --color-node-healthy-stroke: #8d98a4;
+  --color-node-healthy-count: #16191d;
   --color-edge: #4f5862;
   --color-pathogen: #f05252;
   --color-pathogen-outline: #16191d;
@@ -321,16 +325,18 @@ button {
   stroke-width: 1.5;
 }
 
-.node-core {
-  display: none;
-  fill: var(--color-node-infected-core);
+.node-count {
+  fill: var(--color-node-healthy-count);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
-.node-cross {
-  fill: none;
-  stroke: var(--color-node-refuser-mark);
-  stroke-width: 2.4;
-  stroke-linecap: round;
+.node--refuser .node-count {
+  fill: var(--color-node-refuser-count);
+}
+
+.node--infected .node-count {
+  fill: var(--color-node-infected-count);
 }
 
 .node--refuser .node-disc {
@@ -341,14 +347,6 @@ button {
 .node--infected .node-disc {
   fill: var(--color-node-infected);
   stroke: var(--color-node-infected-stroke);
-}
-
-.node--infected .node-core {
-  display: inline;
-}
-
-.node--infected .node-cross {
-  display: none;
 }
 
 .node-halo,
@@ -801,6 +799,24 @@ button {
   height: 45px;
 }
 
+/* Narrow phones: a smaller figure leaves the text a wider column, so the dialog stays short. */
+@media (max-width: 400px) {
+  .how-to-steps li {
+    grid-template-columns: 72px 1fr;
+    gap: 10px;
+    padding: 7px 0;
+  }
+
+  .how-to-steps p {
+    font-size: 0.92rem;
+  }
+
+  .how-to-figure {
+    width: 72px;
+    height: 34px;
+  }
+}
+
 .figure-edge {
   fill: none;
   stroke: var(--color-edge);
@@ -823,10 +839,6 @@ button {
   stroke: var(--color-node-infected-stroke);
 }
 
-.figure-core {
-  fill: var(--color-node-infected-core);
-}
-
 .figure-node--vaccinated {
   fill: none;
   stroke: var(--color-vaccinated);
@@ -840,56 +852,38 @@ button {
   stroke-dasharray: 4 3;
 }
 
-.legend-line {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 16px;
+.legend {
   margin: 12px 0 0;
-  font-size: 0.85rem;
   color: var(--color-text-muted);
-}
-
-.legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  font-size: 0.85rem;
+  line-height: 1.7;
 }
 
 .legend-dot {
-  position: relative;
-  display: inline-block;
-  width: 14px;
-  height: 14px;
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  vertical-align: -4px;
   border: 1.5px solid var(--color-node-healthy-stroke);
   border-radius: 50%;
   background: var(--color-node-healthy);
+  color: var(--color-node-healthy-count);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .legend-dot--refuser {
   border-color: var(--color-node-refuser-stroke);
-  background:
-    linear-gradient(
-      45deg,
-      transparent 43%,
-      var(--color-node-refuser-mark) 43% 57%,
-      transparent 57%
-    ),
-    linear-gradient(
-      -45deg,
-      transparent 43%,
-      var(--color-node-refuser-mark) 43% 57%,
-      transparent 57%
-    ),
-    var(--color-node-refuser);
+  background: var(--color-node-refuser);
+  color: var(--color-node-refuser-count);
 }
 
 .legend-dot--infected {
   border-color: var(--color-node-infected-stroke);
-  background: radial-gradient(
-    circle,
-    var(--color-node-infected-core) 0 22%,
-    var(--color-node-infected) 24%
-  );
+  background: var(--color-node-infected);
+  color: var(--color-node-infected-count);
 }
 
 /* Results */
@@ -956,7 +950,7 @@ button {
 .breakdown-segment--infected,
 .swatch--infected {
   background:
-    radial-gradient(circle at 50% 50%, var(--color-node-infected-core) 0 1.5px, transparent 2px),
+    radial-gradient(circle at 50% 50%, var(--color-infected-pattern) 0 1.5px, transparent 2px),
     var(--color-infected);
   background-size: 6px 6px;
 }

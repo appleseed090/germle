@@ -3,6 +3,7 @@ import { DAILY_PUZZLE_CONFIG, type PuzzleConfig } from './config';
 import {
   applyTap,
   chooseIndexPatients,
+  contactsStillInNetwork,
   countOutcomes,
   isOutbreakContained,
   isTappable,
@@ -195,6 +196,26 @@ describe('the 6-node fixture, as computed on paper', () => {
     expect(() => applyTap(puzzle, afterVaccine, 0)).toThrow();
     const ended = playMoves(puzzle, [5, 4, 3]).state;
     expect(ended.nodeStatuses.some((_, node) => isTappable(puzzle, ended, node))).toBe(false);
+  });
+});
+
+describe('contactsStillInNetwork', () => {
+  it('drops each neighbour by one per vaccination or quarantine and ignores infections', () => {
+    const puzzle = createFixturePuzzle();
+    const contacts = (state: GameState): number[] =>
+      contactsStillInNetwork(puzzle.graph, state.nodeStatuses);
+    const opening = startGame(puzzle).state;
+    expect(contacts(opening)).toEqual([2, 3, 3, 3, 2, 1]);
+
+    // The only vaccine goes to person 1 and starts the outbreak at person 0.
+    const afterVaccine = applyTap(puzzle, opening, 1).state;
+    expect(afterVaccine.nodeStatuses[0]).toBe('infected');
+    expect(contacts(afterVaccine)).toEqual([1, 3, 2, 2, 2, 1]);
+
+    // Quarantining person 3 passes a day in which person 2 falls ill.
+    const afterQuarantine = applyTap(puzzle, afterVaccine, 3).state;
+    expect(afterQuarantine.nodeStatuses[2]).toBe('infected');
+    expect(contacts(afterQuarantine)).toEqual([1, 2, 1, 2, 1, 1]);
   });
 });
 

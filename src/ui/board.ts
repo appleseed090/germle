@@ -1,6 +1,6 @@
 import {
+  contactsStillInNetwork,
   isTappable,
-  nodeDegrees,
   type GameEvent,
   type GameState,
   type GameStep,
@@ -24,7 +24,6 @@ export interface BoardOptions {
   readonly puzzle: Puzzle;
   readonly layout: readonly Point[];
   readonly layoutBounds: LayoutBounds;
-  readonly sizeNodesByDegree: boolean;
   readonly reduceMotion: boolean;
   /** Called when the player taps, clicks or presses Enter/Space on a person (legal or not). */
   readonly onNodeActivate: (node: number) => void;
@@ -38,7 +37,6 @@ export interface Board {
   animateStep(step: GameStep): Promise<void>;
   /** Pulses a ring around the index patients for a moment. */
   highlightIndexPatients(nodes: readonly number[]): void;
-  setSizeNodesByDegree(enabled: boolean): void;
   setReduceMotion(enabled: boolean): void;
 }
 
@@ -47,8 +45,8 @@ const BOARD_MARGIN = 8;
 const MINIMUM_HIT_RADIUS = 22;
 const DRAG_THRESHOLD = 8;
 const BASE_NODE_RADIUS = 14;
-const MINIMUM_NODE_RADIUS = 12;
-const MAXIMUM_NODE_RADIUS = 16;
+/** Font size of the contact count, in disc radii. */
+const COUNT_FONT_SCALE = 1.05;
 const REMOVAL_DURATION = 260;
 const OUTBREAK_DURATION = 320;
 const TRAVEL_DURATION = 420;
@@ -59,8 +57,7 @@ interface NodeElements {
   readonly group: SVGGElement;
   readonly body: SVGGElement;
   readonly disc: SVGCircleElement;
-  readonly core: SVGCircleElement;
-  readonly cross: SVGPathElement | undefined;
+  readonly count: SVGTextElement;
   readonly halo: SVGCircleElement;
   readonly ring: SVGCircleElement;
   readonly focus: SVGCircleElement;
@@ -79,10 +76,6 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
   const { container, puzzle, layoutBounds, onNodeActivate } = options;
   const { graph } = puzzle;
   const positions: Point[] = options.layout.slice();
-  const degrees = nodeDegrees(graph);
-  const minimumDegree = Math.min(...degrees);
-  const maximumDegree = Math.max(...degrees);
-  let sizeNodesByDegree = options.sizeNodesByDegree;
   let reduceMotion = options.reduceMotion;
   let state = initialState;
   let transform: ViewTransform = { scale: 1, transposed: false, offsetX: 0, offsetY: 0 };
@@ -118,13 +111,13 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
     const halo = createSvgElement('circle', { class: 'node-halo' });
     const body = createSvgElement('g', { class: 'node-body' });
     const disc = createSvgElement('circle', { class: 'node-disc' });
-    const core = createSvgElement('circle', { class: 'node-core' });
-    body.append(disc, core);
-    let cross: SVGPathElement | undefined;
-    if (puzzle.isRefuser[node] === true) {
-      cross = createSvgElement('path', { class: 'node-cross' });
-      body.append(cross);
-    }
+    const count = createSvgElement('text', {
+      class: 'node-count',
+      'text-anchor': 'middle',
+      dy: '0.35em',
+      'aria-hidden': 'true',
+    });
+    body.append(disc, count);
     const ring = createSvgElement('circle', { class: 'node-ring' });
     const focus = createSvgElement('circle', { class: 'node-focus' });
     group.append(halo, body, ring, focus);
@@ -135,21 +128,15 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
       else onNodeActivate(node);
     });
     nodeLayer.append(group);
-    return { group, body, disc, core, cross, halo, ring, focus };
+    return { group, body, disc, count, halo, ring, focus };
   }
 
   function elementsOf(node: number): NodeElements {
     return nodeElements[node] as NodeElements;
   }
 
-  function logicalRadius(node: number): number {
-    if (!sizeNodesByDegree || maximumDegree === minimumDegree) return BASE_NODE_RADIUS;
-    const share = ((degrees[node] as number) - minimumDegree) / (maximumDegree - minimumDegree);
-    return MINIMUM_NODE_RADIUS + share * (MAXIMUM_NODE_RADIUS - MINIMUM_NODE_RADIUS);
-  }
-
-  function screenRadius(node: number): number {
-    return logicalRadius(node) * Math.min(Math.max(transform.scale, 0.75), 1.5);
+  function screenRadius(): number {
+    return BASE_NODE_RADIUS * Math.min(Math.max(transform.scale, 0.75), 1.5);
   }
 
   function screenPosition(node: number): Point {
@@ -170,18 +157,13 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
   }
 
   function sizeNode(node: number): void {
-    const radius = screenRadius(node);
+    const radius = screenRadius();
     const elements = elementsOf(node);
     elements.disc.setAttribute('r', String(radius));
-    elements.core.setAttribute('r', String(radius * 0.32));
+    elements.count.setAttribute('font-size', String(radius * COUNT_FONT_SCALE));
     elements.halo.setAttribute('r', String(radius + 7));
     elements.focus.setAttribute('r', String(radius + 4));
     elements.ring.setAttribute('r', String(radius + 8));
-    const arm = radius * 0.42;
-    elements.cross?.setAttribute(
-      'd',
-      `M${-arm} ${-arm}L${arm} ${arm}M${arm} ${-arm}L${-arm} ${arm}`,
-    );
   }
 
   function positionNode(node: number): void {
@@ -206,8 +188,10 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
     // Read focus before touching attributes: Chrome blurs a hidden element as soon as its
     // tabindex changes, so afterwards the focused person would already be lost.
     const focusedNode = nodeElements.findIndex(({ group }) => group === document.activeElement);
+    const contacts = contactsStillInNetwork(graph, statuses);
     statuses.forEach((status, node) => {
-      const { group, body } = elementsOf(node);
+      const { group, body, count } = elementsOf(node);
+      const contactCount = contacts[node] as number;
       const isRemoved = status === 'vaccinated' || status === 'quarantined';
       const tappable = isTappable(puzzle, displayedState, node);
       group.dataset['status'] = status;
@@ -216,7 +200,8 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
       group.classList.toggle('node--infected', status === 'infected');
       group.classList.toggle('node--refuser', puzzle.isRefuser[node] === true);
       group.classList.toggle('node--tappable', tappable);
-      group.setAttribute('aria-label', describeNode(node, status));
+      count.textContent = String(contactCount);
+      group.setAttribute('aria-label', describeNode(node, status, contactCount));
       group.setAttribute('aria-disabled', String(!tappable));
       group.setAttribute('tabindex', isRemoved ? '-1' : '0');
       body.removeAttribute('transform');
@@ -244,8 +229,8 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
     }
   }
 
-  function describeNode(node: number, status: NodeStatus): string {
-    const contacts = degrees[node] === 1 ? '1 contact' : `${degrees[node] ?? 0} contacts`;
+  function describeNode(node: number, status: NodeStatus, contactCount: number): string {
+    const contacts = contactCount === 1 ? '1 contact' : `${contactCount} contacts`;
     const refusal = puzzle.isRefuser[node] === true ? ', refuses vaccines' : '';
     const statusText = status === 'susceptible' ? 'healthy' : status;
     return `Person ${node + 1}: ${statusText}${refusal}, ${contacts}`;
@@ -263,7 +248,7 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
       ({ edgeIndex }) => edgeElements[edgeIndex] as SVGLineElement,
     );
     if (style === 'quarantined') ring.classList.add('node-ring--active');
-    const ringRadius = screenRadius(node) + 8;
+    const ringRadius = screenRadius() + 8;
     return {
       durationMilliseconds: REMOVAL_DURATION,
       update: (progress) => {
@@ -396,7 +381,7 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
       if (isRemovedStatus(status)) return;
       const position = screenPosition(node);
       const distance = Math.hypot(position.x - point.x, position.y - point.y);
-      const hitRadius = Math.max(MINIMUM_HIT_RADIUS, screenRadius(node) + 6);
+      const hitRadius = Math.max(MINIMUM_HIT_RADIUS, screenRadius() + 6);
       if (distance <= hitRadius && distance < nearestDistance) {
         nearestDistance = distance;
         nearestNode = node;
@@ -485,10 +470,6 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
     render,
     animateStep,
     highlightIndexPatients,
-    setSizeNodesByDegree: (enabled) => {
-      sizeNodesByDegree = enabled;
-      layoutGeometry();
-    },
     setReduceMotion: (enabled) => {
       reduceMotion = enabled;
     },
@@ -504,7 +485,7 @@ interface SvgElementTags {
   g: SVGGElement;
   line: SVGLineElement;
   circle: SVGCircleElement;
-  path: SVGPathElement;
+  text: SVGTextElement;
 }
 
 function createSvgElement<Tag extends keyof SvgElementTags>(

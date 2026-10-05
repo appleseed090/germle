@@ -23,7 +23,7 @@ describe('createGameStorage', () => {
   it('round-trips settings, progress, results and the how-to-play flag', () => {
     const storage = createGameStorage(createMemoryStore());
     expect(storage.loadSettings()).toEqual(DEFAULT_SETTINGS);
-    const settings = { sizeNodesByDegree: false, reduceMotion: true, theme: 'dark' } as const;
+    const settings = { reduceMotion: true, theme: 'dark' } as const;
     storage.saveSettings(settings);
     expect(storage.loadSettings()).toEqual(settings);
 
@@ -54,24 +54,34 @@ describe('createGameStorage', () => {
 
   it('loads settings saved before the theme setting existed as following the device', () => {
     const store = createMemoryStore({
-      'germle.v1.settings': JSON.stringify({ sizeNodesByDegree: false, reduceMotion: false }),
+      'germle.v1.settings': JSON.stringify({ reduceMotion: false }),
     });
-    expect(createGameStorage(store).loadSettings()).toEqual({
-      sizeNodesByDegree: false,
-      reduceMotion: false,
-      theme: null,
+    expect(createGameStorage(store).loadSettings()).toEqual({ reduceMotion: false, theme: null });
+  });
+
+  it('loads settings saved with the retired size-by-contacts switch and drops it on the next save', () => {
+    const store = createMemoryStore({
+      'germle.v1.settings': JSON.stringify({
+        sizeNodesByDegree: false,
+        reduceMotion: true,
+        theme: 'dark',
+      }),
+    });
+    const storage = createGameStorage(store);
+    const settings = storage.loadSettings();
+    expect(settings).toEqual({ reduceMotion: true, theme: 'dark' });
+    storage.saveSettings(settings);
+    expect(JSON.parse(store.data.get('germle.v1.settings') ?? '')).toEqual({
+      reduceMotion: true,
+      theme: 'dark',
     });
   });
 
   it('reads settings on their own exactly as the full storage does', () => {
     const store = createMemoryStore({
-      'germle.v1.settings': JSON.stringify({ sizeNodesByDegree: true, theme: 'light' }),
+      'germle.v1.settings': JSON.stringify({ theme: 'light' }),
     });
-    expect(loadSettings(store)).toEqual({
-      sizeNodesByDegree: true,
-      reduceMotion: null,
-      theme: 'light',
-    });
+    expect(loadSettings(store)).toEqual({ reduceMotion: null, theme: 'light' });
     expect(loadSettings(store)).toEqual(createGameStorage(store).loadSettings());
     expect(loadSettings(undefined)).toEqual(DEFAULT_SETTINGS);
   });
@@ -86,7 +96,7 @@ describe('createGameStorage', () => {
   it('ignores malformed stored values', () => {
     const storage = createGameStorage(
       createMemoryStore({
-        'germle.v1.settings': '{"sizeNodesByDegree":"yes","reduceMotion":1,"theme":"sepia"}',
+        'germle.v1.settings': '{"reduceMotion":1,"theme":"sepia"}',
         'germle.v1.daily-progress': '{"puzzleNumber":3,"moves":[1,"2"]}',
         'germle.v1.results': JSON.stringify({
           '1': sampleResult,

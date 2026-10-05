@@ -15,6 +15,7 @@ export {
 } from './daily';
 export {
   applyTap,
+  contactsStillInNetwork,
   countOutcomes,
   isOutbreakContained,
   isTappable,
@@ -29,13 +30,7 @@ export {
   type OutcomeCounts,
   type Transmission,
 } from './game';
-export {
-  findConnectedComponents,
-  nodeDegrees,
-  type Graph,
-  type GraphEdge,
-  type Incidence,
-} from './graph';
+export { findConnectedComponents, type Graph, type GraphEdge, type Incidence } from './graph';
 export { computeForceLayout, layoutBoundsFor, type LayoutBounds, type Point } from './layout';
 export { createPuzzle, type Puzzle } from './puzzle';
 export { createStreamRandom } from './random';

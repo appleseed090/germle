@@ -6,8 +6,6 @@ export type KeyValueStore = Pick<Storage, 'getItem' | 'setItem'>;
 
 /** Player preferences. */
 export interface Settings {
-  /** Draw better-connected people slightly larger. */
-  readonly sizeNodesByDegree: boolean;
   /** `true`/`false` overrides the system setting; `null` follows `prefers-reduced-motion`. */
   readonly reduceMotion: boolean | null;
   /** An explicit colour theme; `null` follows `prefers-color-scheme`. */
@@ -27,7 +25,6 @@ export interface DailyResult {
 }
 
 export const DEFAULT_SETTINGS: Settings = Object.freeze({
-  sizeNodesByDegree: true,
   reduceMotion: null,
   theme: null,
 });
@@ -136,14 +133,9 @@ function isNonNegativeInteger(value: unknown): value is number {
 
 function parseSettings(value: unknown): Settings {
   if (!isRecord(value)) return DEFAULT_SETTINGS;
-  const sizeNodesByDegree = value['sizeNodesByDegree'];
   const reduceMotion = value['reduceMotion'];
   const theme = value['theme'];
   return {
-    sizeNodesByDegree:
-      typeof sizeNodesByDegree === 'boolean'
-        ? sizeNodesByDegree
-        : DEFAULT_SETTINGS.sizeNodesByDegree,
     reduceMotion: typeof reduceMotion === 'boolean' ? reduceMotion : null,
     theme: isThemeChoice(theme) ? theme : null,
   };

@@ -187,7 +187,7 @@ brief are not repeated here.
   web manifest keeps the light colour, since manifests cannot vary by scheme.
 - **Contrast is tested in both themes** (WCAG AA: 4.5:1 for text, 3:1 for marks and outlines).
   The light theme's healthy outline was 2.90:1 against the page and moved from `#87929e` to
-  `#828d99` (3.10:1). Known gap: the refusers' white cross is 2.5:1 on orange (see `TODO.md`).
+  `#828d99` (3.10:1). The refusers' white cross (2.5:1 on orange) is gone; see "Contact counts".
   Not tested, by design: edges stay faint (1.7:1 light, 2.4:1 dark); outcome-bar neighbours
   (untouched next to vaccinated or infected: about 3.6:1 light, 2.8:1 dark) also differ by pattern
   and the legend gives exact counts.
@@ -199,3 +199,36 @@ brief are not repeated here.
   on a Content-Security-Policy console error, so CSP breakage shows up before deploy.
 - **Vitest processes CSS (`css: true`)** so the theme test can import `main.css?raw`; it blanks CSS
   otherwise.
+
+## Contact counts on people
+
+- **Each person shows how many contacts they still have: neighbours who are healthy or infected.**
+  Vaccinated and quarantined neighbours do not count, and removed people show nothing because
+  they leave the board. Counts change only on the player's moves: vaccinating or quarantining
+  someone lowers each neighbour's count by one; an infection changes nothing. Counting only
+  healthy neighbours was rejected: it would tick down as the infection spreads, and on infected
+  people it would read as "healthy people I can still infect", pointing at the frontier, which
+  players should find themselves. Computed by `contactsStillInNetwork` in the engine.
+- **Always on, no setting.** The owner's call. The counts show how connected each person is, which
+  sizing already approximated and the lines show; the hard part, finding the people whose removal
+  splits the network, stays the player's.
+- **"Size people by contacts" is retired; every person is the same size.** Size showed the starting
+  count and would contradict the live number after the first vaccine, and equal discs give every
+  digit the same room. Stored settings with `sizeNodesByDegree` still load; the field is ignored
+  and dropped on the next save.
+- **Refusers lose their cross and infected people their white centre; colour alone tells them
+  apart.** The owner's call. The how-to-play figures drop the centre dot too, and the legend shows
+  a sample number in each colour.
+- **The how-to-play legend and the number's explanation share one paragraph, and phones under
+  400 px get smaller step figures.** It opens with "Start playing" focused, so a dialog taller than
+  the screen would open scrolled past step 1; it fits 360 × 740 and 375 × 667 without scrolling.
+- **Dark digits on grey and orange, white digits on red, in both themes.** Contrast requires it
+  anyway (6.3:1 on orange; white would be 2.5:1), and it gives red–green colour-blind players a
+  second cue: simulated (Machado 2009, full severity), orange and red differ only in lightness
+  (1.7–2.1:1), but the digit's polarity survives protanopia, deuteranopia and tritanopia.
+  `src/styles/theme.test.ts` keeps every digit at 4.5:1 or more.
+- **Digits are drawn at 1.05× the disc radius.** On a Pixel 7, 40 people get about 16 px digits;
+  80 people hit the 0.75× radius floor, about 11 px digits in 21 px discs on a 360 px phone.
+  Counts above 9 are vanishingly rare (one in 24,000 people at 80 people and 6 neighbours).
+- **Each person's screen-reader label uses the live count** (`Person 7: healthy, 3 contacts`), so
+  it always says what the digit shows.
