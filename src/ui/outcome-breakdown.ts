@@ -1,4 +1,5 @@
 import type { OutcomeCounts } from '../engine';
+import { verdictForScore } from '../verdict';
 
 const OUTCOME_ORDER = ['vaccinated', 'quarantined', 'untouched', 'infected'] as const;
 
@@ -20,10 +21,9 @@ export function renderOutcomeBreakdown(
   });
 }
 
-/** One line comparing a score with par, e.g. `Par 83% · 5 points below par`. */
-export function describeParComparison(score: number, par: number): string {
-  if (score > par) return `Par ${par}% · You beat par!`;
-  if (score === par) return `Par ${par}% · You matched par.`;
-  const gap = par - score;
-  return `Par ${par}% · ${gap} ${gap === 1 ? 'point' : 'points'} below par`;
+/** Shows the verdict word for a score; `data-verdict` (`contained` or `spread`) drives its colour. */
+export function renderVerdict(element: HTMLElement, score: number): void {
+  const verdict = verdictForScore(score);
+  element.textContent = verdict;
+  element.dataset['verdict'] = verdict.toLowerCase();
 }

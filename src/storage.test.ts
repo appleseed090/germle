@@ -38,17 +38,17 @@ describe('createGameStorage', () => {
     expect(storage.hasSeenHowToPlay()).toBe(true);
   });
 
-  it('keeps a valid par and drops an invalid one without losing the result', () => {
-    const storage = createGameStorage(
-      createMemoryStore({
-        'germle.v1.results': JSON.stringify({
-          '1': { ...sampleResult, par: 85 },
-          '2': { ...sampleResult, par: 'high' },
-        }),
-      }),
-    );
-    expect(storage.loadResults().get(1)?.par).toBe(85);
-    expect(storage.loadResults().get(2)).toEqual(sampleResult);
+  it('loads results saved with the retired par field and drops it on the next save', () => {
+    const store = createMemoryStore({
+      'germle.v1.results': JSON.stringify({ '1': { ...sampleResult, par: 85 } }),
+    });
+    const storage = createGameStorage(store);
+    expect(storage.loadResults()).toEqual(new Map([[1, sampleResult]]));
+    storage.saveResult(2, sampleResult);
+    expect(JSON.parse(store.data.get('germle.v1.results') ?? '')).toEqual({
+      '1': sampleResult,
+      '2': sampleResult,
+    });
   });
 
   it('never overwrites a recorded result', () => {

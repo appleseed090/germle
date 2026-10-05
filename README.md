@@ -12,7 +12,7 @@ licensing notice.
 
 ## Status
 
-Milestone M3: the daily game at `/` (with par, stats and sharing), practice mode at `/practice`
+Milestone M3: the daily game at `/` (with stats and sharing), practice mode at `/practice`
 and the About page at `/about`. See `TODO.md` for the backlog.
 
 ## Prerequisites
@@ -35,7 +35,7 @@ and the About page at `/about`. See `TODO.md` for the backlog.
 
 `npm run check` must pass before every commit; CI runs the same script on every push and PR, plus
 the Playwright tests in a second job (daily and practice smoke tests on a phone and a desktop
-viewport, plus a check that par solves in under 300 ms with the CPU throttled 4×). Playwright needs a Chromium build: run
+viewport). Playwright needs a Chromium build: run
 `npx playwright install chromium` once (the version is pinned in `package.json`).
 
 ## Architecture
@@ -47,12 +47,12 @@ viewport, plus a check that par solves in under 300 ms with the CPU throttled 4�
   player state lives in `localStorage`. Security and cache headers are in `public/_headers`.
 - **Engine:** `src/engine/` is pure TypeScript with no DOM access: seeded streams, the
   Watts–Strogatz network, layout, game rules and scoring. Its rules are specified in
-  `docs/ENGINE.md`; unit tests sit next to each module (`*.test.ts`). `solver.ts` computes each
-  puzzle's par (also specified in `docs/ENGINE.md`).
+  `docs/ENGINE.md`; unit tests sit next to each module (`*.test.ts`).
 - **UI:** `src/pages/` holds one entry per page; `src/ui/` the SVG board (rendering, hit
   testing, drag, animations), dialogs and toolbar; `src/share.ts`, `src/stats.ts`,
-  `src/storage.ts` and `src/practice-setup.ts` are pure, tested modules for the share card,
-  statistics, validated `localStorage` access and practice links. Page shells are plain HTML (`index.html`, `about.html`) so nothing shifts
+  `src/storage.ts`, `src/practice-setup.ts` and `src/verdict.ts` are pure, tested modules for the
+  share card, statistics, validated `localStorage` access, practice links and the
+  Contained/Spread verdict. Page shells are plain HTML (`index.html`, `about.html`) so nothing shifts
   while scripts load.
 - **Docs:** `AGENTS.md` (engineering rules), `DECISIONS.md` (why things are the way they are),
   `TODO.md` (backlog), `DEPLOY.md` (Cloudflare and DNS setup).

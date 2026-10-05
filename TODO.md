@@ -6,7 +6,8 @@ External memory for the project: what is pending, constraints to remember, defer
 
 - [x] M1 — Engine (`src/engine/`), pure TypeScript with unit tests; spec in `docs/ENGINE.md`.
 - [x] M2 — Playable daily game, Playwright smoke test, `LAUNCH_DATE` = 2026-10-04.
-- [x] M3 — Par solver, calibration (constants kept, see `DECISIONS.md`) and practice mode.
+- [x] M3 — Practice mode. The par solver built for M3 was later dropped for a fixed
+      Contained/Spread verdict (see `DECISIONS.md`).
 
 ## Needs the owner
 
@@ -33,6 +34,8 @@ External memory for the project: what is pending, constraints to remember, defer
   want pressure.
 - **Dark mode:** colours are already CSS variables; add a `prefers-color-scheme: dark` palette
   and check contrast for every node state.
+- **Community percentile comparison:** show where a score ranks among everyone who played that
+  day's puzzle. Needs a small backend to collect daily scores; today there is none.
 - **Link from the Snackle hub:** add a Germle entry to the owner's Snackle hub so players can
   find it alongside the other games.
 
@@ -45,8 +48,10 @@ External memory for the project: what is pending, constraints to remember, defer
 
 - The About page states the daily constants (40 people, 4 vaccines, 35%). Update it whenever
   `DAILY_PUZZLE_CONFIG` changes.
-- The share card's first line (`Germle #<n> · <score>% saved · par <p>%`) is matched by the e2e
-  tests and by anyone parsing pasted results.
+- The share card's first line (`Germle #<n> · <score>% saved`) is matched by the e2e tests and by
+  anyone parsing pasted results.
+- The About page states the 70% Contained/Spread threshold. Update it whenever
+  `CONTAINED_THRESHOLD_PERCENT` (`src/verdict.ts`) changes.
 - Practice link parameters are a public format (people save links); renaming one breaks them.
 
 ## Constraints

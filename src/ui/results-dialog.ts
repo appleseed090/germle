@@ -8,7 +8,7 @@ import {
 import { histogramBand, type PlayerStats } from '../stats';
 import { openDialog, wireDialog } from './dialogs';
 import { requireElement } from './dom';
-import { describeParComparison, renderOutcomeBreakdown } from './outcome-breakdown';
+import { renderOutcomeBreakdown, renderVerdict } from './outcome-breakdown';
 import type { Toast } from './toast';
 
 /** The results and statistics dialog of the daily page. */
@@ -30,7 +30,7 @@ export function createResultsDialog(toast: Toast, nextPuzzleAt: Date): ResultsDi
   const summary = requireElement('result-summary', HTMLElement);
   const pending = requireElement('result-pending', HTMLElement);
   const score = requireElement('result-score', HTMLElement);
-  const parLine = requireElement('result-par', HTMLElement);
+  const verdict = requireElement('result-verdict', HTMLElement);
   const breakdownBar = requireElement('breakdown-bar', HTMLElement);
   const breakdownLegend = requireElement('breakdown-legend', HTMLElement);
   const sharePreview = requireElement('share-preview', HTMLElement);
@@ -87,9 +87,7 @@ export function createResultsDialog(toast: Toast, nextPuzzleAt: Date): ResultsDi
       if (result !== undefined) {
         title.textContent = `Germle #${result.puzzleNumber}`;
         score.textContent = `${result.score}%`;
-        parLine.hidden = result.par === undefined;
-        if (result.par !== undefined)
-          parLine.textContent = describeParComparison(result.score, result.par);
+        renderVerdict(verdict, result.score);
         renderOutcomeBreakdown(breakdownBar, breakdownLegend, result.counts);
         shareText = buildShareText(result);
         sharePreview.textContent = shareText;

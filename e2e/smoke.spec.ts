@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
+import { expectVerdictToMatchScore } from './verdict';
 
-const SHARE_FIRST_LINE = /^Germle #\d+ · \d+% saved · par \d+%$/m;
+const SHARE_FIRST_LINE = /^Germle #\d+ · \d+% saved$/m;
 
 async function tapFirstTappablePerson(page: Page): Promise<void> {
   await page.locator('.node[data-tappable="true"]').first().click();
@@ -32,12 +33,12 @@ test('plays a full daily game, shares the result and restores it on reload', asy
     move < 40 && !(await resultsDialog.evaluate((dialog: HTMLDialogElement) => dialog.open));
     move++
   ) {
-    if ((await page.locator('#phase-label').textContent()) === 'Contained') break;
+    if ((await page.locator('#phase-label').getAttribute('data-phase')) === 'ended') break;
     await tapFirstTappablePerson(page);
   }
   await expect(resultsDialog).toBeVisible();
-  await expect(page.locator('#phase-label')).toHaveText('Contained');
-  await expect(page.locator('#result-par')).toHaveText(/^Par \d+% · /);
+  await expect(page.locator('#phase-label')).toHaveAttribute('data-phase', 'ended');
+  await expectVerdictToMatchScore(page);
 
   const preview = (await page.locator('#share-preview').textContent()) ?? '';
   expect(preview).toMatch(SHARE_FIRST_LINE);

@@ -20,8 +20,7 @@ import { browserLocalStorage, createGameStorage } from '../storage';
 import { openDialog, wireDialog } from '../ui/dialogs';
 import { requireElement } from '../ui/dom';
 import { mountGameSession, pluralize } from '../ui/game-session';
-import { describeParComparison, renderOutcomeBreakdown } from '../ui/outcome-breakdown';
-import { PAR_SOLVE_DELAY_MILLISECONDS, createParSolver } from '../ui/par';
+import { renderOutcomeBreakdown, renderVerdict } from '../ui/outcome-breakdown';
 import { connectSettingsDialog, displayOptionsFor } from '../ui/settings-dialog';
 import { createToast } from '../ui/toast';
 
@@ -36,7 +35,6 @@ const practiceUrl = (practice: PracticeSetup): string =>
 window.history.replaceState(null, '', practiceUrl(setup));
 
 const puzzle = createPuzzle(setup.config, practiceSeedKey(setup.seed));
-const solveParOnce = createParSolver(puzzle);
 const toast = createToast(requireElement('toast', HTMLElement));
 const resultsDialog = requireElement('results-dialog', HTMLDialogElement);
 wireDialog(resultsDialog);
@@ -56,22 +54,12 @@ const session = mountGameSession({
     toolbarResultsButton: requireElement('toolbar-results', HTMLButtonElement),
     announcer: requireElement('announcer', HTMLElement),
   },
-  onMove: (step) => {
-    if (
-      step.state.phase !== 'ended' &&
-      step.events.some((event) => event.kind === 'outbreak-started')
-    ) {
-      window.setTimeout(solveParOnce, PAR_SOLVE_DELAY_MILLISECONDS);
-    }
-  },
+  onMove: () => undefined,
   onGameEnded: (state) => {
     const counts = countOutcomes(state);
     const score = scorePercent(counts);
     requireElement('result-score', HTMLElement).textContent = `${score}%`;
-    requireElement('result-par', HTMLElement).textContent = describeParComparison(
-      score,
-      solveParOnce().score,
-    );
+    renderVerdict(requireElement('result-verdict', HTMLElement), score);
     renderOutcomeBreakdown(
       requireElement('breakdown-bar', HTMLElement),
       requireElement('breakdown-legend', HTMLElement),

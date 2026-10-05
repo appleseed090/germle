@@ -389,6 +389,10 @@ button {
   background: var(--color-accent);
 }
 
+.phase-pill[data-phase='ended'][data-verdict='spread'] {
+  background: var(--color-node-infected);
+}
+
 .counter {
   overflow: hidden;
   font-weight: 600;
@@ -746,9 +750,14 @@ button {
   line-height: 1;
 }
 
-.result-par {
+.result-verdict {
   margin: -6px 0 12px;
-  font-weight: 600;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.result-verdict[data-verdict='spread'] {
+  color: var(--color-pathogen);
 }
 
 .breakdown-bar {
