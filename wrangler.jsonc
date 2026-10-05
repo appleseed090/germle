@@ -10,4 +10,7 @@
     // Unknown paths get a plain 404 rather than the game page.
     "not_found_handling": "none",
   },
+  // Workers Builds runs `npx wrangler preview` for every non-main branch, which refuses to run
+  // without this block. Empty: previews use the settings above and need no extra bindings.
+  "previews": {},
 }

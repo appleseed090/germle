@@ -33,7 +33,7 @@ authorise GitHub (choose **Only select repositories** → `germle`) → select `
 | Project name          | `germle` (must match `name` in `wrangler.jsonc`) |
 | Build command         | `npm run build`                                  |
 | Deploy command        | `npx wrangler deploy` (the default)              |
-| Non-production deploy | `npx wrangler versions upload` (the default)     |
+| Non-production deploy | `npx wrangler preview` (the default)             |
 | Root directory / path | `/` (leave blank)                                |
 | Environment variables | none                                             |
 | Node version          | read from `.node-version`                        |
@@ -108,8 +108,10 @@ Use HTTPS**, so plain `http://` visits are redirected before the HSTS header can
   with **automatic setup**. No code change is needed: Cloudflare injects its beacon script, and
   the Content-Security-Policy in `public/_headers` already allows `static.cloudflareinsights.com`
   (script) and `cloudflareinsights.com` (beacon).
-- **Preview URLs:** Worker → **Settings** → **Build** → **Branch control** → enable builds for
-  non-production branches if you want a preview version for each PR.
+- **Preview URLs:** builds for non-production branches run `npx wrangler preview` (Worker
+  Previews, in open beta), which needs the `previews` block in `wrangler.jsonc`; it is there and
+  empty. Turn branch builds on or off under Worker → **Settings** → **Build** → **Branch
+  control**.
 
 ## Fallback: keeping DNS at Porkbun
 
