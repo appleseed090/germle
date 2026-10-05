@@ -58,6 +58,9 @@ interface NodeElements {
   readonly body: SVGGElement;
   readonly disc: SVGCircleElement;
   readonly count: SVGTextElement;
+  /** Infected people's centre dot and refusers' cross, shown instead of counts when those are off. */
+  readonly core: SVGCircleElement;
+  readonly cross: SVGPathElement | undefined;
   readonly halo: SVGCircleElement;
   readonly ring: SVGCircleElement;
   readonly focus: SVGCircleElement;
@@ -117,7 +120,13 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
       dy: '0.35em',
       'aria-hidden': 'true',
     });
-    body.append(disc, count);
+    const core = createSvgElement('circle', { class: 'node-core' });
+    body.append(disc, count, core);
+    let cross: SVGPathElement | undefined;
+    if (puzzle.isRefuser[node] === true) {
+      cross = createSvgElement('path', { class: 'node-cross' });
+      body.append(cross);
+    }
     const ring = createSvgElement('circle', { class: 'node-ring' });
     const focus = createSvgElement('circle', { class: 'node-focus' });
     group.append(halo, body, ring, focus);
@@ -128,7 +137,7 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
       else onNodeActivate(node);
     });
     nodeLayer.append(group);
-    return { group, body, disc, count, halo, ring, focus };
+    return { group, body, disc, count, core, cross, halo, ring, focus };
   }
 
   function elementsOf(node: number): NodeElements {
@@ -161,6 +170,12 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
     const elements = elementsOf(node);
     elements.disc.setAttribute('r', String(radius));
     elements.count.setAttribute('font-size', String(radius * COUNT_FONT_SCALE));
+    elements.core.setAttribute('r', String(radius * 0.32));
+    const arm = radius * 0.42;
+    elements.cross?.setAttribute(
+      'd',
+      `M${-arm} ${-arm}L${arm} ${arm}M${arm} ${-arm}L${-arm} ${arm}`,
+    );
     elements.halo.setAttribute('r', String(radius + 7));
     elements.focus.setAttribute('r', String(radius + 4));
     elements.ring.setAttribute('r', String(radius + 8));
@@ -486,6 +501,7 @@ interface SvgElementTags {
   line: SVGLineElement;
   circle: SVGCircleElement;
   text: SVGTextElement;
+  path: SVGPathElement;
 }
 
 function createSvgElement<Tag extends keyof SvgElementTags>(

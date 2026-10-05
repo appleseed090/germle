@@ -33,7 +33,7 @@ test('shows live contact counts that only your moves change, and reads them out'
   await page.goto(
     '/practice?people=30&neighbours=4&vaccines=2&outbreaks=1&refusers=2&contagion=40&seed=counts',
   );
-  await expect(page.locator('.node-cross, .node-core')).toHaveCount(0);
+  await expect(page.locator('.node-cross:visible, .node-core:visible')).toHaveCount(0);
   let people = await peopleOnBoard(page);
   expectLabelsToMatchCounts(people);
 
@@ -55,4 +55,40 @@ test('shows live contact counts that only your moves change, and reads them out'
     people = after;
   }
   expect(movesThatAlsoInfected).toBeGreaterThan(0);
+});
+
+test('Settings can hide the numbers, bringing back the refuser cross and infected dot', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto(
+    '/practice?people=30&neighbours=4&vaccines=1&outbreaks=2&refusers=4&contagion=35&seed=marks',
+  );
+  await page.locator('.node[data-tappable="true"]').first().click();
+  await expect(page.locator('#board')).toHaveAttribute('data-animating', 'false');
+  const counts = page.locator('.node:not(.node--removed) .node-count');
+  const crosses = page.locator(
+    '.node--refuser:not(.node--infected):not(.node--removed) .node-cross',
+  );
+  const dots = page.locator('.node--infected .node-core');
+  await expect(crosses).not.toHaveCount(0);
+  await expect(dots).not.toHaveCount(0);
+
+  const showNumbers = page.getByRole('checkbox', { name: 'Show contact numbers' });
+  await page.getByRole('button', { name: 'Settings' }).click();
+  await expect(showNumbers).toBeChecked();
+  await showNumbers.uncheck();
+  for (const count of await counts.all()) await expect(count).toBeHidden();
+  for (const cross of await crosses.all()) await expect(cross).toBeVisible();
+  for (const dot of await dots.all()) await expect(dot).toBeVisible();
+
+  // Reloading restarts the practice game from its link, so all 30 people are back.
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-contact-counts', 'hidden');
+  await expect(page.locator('.node-count:visible')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Settings' }).click();
+  await expect(showNumbers).not.toBeChecked();
+  await showNumbers.check();
+  await expect(page.locator('.node-cross:visible, .node-core:visible')).toHaveCount(0);
+  await expect(page.locator('.node-count:visible')).toHaveCount(30);
 });

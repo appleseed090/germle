@@ -39,10 +39,6 @@ External memory for the project: what is pending, constraints to remember, defer
 
 ## Deferred cleanups
 
-- `og.png` and the app icons (`scripts/generate-images.ts`) still draw refusers with a cross and
-  infected people with a white centre, which the board no longer shows. Regenerate with numbers
-  if the share card should match the game.
-
 - The three page shells repeat the header, toolbar and settings dialog markup. A small Vite HTML
   transform could share it if a fourth page appears.
 
