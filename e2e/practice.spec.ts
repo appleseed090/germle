@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { expectVerdictToMatchScore } from './verdict';
 
 test('plays a practice game from a link and offers a replay of the same seed', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -12,14 +13,14 @@ test('plays a practice game from a link and offers a replay of the same seed', a
   const resultsDialog = page.locator('#results-dialog');
   for (
     let move = 0;
-    move < 40 && (await page.locator('#phase-label').textContent()) !== 'Contained';
+    move < 40 && (await page.locator('#phase-label').getAttribute('data-phase')) !== 'ended';
     move++
   ) {
     await page.locator('.node[data-tappable="true"]').first().click();
     await expect(page.locator('#board')).toHaveAttribute('data-animating', 'false');
   }
   await expect(resultsDialog).toBeVisible();
-  await expect(page.locator('#result-par')).toHaveText(/^Par \d+% · /);
+  await expectVerdictToMatchScore(page);
   await expect(page.locator('#practice-summary')).toHaveText(
     '30 people · 3 vaccines · 1 outbreak · 1 refuser · 40% contagious · seed smoke',
   );

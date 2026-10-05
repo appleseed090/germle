@@ -10,7 +10,9 @@ import {
   type GameStep,
   type Puzzle,
 } from '../engine';
+import { verdictForScore } from '../verdict';
 import { createBoard, type Board } from './board';
+import { renderVerdict } from './outcome-breakdown';
 import type { Toast } from './toast';
 
 /** The page elements a game session drives. */
@@ -125,8 +127,9 @@ export function mountGameSession(options: GameSessionOptions): GameSession {
       instruction.textContent =
         'Tap a healthy person to quarantine them. Each quarantine passes one day.';
     } else {
-      phaseLabel.textContent = 'Contained';
-      counter.textContent = `${scorePercent(countOutcomes(state))}% saved`;
+      const score = scorePercent(countOutcomes(state));
+      renderVerdict(phaseLabel, score);
+      counter.textContent = `${score}% saved`;
       instruction.textContent = 'The outbreak has nowhere left to go.';
     }
   }
@@ -149,7 +152,8 @@ export function mountGameSession(options: GameSessionOptions): GameSession {
           `Day ${event.turn + 1}: ${pluralize(event.transmissions.length, 'new infection', 'new infections')}.`,
         );
       } else {
-        messages.push(`Outbreak contained. ${scorePercent(countOutcomes(state))}% saved.`);
+        const score = scorePercent(countOutcomes(state));
+        messages.push(`Outbreak ${verdictForScore(score).toLowerCase()}. ${score}% saved.`);
       }
     }
     elements.announcer.textContent = messages.join(' ');

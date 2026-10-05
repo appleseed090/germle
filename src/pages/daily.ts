@@ -20,7 +20,6 @@ import { requireElement } from '../ui/dom';
 import { mountGameSession } from '../ui/game-session';
 import { createResultsDialog } from '../ui/results-dialog';
 import { connectSettingsDialog, displayOptionsFor } from '../ui/settings-dialog';
-import { PAR_SOLVE_DELAY_MILLISECONDS, createParSolver } from '../ui/par';
 import { createToast } from '../ui/toast';
 
 const RESULTS_DELAY_AFTER_END = 700;
@@ -36,7 +35,6 @@ const restoredState =
     ? replayMoves(puzzle, savedProgress.moves)
     : undefined;
 const initialState = restoredState ?? startGame(puzzle).state;
-const solveParOnce = createParSolver(puzzle);
 
 const toast = createToast(requireElement('toast', HTMLElement));
 const resultsDialog = createResultsDialog(toast, nextPuzzleStart(today));
@@ -63,13 +61,7 @@ const session = mountGameSession({
     storage.saveDailyProgress({ puzzleNumber, moves: step.state.moves });
     if (step.state.phase === 'ended') {
       const counts = countOutcomes(step.state);
-      storage.saveResult(puzzleNumber, {
-        score: scorePercent(counts),
-        counts,
-        par: solveParOnce().score,
-      });
-    } else if (step.events.some((event) => event.kind === 'outbreak-started')) {
-      window.setTimeout(solveParOnce, PAR_SOLVE_DELAY_MILLISECONDS);
+      storage.saveResult(puzzleNumber, { score: scorePercent(counts), counts });
     }
   },
   onGameEnded: (state) => {
@@ -87,8 +79,7 @@ function refreshResults(state: GameState): void {
   let result: ShareableResult | undefined;
   if (state.phase === 'ended') {
     const counts = countOutcomes(state);
-    const par = storage.loadResults().get(puzzleNumber)?.par ?? solveParOnce().score;
-    result = { puzzleNumber, score: scorePercent(counts), counts, par };
+    result = { puzzleNumber, score: scorePercent(counts), counts };
   }
   resultsDialog.update(result, computePlayerStats(storage.loadResults(), puzzleNumber));
 }

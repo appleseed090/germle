@@ -2,17 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { buildShareBar, buildShareText, shareOrCopy } from './share';
 
 describe('buildShareText', () => {
-  it('appends par when known', () => {
-    const text = buildShareText({
-      puzzleNumber: 3,
-      score: 80,
-      par: 85,
-      counts: { vaccinated: 4, quarantined: 4, untouched: 24, infected: 8 },
-    });
-    expect(text.split('\n')[0]).toBe('Germle #3 · 80% saved · par 85%');
-    expect(text.split('\n')[0]).toMatch(/^Germle #\d+ · \d+% saved/);
-  });
-
   it('produces the three-line card', () => {
     const text = buildShareText({
       puzzleNumber: 12,
@@ -20,7 +9,7 @@ describe('buildShareText', () => {
       counts: { vaccinated: 4, quarantined: 7, untouched: 20, infected: 9 },
     });
     expect(text).toBe('Germle #12 · 78% saved\n▣▨▨□□□□□■■\ngermle.com');
-    expect(text.split('\n')[0]).toMatch(/^Germle #\d+ · \d+% saved/);
+    expect(text.split('\n')[0]).toMatch(/^Germle #\d+ · \d+% saved$/);
   });
 });
 

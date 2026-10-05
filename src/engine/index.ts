@@ -39,10 +39,3 @@ export {
 export { computeForceLayout, layoutBoundsFor, type LayoutBounds, type Point } from './layout';
 export { createPuzzle, type Puzzle } from './puzzle';
 export { createStreamRandom } from './random';
-export {
-  DEFAULT_SOLVER_BUDGET,
-  solvePuzzle,
-  solverBudgetFor,
-  type Solution,
-  type SolverBudget,
-} from './solver';
