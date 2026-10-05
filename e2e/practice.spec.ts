@@ -68,7 +68,10 @@ test('explains every setup field on tap or keyboard, and to screen readers', asy
   await contagionInfo.click();
   await expect(contagionInfo).toHaveAttribute('aria-expanded', 'true');
   await expect(contagionText).toHaveText(
-    'The chance, each day, that the infection passes along each contact between an infected and a healthy person.',
+    'Each day, the chance the infection passes along each contact between an infected and a healthy person.',
+  );
+  await expect(contagionText.locator('strong')).toHaveText(
+    'the chance the infection passes along each contact',
   );
   await contagionInfo.click();
   await expect(contagionText).toBeHidden();

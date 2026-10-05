@@ -133,6 +133,14 @@ brief are not repeated here.
   hear whether it is open. Each sentence is also its control's `aria-describedby`, so it is read
   when the slider or seed box is focused, open or not. The button is a 36 px target around a 20 px
   badge; the focus ring is drawn on the badge.
+- **Contagiousness stays β in percent; the slider does not show R0.** Nobody recovers, so every
+  contact eventually passes the infection on and R0 equals the number of contacts (about 4.0 for
+  an index patient on the daily network, 3.1 for later cases) whatever β is: an R0 readout would
+  not move with the slider. β sets the speed instead, on average 1/β days per contact (2.9 at
+  35%). The never-fizzle rule flattens the low end: in a 300-puzzle simulation with a simple
+  strategy, 51% of days at 15% infected only the guaranteed one person, against 25% at 35%. The
+  "i" text explains β, with "the chance the infection passes along each contact" in bold (the
+  owner's wording); the `contagion` link parameter is unchanged.
 
 ## Par removed; a fixed verdict instead
 

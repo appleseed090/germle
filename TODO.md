@@ -13,9 +13,6 @@ External memory for the project: what is pending, constraints to remember, defer
 
 Recommendations were sent on 2026-10-05; build once decided.
 
-- **Contagiousness vs R0.** Recommended: keep the slider as β in percent (R0 equals the number of
-  contacts here and does not depend on β). The setup's "i" text already explains β; update it
-  if the slider changes.
 - **Daily settings in the game.** Recommended: one line in the how-to-play dialog built from
   `DAILY_PUZZLE_CONFIG` with practice's summary formatter; not in the toolbar or results.
 
