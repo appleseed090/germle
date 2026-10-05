@@ -170,15 +170,33 @@ export function scorePercent(counts: OutcomeCounts): number {
  * infected and a susceptible person, i.e. the outbreak has nowhere left to go.
  */
 export function isOutbreakContained(graph: Graph, nodeStatuses: readonly NodeStatus[]): boolean {
-  const isPresent = (node: number): boolean => {
-    const status = nodeStatuses[node];
-    return status === 'susceptible' || status === 'infected';
-  };
+  const isPresent = (node: number): boolean => isInNetwork(nodeStatuses[node]);
   return findConnectedComponents(graph, isPresent).every((component) => {
     const hasInfected = component.some((node) => nodeStatuses[node] === 'infected');
     const hasSusceptible = component.some((node) => nodeStatuses[node] === 'susceptible');
     return !(hasInfected && hasSusceptible);
   });
+}
+
+/**
+ * How many contacts each person still has: neighbours who are susceptible or infected, i.e. still
+ * in the network. Vaccinating or quarantining someone lowers each neighbour's count by one; an
+ * infection changes no count. Removed people get a count too, though the board does not show it.
+ *
+ * @returns One count per node, indexed like `nodeStatuses`.
+ */
+export function contactsStillInNetwork(
+  graph: Graph,
+  nodeStatuses: readonly NodeStatus[],
+): number[] {
+  return graph.adjacency.map(
+    (incidences) =>
+      incidences.filter(({ neighbour }) => isInNetwork(nodeStatuses[neighbour])).length,
+  );
+}
+
+function isInNetwork(status: NodeStatus | undefined): boolean {
+  return status === 'susceptible' || status === 'infected';
 }
 
 /**

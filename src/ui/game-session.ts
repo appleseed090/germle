@@ -29,7 +29,6 @@ export interface GameSessionElements {
 
 /** Display preferences a session applies live. */
 export interface GameDisplayOptions {
-  readonly sizeNodesByDegree: boolean;
   readonly reduceMotion: boolean;
 }
 
@@ -72,7 +71,6 @@ export function mountGameSession(options: GameSessionOptions): GameSession {
         layoutBounds,
       ),
       layoutBounds,
-      sizeNodesByDegree: options.display.sizeNodesByDegree,
       reduceMotion: options.display.reduceMotion,
       onNodeActivate: (node) => {
         void handleActivate(node);
@@ -170,7 +168,6 @@ export function mountGameSession(options: GameSessionOptions): GameSession {
   return {
     getState: () => state,
     setDisplayOptions(display) {
-      board.setSizeNodesByDegree(display.sizeNodesByDegree);
       board.setReduceMotion(display.reduceMotion);
       elements.boardContainer.classList.toggle('board--reduced-motion', display.reduceMotion);
     },

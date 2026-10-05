@@ -13,9 +13,6 @@ External memory for the project: what is pending, constraints to remember, defer
 
 Recommendations were sent on 2026-10-05; build once decided.
 
-- **Neighbour counts on each person.** Recommended: the count of neighbours still in the network
-  (healthy and infected), always on; retire "Size people by contacts"; dark digits on grey and
-  orange, white on red; screen-reader label uses the live count.
 - **Contagiousness vs R0.** Recommended: keep the slider as β in percent (R0 equals the number of
   contacts here and does not depend on β). The setup's "i" text already explains β; update it
   if the slider changes.
@@ -52,6 +49,10 @@ Recommendations were sent on 2026-10-05; build once decided.
 
 ## Deferred cleanups
 
+- `og.png` and the app icons (`scripts/generate-images.ts`) still draw refusers with a cross and
+  infected people with a white centre, which the board no longer shows. Regenerate with numbers
+  if the share card should match the game.
+
 - The three page shells repeat the header, toolbar and settings dialog markup. A small Vite HTML
   transform could share it if a fourth page appears.
 
@@ -67,8 +68,6 @@ Recommendations were sent on 2026-10-05; build once decided.
 - The dark theme's overrides are written twice in `src/styles/main.css` (under
   `prefers-color-scheme: dark` and under `[data-theme='dark']`), and each page's two `theme-color`
   metas repeat `--color-page`. `src/styles/theme.test.ts` fails if they drift.
-- The refusers' white cross is 2.5:1 on orange in both themes, below WCAG's 3:1 for marks. The
-  neighbour-count decision above removes or replaces it; otherwise darken the cross.
 
 ## Constraints
 

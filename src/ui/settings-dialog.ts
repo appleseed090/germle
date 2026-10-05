@@ -7,7 +7,6 @@ import type { GameDisplayOptions, GameSession } from './game-session';
 /** The display options implied by stored settings and the device's motion preference. */
 export function displayOptionsFor(settings: Settings): GameDisplayOptions {
   return {
-    sizeNodesByDegree: settings.sizeNodesByDegree,
     reduceMotion: settings.reduceMotion ?? prefersReducedMotion(),
   };
 }
@@ -25,7 +24,6 @@ export function connectSettingsDialog(
   session: GameSession,
 ): HTMLDialogElement {
   const dialog = requireElement('settings-dialog', HTMLDialogElement);
-  const sizeByDegree = requireElement('setting-size-by-degree', HTMLInputElement);
   const reduceMotion = requireElement('setting-reduce-motion', HTMLInputElement);
   const themeOptions = Array.from(
     requireElement('setting-theme', HTMLElement).querySelectorAll<HTMLInputElement>(
@@ -41,15 +39,11 @@ export function connectSettingsDialog(
     session.setDisplayOptions(displayOptionsFor(settings));
   };
   const showCurrent = (): void => {
-    sizeByDegree.checked = settings.sizeNodesByDegree;
     reduceMotion.checked = settings.reduceMotion ?? prefersReducedMotion();
     for (const option of themeOptions)
       option.checked = option.value === (settings.theme ?? 'system');
   };
 
-  sizeByDegree.addEventListener('change', () => {
-    apply({ ...settings, sizeNodesByDegree: sizeByDegree.checked });
-  });
   reduceMotion.addEventListener('change', () => {
     apply({ ...settings, reduceMotion: reduceMotion.checked });
   });

@@ -63,14 +63,14 @@ const TEXT_PAIRS: readonly (readonly [string, string])[] = [
   ['--color-surface', '--color-text'],
   ['--color-text', '--color-histogram-bar'],
   ['--color-text-muted', '--color-histogram-bar-empty'],
+  ['--color-node-healthy-count', '--color-node-healthy'],
+  ['--color-node-refuser-count', '--color-node-refuser'],
+  ['--color-node-infected-count', '--color-node-infected'],
 ];
 
-/**
- * Non-text marks a player needs to read the board: WCAG AA 3:1 (1.4.11). The refusers' white
- * cross (2.5:1 on orange) is a known gap tracked in TODO.md.
- */
+/** Non-text marks a player needs to read the board and results: WCAG AA 3:1 (1.4.11). */
 const MARK_PAIRS: readonly (readonly [string, string])[] = [
-  ['--color-node-infected-core', '--color-node-infected'],
+  ['--color-infected-pattern', '--color-infected'],
   ['--color-pathogen', '--color-page'],
   ['--color-focus', '--color-page'],
   ['--color-focus', '--color-surface'],
