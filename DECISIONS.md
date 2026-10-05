@@ -127,6 +127,12 @@ brief are not repeated here.
   seed goes straight to the game.
 - **Page shells repeat the header, toolbar and settings markup.** No templating step for three
   static pages; listed in `TODO.md` as a possible cleanup.
+- **Each setup field has an "i" button that shows one sentence inline, below the field.** A
+  disclosure (`aria-expanded`, `aria-controls`, `hidden`) rather than a tooltip or popover: it
+  opens on tap, click, Enter or Space, needs no positioning or inline styles, and screen readers
+  hear whether it is open. Each sentence is also its control's `aria-describedby`, so it is read
+  when the slider or seed box is focused, open or not. The button is a 36 px target around a 20 px
+  badge; the focus ring is drawn on the badge.
 
 ## Par removed; a fixed verdict instead
 

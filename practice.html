@@ -93,46 +93,131 @@
         Build any network you like. Practice games never count toward your stats.
       </p>
       <div class="slider-field">
-        <label for="setup-people">People</label
-        ><output id="setup-people-value" for="setup-people"></output>
-        <input type="range" id="setup-people" />
+        <label for="setup-people">People</label>
+        <button
+          class="info-button"
+          type="button"
+          aria-label="About People"
+          aria-expanded="false"
+          aria-controls="setup-people-info"
+        >
+          <span aria-hidden="true">i</span>
+        </button>
+        <output id="setup-people-value" for="setup-people"></output>
+        <input type="range" id="setup-people" aria-describedby="setup-people-info" />
+        <p class="field-info" id="setup-people-info" hidden>How many people are in the network.</p>
       </div>
       <div class="slider-field">
-        <label for="setup-neighbours">Neighbours</label
-        ><output id="setup-neighbours-value" for="setup-neighbours"></output>
-        <input type="range" id="setup-neighbours" />
+        <label for="setup-neighbours">Neighbours</label>
+        <button
+          class="info-button"
+          type="button"
+          aria-label="About Neighbours"
+          aria-expanded="false"
+          aria-controls="setup-neighbours-info"
+        >
+          <span aria-hidden="true">i</span>
+        </button>
+        <output id="setup-neighbours-value" for="setup-neighbours"></output>
+        <input type="range" id="setup-neighbours" aria-describedby="setup-neighbours-info" />
+        <p class="field-info" id="setup-neighbours-info" hidden>
+          How many contacts each person starts with, before about one contact in ten is moved to
+          someone at random.
+        </p>
       </div>
       <div class="slider-field">
-        <label for="setup-vaccines">Vaccines</label
-        ><output id="setup-vaccines-value" for="setup-vaccines"></output>
-        <input type="range" id="setup-vaccines" />
+        <label for="setup-vaccines">Vaccines</label>
+        <button
+          class="info-button"
+          type="button"
+          aria-label="About Vaccines"
+          aria-expanded="false"
+          aria-controls="setup-vaccines-info"
+        >
+          <span aria-hidden="true">i</span>
+        </button>
+        <output id="setup-vaccines-value" for="setup-vaccines"></output>
+        <input type="range" id="setup-vaccines" aria-describedby="setup-vaccines-info" />
+        <p class="field-info" id="setup-vaccines-info" hidden>
+          How many people you vaccinate before the outbreak; vaccinated people leave the network.
+        </p>
       </div>
       <div class="slider-field">
-        <label for="setup-outbreaks">Outbreaks</label
-        ><output id="setup-outbreaks-value" for="setup-outbreaks"></output>
-        <input type="range" id="setup-outbreaks" />
+        <label for="setup-outbreaks">Outbreaks</label>
+        <button
+          class="info-button"
+          type="button"
+          aria-label="About Outbreaks"
+          aria-expanded="false"
+          aria-controls="setup-outbreaks-info"
+        >
+          <span aria-hidden="true">i</span>
+        </button>
+        <output id="setup-outbreaks-value" for="setup-outbreaks"></output>
+        <input type="range" id="setup-outbreaks" aria-describedby="setup-outbreaks-info" />
+        <p class="field-info" id="setup-outbreaks-info" hidden>
+          How many people fall ill when the outbreak starts.
+        </p>
       </div>
       <div class="slider-field">
-        <label for="setup-refusers">Refusers</label
-        ><output id="setup-refusers-value" for="setup-refusers"></output>
-        <input type="range" id="setup-refusers" />
+        <label for="setup-refusers">Refusers</label>
+        <button
+          class="info-button"
+          type="button"
+          aria-label="About Refusers"
+          aria-expanded="false"
+          aria-controls="setup-refusers-info"
+        >
+          <span aria-hidden="true">i</span>
+        </button>
+        <output id="setup-refusers-value" for="setup-refusers"></output>
+        <input type="range" id="setup-refusers" aria-describedby="setup-refusers-info" />
+        <p class="field-info" id="setup-refusers-info" hidden>
+          How many people refuse vaccines; they can still be infected or quarantined.
+        </p>
       </div>
       <div class="slider-field">
-        <label for="setup-contagion">Contagiousness</label
-        ><output id="setup-contagion-value" for="setup-contagion"></output>
-        <input type="range" id="setup-contagion" />
+        <label for="setup-contagion">Contagiousness</label>
+        <button
+          class="info-button"
+          type="button"
+          aria-label="About Contagiousness"
+          aria-expanded="false"
+          aria-controls="setup-contagion-info"
+        >
+          <span aria-hidden="true">i</span>
+        </button>
+        <output id="setup-contagion-value" for="setup-contagion"></output>
+        <input type="range" id="setup-contagion" aria-describedby="setup-contagion-info" />
+        <p class="field-info" id="setup-contagion-info" hidden>
+          The chance, each day, that the infection passes along each contact between an infected and
+          a healthy person.
+        </p>
       </div>
       <div class="seed-field">
         <label for="setup-seed">Seed</label>
+        <button
+          class="info-button"
+          type="button"
+          aria-label="About Seed"
+          aria-expanded="false"
+          aria-controls="setup-seed-info"
+        >
+          <span aria-hidden="true">i</span>
+        </button>
         <input
           type="text"
           id="setup-seed"
+          aria-describedby="setup-seed-info"
           maxlength="24"
           autocomplete="off"
           spellcheck="false"
           autocapitalize="off"
         />
         <button class="secondary-button" type="button" id="setup-random-seed">Random</button>
+        <p class="field-info" id="setup-seed-info" hidden>
+          Any word: the same seed and settings always make the same network and outbreak.
+        </p>
       </div>
       <button class="primary-button" type="button" id="setup-start">Start</button>
       <p class="dialog-footnote">

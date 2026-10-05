@@ -18,6 +18,7 @@ import {
 } from '../practice-setup';
 import { browserLocalStorage, createGameStorage } from '../storage';
 import { openDialog, wireDialog } from '../ui/dialogs';
+import { wireDisclosureButtons } from '../ui/disclosure';
 import { requireElement } from '../ui/dom';
 import { mountGameSession, pluralize } from '../ui/game-session';
 import { renderOutcomeBreakdown, renderVerdict } from '../ui/outcome-breakdown';
@@ -118,6 +119,7 @@ interface SliderBinding {
 function bindSetupDialog(initial: PracticeSetup): HTMLDialogElement {
   const dialog = requireElement('setup-dialog', HTMLDialogElement);
   wireDialog(dialog);
+  wireDisclosureButtons(dialog);
   const slider = (
     id: string,
     range: { minimum: number; maximum: number; step: number },
