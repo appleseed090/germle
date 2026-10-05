@@ -124,7 +124,10 @@ brief are not repeated here.
   and every game is shareable and replayable.
 - **Practice seed key is `practice-<seed>`; rewiring stays at the daily 0.1.** The brief's slider
   list does not include rewiring.
-- **"Neighbours" slider is the ring degree: 2, 4 or 6.**
+- **"Neighbors" slider is the ring degree: 2, 4 or 6.** Labelled "Neighbors" (the owner's
+  spelling) and explained as "How many contacts each person starts with, on average.", which holds
+  after rewiring (the daily network averages 3.97 for 4). The link parameter stays `neighbours`,
+  because saved practice links use it.
 - **Practice never touches stats or progress, and has no share card.** The brief says practice is
   not counted; settings are shared with the daily page.
 - **A bare `/practice` visit opens the setup dialog over a playable random game.** A link with a
