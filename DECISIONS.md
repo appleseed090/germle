@@ -283,12 +283,13 @@ brief are not repeated here.
   and "Spread" describes the outbreak, not the player. `renderVerdictRule` builds the line from
   `CONTAINED_THRESHOLD_PERCENT` and the `Verdict` names, so the rule and the verdict cannot
   disagree.
-- **Dialogs open at their top, then focus their main control without scrolling.** The owner saw
-  how-to-play open scrolled to the bottom on an iPhone: `autofocus` scrolls the dialog to Start
-  playing. The four dialogs now mark that control with `data-initial-focus`, and `openDialog`
-  focuses it with `preventScroll`, so Enter still starts the game. It then resets the scroll for
-  browsers without `preventScroll`. Phones with browser toolbars often show less than 600 px of
-  height, where how-to-play has to scroll.
+- **Dialogs open at their top, and how to play focuses its own heading.** The owner saw how to
+  play open scrolled to the bottom on an iPhone, first with `autofocus` on Start playing and then
+  with `focus({ preventScroll: true })`: iOS Safari still scrolled to the focused button on the
+  first visit. How to play now focuses its heading (`tabindex="-1"`), like Practice setup, so
+  whatever a browser scrolls to is the top. Keyboard players close it with Escape or Tab to a
+  button. The other dialogs mark their main control (Share, Play again) with
+  `data-initial-focus`; `openDialog` focuses it with `preventScroll` and resets the scroll.
 
 ## Navigation
 

@@ -124,7 +124,7 @@
 
     <dialog class="dialog" id="how-to-play-dialog" aria-labelledby="how-to-play-title">
       <div class="dialog-header">
-        <h2 id="how-to-play-title">How to play</h2>
+        <h2 id="how-to-play-title" tabindex="-1" data-initial-focus>How to play</h2>
         <button class="icon-button" type="button" data-close-dialog aria-label="Close">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
         </button>
@@ -186,9 +186,7 @@
         <span class="legend-dot legend-dot--refuser"></span> refuses vaccines,
         <span class="legend-dot legend-dot--infected"></span> infected.
       </p>
-      <button class="primary-button" type="button" data-close-dialog data-initial-focus>
-        Start playing
-      </button>
+      <button class="primary-button" type="button" data-close-dialog>Start playing</button>
       <p class="dialog-footnote">A new puzzle every day at midnight.</p>
     </dialog>
 
