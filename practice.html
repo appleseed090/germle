@@ -84,7 +84,7 @@
 
     <dialog class="dialog" id="setup-dialog" aria-labelledby="setup-title">
       <div class="dialog-header">
-        <h2 id="setup-title" tabindex="-1" autofocus>Practice setup</h2>
+        <h2 id="setup-title" tabindex="-1" data-initial-focus>Practice setup</h2>
         <button class="icon-button" type="button" data-close-dialog aria-label="Close">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
         </button>
@@ -251,7 +251,7 @@
         <li><span class="swatch swatch--infected"></span>Infected <strong></strong></li>
       </ul>
       <p class="practice-summary" id="practice-summary"></p>
-      <a class="primary-button" id="play-again" href="/practice" autofocus>Play again</a>
+      <a class="primary-button" id="play-again" href="/practice" data-initial-focus>Play again</a>
       <div class="button-row">
         <a class="secondary-button" id="new-network" href="/practice">New network</a>
         <button class="secondary-button" type="button" id="change-setup">Change setup</button>
