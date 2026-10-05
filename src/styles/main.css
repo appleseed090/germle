@@ -375,11 +375,6 @@ button {
   fill: var(--color-node-infected-count);
 }
 
-.node-core,
-.node-cross {
-  display: none;
-}
-
 .node-core {
   fill: var(--color-node-infected-core);
 }
@@ -391,14 +386,26 @@ button {
   stroke-linecap: round;
 }
 
-/* Settings, "Show contact numbers" off: the infected dot and refuser cross replace the counts. */
-:root[data-contact-counts='hidden'] .node-count {
+/* By default infected people carry a centre dot and refusers a cross. */
+.node-count,
+.node-core,
+.node-cross {
   display: none;
 }
 
-:root[data-contact-counts='hidden'] .node--infected .node-core,
-:root[data-contact-counts='hidden'] .node--refuser:not(.node--infected) .node-cross {
+.node--infected .node-core,
+.node--refuser:not(.node--infected) .node-cross {
   display: inline;
+}
+
+/* Settings, "Show contact numbers" on: each person's count replaces the dot and cross. */
+:root[data-contact-counts='shown'] .node-count {
+  display: inline;
+}
+
+:root[data-contact-counts='shown'] .node-core,
+:root[data-contact-counts='shown'] .node-cross {
+  display: none;
 }
 
 .node--refuser .node-disc {
@@ -946,15 +953,6 @@ button {
 
 .legend-dot--refuser {
   border-color: var(--color-node-refuser-stroke);
-  background: var(--color-node-refuser);
-}
-
-.legend-dot--infected {
-  border-color: var(--color-node-infected-stroke);
-  background: var(--color-node-infected);
-}
-
-:root[data-contact-counts='hidden'] .legend-dot--refuser {
   background:
     linear-gradient(
       45deg,
@@ -971,12 +969,22 @@ button {
     var(--color-node-refuser);
 }
 
-:root[data-contact-counts='hidden'] .legend-dot--infected {
+.legend-dot--infected {
+  border-color: var(--color-node-infected-stroke);
   background: radial-gradient(
     circle,
     var(--color-node-infected-core) 0 24%,
     var(--color-node-infected) 28%
   );
+}
+
+/* With contact numbers on, the board drops the cross and dot, so the legend does too. */
+:root[data-contact-counts='shown'] .legend-dot--refuser {
+  background: var(--color-node-refuser);
+}
+
+:root[data-contact-counts='shown'] .legend-dot--infected {
+  background: var(--color-node-infected);
 }
 
 /* Results */

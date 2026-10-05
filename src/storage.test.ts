@@ -23,7 +23,7 @@ describe('createGameStorage', () => {
   it('round-trips settings, progress, results and the how-to-play flag', () => {
     const storage = createGameStorage(createMemoryStore());
     expect(storage.loadSettings()).toEqual(DEFAULT_SETTINGS);
-    const settings = { reduceMotion: true, theme: 'dark', showContactCounts: false } as const;
+    const settings = { reduceMotion: true, theme: 'dark', showContactCounts: true } as const;
     storage.saveSettings(settings);
     expect(storage.loadSettings()).toEqual(settings);
 
@@ -52,14 +52,14 @@ describe('createGameStorage', () => {
     });
   });
 
-  it('loads older settings as following the device theme, with contact numbers shown', () => {
+  it('loads older settings as following the device theme, with contact numbers hidden', () => {
     const store = createMemoryStore({
       'germle.v1.settings': JSON.stringify({ reduceMotion: false }),
     });
     expect(createGameStorage(store).loadSettings()).toEqual({
       reduceMotion: false,
       theme: null,
-      showContactCounts: true,
+      showContactCounts: false,
     });
   });
 
@@ -73,12 +73,12 @@ describe('createGameStorage', () => {
     });
     const storage = createGameStorage(store);
     const settings = storage.loadSettings();
-    expect(settings).toEqual({ reduceMotion: true, theme: 'dark', showContactCounts: true });
+    expect(settings).toEqual({ reduceMotion: true, theme: 'dark', showContactCounts: false });
     storage.saveSettings(settings);
     expect(JSON.parse(store.data.get('germle.v1.settings') ?? '')).toEqual({
       reduceMotion: true,
       theme: 'dark',
-      showContactCounts: true,
+      showContactCounts: false,
     });
   });
 
@@ -89,7 +89,7 @@ describe('createGameStorage', () => {
     expect(loadSettings(store)).toEqual({
       reduceMotion: null,
       theme: 'light',
-      showContactCounts: true,
+      showContactCounts: false,
     });
     expect(loadSettings(store)).toEqual(createGameStorage(store).loadSettings());
     expect(loadSettings(undefined)).toEqual(DEFAULT_SETTINGS);

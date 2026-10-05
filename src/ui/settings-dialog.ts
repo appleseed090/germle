@@ -72,8 +72,8 @@ export function connectSettingsDialog(
 }
 
 /**
- * The stylesheet draws contact counts unless `<html>` says `data-contact-counts="hidden"`, in
- * which case the refusers' cross and the infected people's dot come back instead.
+ * The stylesheet marks refusers with a cross and infected people with a dot unless `<html>` says
+ * `data-contact-counts="shown"`, in which case each person shows their contact count instead.
  */
 function showContactCounts(page: Document, show: boolean): void {
   page.documentElement.dataset['contactCounts'] = show ? 'shown' : 'hidden';
