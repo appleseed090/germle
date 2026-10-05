@@ -30,6 +30,9 @@ test('shows live contact counts that only your moves change, and reads them out'
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.addInitScript(() => {
+    localStorage.setItem('germle.v1.settings', JSON.stringify({ showContactCounts: true }));
+  });
   await page.goto(
     '/practice?people=30&neighbours=4&vaccines=2&outbreaks=1&refusers=2&contagion=40&seed=counts',
   );
@@ -57,9 +60,7 @@ test('shows live contact counts that only your moves change, and reads them out'
   expect(movesThatAlsoInfected).toBeGreaterThan(0);
 });
 
-test('Settings can hide the numbers, bringing back the refuser cross and infected dot', async ({
-  page,
-}) => {
+test('people carry a cross or dot until Settings shows the numbers instead', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(
     '/practice?people=30&neighbours=4&vaccines=1&outbreaks=2&refusers=4&contagion=35&seed=marks',
@@ -73,22 +74,24 @@ test('Settings can hide the numbers, bringing back the refuser cross and infecte
   const dots = page.locator('.node--infected .node-core');
   await expect(crosses).not.toHaveCount(0);
   await expect(dots).not.toHaveCount(0);
-
-  const showNumbers = page.getByRole('checkbox', { name: 'Show contact numbers' });
-  await page.getByRole('button', { name: 'Settings' }).click();
-  await expect(showNumbers).toBeChecked();
-  await showNumbers.uncheck();
   for (const count of await counts.all()) await expect(count).toBeHidden();
   for (const cross of await crosses.all()) await expect(cross).toBeVisible();
   for (const dot of await dots.all()) await expect(dot).toBeVisible();
 
-  // Reloading restarts the practice game from its link, so all 30 people are back.
-  await page.reload();
-  await expect(page.locator('html')).toHaveAttribute('data-contact-counts', 'hidden');
-  await expect(page.locator('.node-count:visible')).toHaveCount(0);
+  const showNumbers = page.getByRole('checkbox', { name: 'Show contact numbers' });
   await page.getByRole('button', { name: 'Settings' }).click();
   await expect(showNumbers).not.toBeChecked();
   await showNumbers.check();
   await expect(page.locator('.node-cross:visible, .node-core:visible')).toHaveCount(0);
+  for (const count of await counts.all()) await expect(count).toBeVisible();
+
+  // Reloading restarts the practice game from its link, so all 30 people are back.
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-contact-counts', 'shown');
   await expect(page.locator('.node-count:visible')).toHaveCount(30);
+  await page.getByRole('button', { name: 'Settings' }).click();
+  await expect(showNumbers).toBeChecked();
+  await showNumbers.uncheck();
+  await expect(page.locator('.node-count:visible')).toHaveCount(0);
+  await expect(page.locator('.node--refuser .node-cross:visible')).not.toHaveCount(0);
 });

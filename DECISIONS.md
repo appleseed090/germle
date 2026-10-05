@@ -224,11 +224,12 @@ brief are not repeated here.
   healthy neighbours was rejected: it would tick down as the infection spreads, and on infected
   people it would read as "healthy people I can still infect", pointing at the frontier, which
   players should find themselves. Computed by `contactsStillInNetwork` in the engine.
-- **Shown by default; Settings → "Show contact numbers" can hide them.** First always on, then the
-  owner added the switch. Off brings back the refusers' white cross and the infected people's
-  white centre dot, so the board matches `og.png` and the icons. Stored as `showContactCounts`,
-  default `true`; settings saved before it load with numbers shown. The switch sets
-  `data-contact-counts` on `<html>` and CSS does the rest, so the how-to-play legend follows too.
+- **Hidden by default; Settings → "Show contact numbers" turns them on.** First always on, then
+  the owner added the switch and made off the default. Off shows the refusers' white cross and
+  the infected people's white centre dot, so the board matches `og.png` and the icons. Stored as
+  `showContactCounts`, default `false`; settings saved before it load with numbers hidden. The
+  switch sets `data-contact-counts="shown"` on `<html>`; without it the stylesheet draws the cross
+  and dot, so the page's default matches the setting's. The how-to-play legend follows too.
   The cross is 2.5:1 on orange, below WCAG's 3:1, a known gap kept to match `og.png`. The counts
   show how connected each person is; the hard part, finding the people whose removal splits the
   network, stays the player's either way.

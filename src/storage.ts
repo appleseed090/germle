@@ -11,8 +11,8 @@ export interface Settings {
   /** An explicit colour theme; `null` follows `prefers-color-scheme`. */
   readonly theme: ThemeChoice | null;
   /**
-   * Draw each person's count of contacts still in the network. Off brings back the refusers'
-   * cross and the infected people's centre dot.
+   * Draw each person's count of contacts still in the network instead of the refusers' cross and
+   * the infected people's centre dot. Off by default.
    */
   readonly showContactCounts: boolean;
 }
@@ -32,7 +32,7 @@ export interface DailyResult {
 export const DEFAULT_SETTINGS: Settings = Object.freeze({
   reduceMotion: null,
   theme: null,
-  showContactCounts: true,
+  showContactCounts: false,
 });
 
 /**
