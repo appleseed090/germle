@@ -172,8 +172,7 @@
       <p class="legend">
         <span class="legend-dot legend-dot--healthy"></span> Healthy,
         <span class="legend-dot legend-dot--refuser"></span> refuses vaccines,
-        <span class="legend-dot legend-dot--infected"></span> infected. Each number counts that
-        person's contacts still in the network.
+        <span class="legend-dot legend-dot--infected"></span> infected.
       </p>
       <button class="primary-button" type="button" data-close-dialog data-initial-focus>
         Start playing
@@ -274,6 +273,15 @@
           >
         </span>
       </div>
+      <label class="setting">
+        <span>
+          <span class="setting-name">Show contact numbers</span>
+          <span class="setting-hint"
+            >The number on each person counts their contacts still in the network.</span
+          >
+        </span>
+        <input type="checkbox" class="switch" id="setting-contact-counts" />
+      </label>
       <label class="setting">
         <span>
           <span class="setting-name">Reduce motion</span>

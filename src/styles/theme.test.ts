@@ -68,9 +68,14 @@ const TEXT_PAIRS: readonly (readonly [string, string])[] = [
   ['--color-node-infected-count', '--color-node-infected'],
 ];
 
-/** Non-text marks a player needs to read the board and results: WCAG AA 3:1 (1.4.11). */
+/**
+ * Non-text marks a player needs to read the board and results: WCAG AA 3:1 (1.4.11). With contact
+ * numbers off, refusers show a white cross at 2.5:1 on orange, a known gap kept so the board
+ * matches og.png (see DECISIONS.md).
+ */
 const MARK_PAIRS: readonly (readonly [string, string])[] = [
   ['--color-infected-pattern', '--color-infected'],
+  ['--color-node-infected-core', '--color-node-infected'],
   ['--color-pathogen', '--color-page'],
   ['--color-focus', '--color-page'],
   ['--color-focus', '--color-surface'],

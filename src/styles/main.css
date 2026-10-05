@@ -26,9 +26,11 @@
   --color-node-refuser: #f0892c;
   --color-node-refuser-stroke: #b05a0c;
   --color-node-refuser-count: #1d2329;
+  --color-node-refuser-mark: #ffffff;
   --color-node-infected: #d63a3a;
   --color-node-infected-stroke: #962020;
   --color-node-infected-count: #ffffff;
+  --color-node-infected-core: #ffffff;
   --color-edge: #b8bfc7;
   --color-pathogen: #b91c1c;
   --color-pathogen-outline: #ffffff;
@@ -337,6 +339,32 @@ button {
 
 .node--infected .node-count {
   fill: var(--color-node-infected-count);
+}
+
+.node-core,
+.node-cross {
+  display: none;
+}
+
+.node-core {
+  fill: var(--color-node-infected-core);
+}
+
+.node-cross {
+  fill: none;
+  stroke: var(--color-node-refuser-mark);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+/* Settings, "Show contact numbers" off: the infected dot and refuser cross replace the counts. */
+:root[data-contact-counts='hidden'] .node-count {
+  display: none;
+}
+
+:root[data-contact-counts='hidden'] .node--infected .node-core,
+:root[data-contact-counts='hidden'] .node--refuser:not(.node--infected) .node-cross {
+  display: inline;
 }
 
 .node--refuser .node-disc {
@@ -890,6 +918,31 @@ button {
 .legend-dot--infected {
   border-color: var(--color-node-infected-stroke);
   background: var(--color-node-infected);
+}
+
+:root[data-contact-counts='hidden'] .legend-dot--refuser {
+  background:
+    linear-gradient(
+      45deg,
+      transparent 40%,
+      var(--color-node-refuser-mark) 40% 60%,
+      transparent 60%
+    ),
+    linear-gradient(
+      -45deg,
+      transparent 40%,
+      var(--color-node-refuser-mark) 40% 60%,
+      transparent 60%
+    ),
+    var(--color-node-refuser);
+}
+
+:root[data-contact-counts='hidden'] .legend-dot--infected {
+  background: radial-gradient(
+    circle,
+    var(--color-node-infected-core) 0 24%,
+    var(--color-node-infected) 28%
+  );
 }
 
 /* Results */

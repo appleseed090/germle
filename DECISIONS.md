@@ -199,7 +199,8 @@ brief are not repeated here.
   web manifest keeps the light colour, since manifests cannot vary by scheme.
 - **Contrast is tested in both themes** (WCAG AA: 4.5:1 for text, 3:1 for marks and outlines).
   The light theme's healthy outline was 2.90:1 against the page and moved from `#87929e` to
-  `#828d99` (3.10:1). The refusers' white cross (2.5:1 on orange) is gone; see "Contact counts".
+  `#828d99` (3.10:1). The refusers' white cross (2.5:1 on orange) shows only with contact numbers
+  off; see "Contact counts".
   Not tested, by design: edges stay faint (1.7:1 light, 2.4:1 dark); outcome-bar neighbours
   (untouched next to vaccinated or infected: about 3.6:1 light, 2.8:1 dark) also differ by pattern
   and the legend gives exact counts.
@@ -219,18 +220,24 @@ brief are not repeated here.
   healthy neighbours was rejected: it would tick down as the infection spreads, and on infected
   people it would read as "healthy people I can still infect", pointing at the frontier, which
   players should find themselves. Computed by `contactsStillInNetwork` in the engine.
-- **Always on, no setting.** The owner's call. The counts show how connected each person is, which
-  sizing already approximated and the lines show; the hard part, finding the people whose removal
-  splits the network, stays the player's.
+- **Shown by default; Settings → "Show contact numbers" can hide them.** First always on, then the
+  owner added the switch. Off brings back the refusers' white cross and the infected people's
+  white centre dot, so the board matches `og.png` and the icons. Stored as `showContactCounts`,
+  default `true`; settings saved before it load with numbers shown. The switch sets
+  `data-contact-counts` on `<html>` and CSS does the rest, so the how-to-play legend follows too.
+  The cross is 2.5:1 on orange, below WCAG's 3:1, a known gap kept to match `og.png`. The counts
+  show how connected each person is; the hard part, finding the people whose removal splits the
+  network, stays the player's either way.
 - **"Size people by contacts" is retired; every person is the same size.** Size showed the starting
   count and would contradict the live number after the first vaccine, and equal discs give every
   digit the same room. Stored settings with `sizeNodesByDegree` still load; the field is ignored
   and dropped on the next save.
-- **Refusers lose their cross and infected people their white centre; colour alone tells them
-  apart.** The owner's call. The how-to-play figures drop the centre dot too, and the legend's
-  dots are plain colour (the owner's call), sized in em so they line up with the text.
-- **The how-to-play legend and the number's explanation share one paragraph, and phones under
-  400 px get smaller step figures,** to keep the dialog short on phones.
+- **With numbers on, refusers lose their cross and infected people their white centre; colour
+  alone tells them apart.** The owner's call. The how-to-play figures have no centre dot, and the
+  legend's dots are plain colour (with the cross and dot when numbers are off), sized in em so
+  they line up with the text. The legend does not explain the numbers; the Settings switch does
+  ("The number on each person counts their contacts still in the network."), as the owner asked.
+- **Phones under 400 px get smaller how-to-play step figures,** to keep the dialog short.
 - **Dark digits on grey and orange, white digits on red, in both themes.** Contrast requires it
   anyway (6.3:1 on orange; white would be 2.5:1), and it gives red–green colour-blind players a
   second cue: simulated (Machado 2009, full severity), orange and red differ only in lightness
@@ -240,7 +247,8 @@ brief are not repeated here.
   80 people hit the 0.75× radius floor, about 11 px digits in 21 px discs on a 360 px phone.
   Counts above 9 are vanishingly rare (one in 24,000 people at 80 people and 6 neighbours).
 - **Each person's screen-reader label uses the live count** (`Person 7: healthy, 3 contacts`), so
-  it always says what the digit shows.
+  it always says what the digit shows. It keeps the count with numbers off too, since it is the
+  only way a screen-reader player learns it.
 
 ## Daily constants in the game
 

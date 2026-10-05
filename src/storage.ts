@@ -10,6 +10,11 @@ export interface Settings {
   readonly reduceMotion: boolean | null;
   /** An explicit colour theme; `null` follows `prefers-color-scheme`. */
   readonly theme: ThemeChoice | null;
+  /**
+   * Draw each person's count of contacts still in the network. Off brings back the refusers'
+   * cross and the infected people's centre dot.
+   */
+  readonly showContactCounts: boolean;
 }
 
 /** The moves of today's unfinished or finished daily game, replayed on reload. */
@@ -27,6 +32,7 @@ export interface DailyResult {
 export const DEFAULT_SETTINGS: Settings = Object.freeze({
   reduceMotion: null,
   theme: null,
+  showContactCounts: true,
 });
 
 /**
@@ -135,9 +141,14 @@ function parseSettings(value: unknown): Settings {
   if (!isRecord(value)) return DEFAULT_SETTINGS;
   const reduceMotion = value['reduceMotion'];
   const theme = value['theme'];
+  const showContactCounts = value['showContactCounts'];
   return {
     reduceMotion: typeof reduceMotion === 'boolean' ? reduceMotion : null,
     theme: isThemeChoice(theme) ? theme : null,
+    showContactCounts:
+      typeof showContactCounts === 'boolean'
+        ? showContactCounts
+        : DEFAULT_SETTINGS.showContactCounts,
   };
 }
 

@@ -15,7 +15,8 @@ export function displayOptionsFor(settings: Settings): GameDisplayOptions {
  * Binds the settings dialog of the page shell to stored settings and a running game. The
  * reduce-motion switch shows the device setting until the player touches it, which stores an
  * explicit choice; device changes apply live while no choice is stored. The theme choice applies
- * to the page at once; "System" stores `null` and leaves the colours to the device.
+ * to the page at once; "System" stores `null` and leaves the colours to the device. The contact
+ * numbers switch applies at once too, to the board and to the how-to-play legend.
  *
  * @returns The dialog element, for opening.
  */
@@ -25,6 +26,7 @@ export function connectSettingsDialog(
 ): HTMLDialogElement {
   const dialog = requireElement('settings-dialog', HTMLDialogElement);
   const reduceMotion = requireElement('setting-reduce-motion', HTMLInputElement);
+  const contactCounts = requireElement('setting-contact-counts', HTMLInputElement);
   const themeOptions = Array.from(
     requireElement('setting-theme', HTMLElement).querySelectorAll<HTMLInputElement>(
       'input[type="radio"]',
@@ -37,13 +39,18 @@ export function connectSettingsDialog(
     settings = updated;
     storage.saveSettings(settings);
     session.setDisplayOptions(displayOptionsFor(settings));
+    showContactCounts(document, settings.showContactCounts);
   };
   const showCurrent = (): void => {
+    contactCounts.checked = settings.showContactCounts;
     reduceMotion.checked = settings.reduceMotion ?? prefersReducedMotion();
     for (const option of themeOptions)
       option.checked = option.value === (settings.theme ?? 'system');
   };
 
+  contactCounts.addEventListener('change', () => {
+    apply({ ...settings, showContactCounts: contactCounts.checked });
+  });
   reduceMotion.addEventListener('change', () => {
     apply({ ...settings, reduceMotion: reduceMotion.checked });
   });
@@ -59,6 +66,15 @@ export function connectSettingsDialog(
     showCurrent();
   });
   session.setDisplayOptions(displayOptionsFor(settings));
+  showContactCounts(document, settings.showContactCounts);
   showCurrent();
   return dialog;
+}
+
+/**
+ * The stylesheet draws contact counts unless `<html>` says `data-contact-counts="hidden"`, in
+ * which case the refusers' cross and the infected people's dot come back instead.
+ */
+function showContactCounts(page: Document, show: boolean): void {
+  page.documentElement.dataset['contactCounts'] = show ? 'shown' : 'hidden';
 }
