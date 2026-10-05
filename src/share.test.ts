@@ -8,7 +8,7 @@ describe('buildShareText', () => {
       score: 78,
       counts: { vaccinated: 4, quarantined: 7, untouched: 20, infected: 9 },
     });
-    expect(text).toBe('Germle #12 · 78% saved\n▣▨▨□□□□□■■\ngermle.com');
+    expect(text).toBe('Germle #12 · 78% saved\n🟦🟨🟨⬜⬜⬜⬜⬜🟥🟥\ngermle.com');
     expect(text.split('\n')[0]).toMatch(/^Germle #\d+ · \d+% saved$/);
   });
 });
@@ -25,7 +25,7 @@ describe('buildShareBar', () => {
         };
         const bar = buildShareBar(counts);
         expect(Array.from(bar)).toHaveLength(10);
-        expect(bar).toMatch(/^▣*▨*□*■*$/u);
+        expect(bar).toMatch(/^🟦*🟨*⬜*🟥*$/u);
       }
     }
   });
@@ -33,19 +33,19 @@ describe('buildShareBar', () => {
   it('splits saved and infected squares the way the score rounds', () => {
     // 30 of 40 saved is 75%: 7.5 squares rounds up to 8 saved.
     const bar = buildShareBar({ vaccinated: 4, quarantined: 6, untouched: 20, infected: 10 });
-    expect(Array.from(bar).filter((square) => square === '■')).toHaveLength(2);
+    expect(Array.from(bar).filter((square) => square === '🟥')).toHaveLength(2);
   });
 
   it('handles an outbreak that infected everyone left', () => {
     expect(buildShareBar({ vaccinated: 4, quarantined: 0, untouched: 0, infected: 36 })).toBe(
-      '▣■■■■■■■■■',
+      '🟦🟥🟥🟥🟥🟥🟥🟥🟥🟥',
     );
   });
 
   it('breaks equal remainders toward the earlier outcome', () => {
     // Quarantined 2/40 and untouched 34/40 both leave half a square over; quarantined wins.
     expect(buildShareBar({ vaccinated: 4, quarantined: 2, untouched: 34, infected: 0 })).toBe(
-      '▣▨□□□□□□□□',
+      '🟦🟨⬜⬜⬜⬜⬜⬜⬜⬜',
     );
   });
 });
