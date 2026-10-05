@@ -10,9 +10,12 @@ External memory for the project: what is pending, constraints to remember, defer
 
 ## Needs the owner
 
-- [ ] Cloudflare Workers + DNS setup: follow `DEPLOY.md`.
-- [ ] GitHub default branch is `claude/ecstatic-volta-wr90cz` (the first branch pushed); switch it
-      to `main` in GitHub → Settings → General → Default branch, then delete the old branch.
+- [x] GitHub default branch switched to `main`.
+- [x] Cloudflare Worker connected to the repo; builds from `main` and serves the site on its
+      `workers.dev` address (verified 2026-10-05: headers, routes, full game on phone and desktop).
+- [ ] Move `germle.com` DNS to Cloudflare, attach `germle.com` and `www.germle.com` to the Worker,
+      add the www → apex Redirect Rule: `DEPLOY.md` steps 2–5. `germle.com` still shows Porkbun's
+      parking redirect.
 
 ## M4 backlog (not scheduled)
 
