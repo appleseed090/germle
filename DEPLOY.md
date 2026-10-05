@@ -90,9 +90,12 @@ to Root** → **Create rule**. The template fills in:
 Deploy the rule. It only fires if the `www` DNS record is proxied (orange cloud), which it is when
 the custom domain was added in the step above.
 
+**Always use HTTPS.** `germle.com` zone → **SSL/TLS** → **Edge Certificates** → turn on **Always
+Use HTTPS**, so plain `http://` visits are redirected before the HSTS header can take over.
+
 ## 5. Verify
 
-- `https://germle.com` loads with a valid certificate.
+- `https://germle.com` loads with a valid certificate, and `http://germle.com` redirects to it.
 - `https://www.germle.com/anything` redirects (301) to `https://germle.com/anything`.
   From a terminal: `curl -sI https://www.germle.com/anything | grep -i -E '^(HTTP|location)'`
 - The `germle.<your-subdomain>.workers.dev` address still works.
