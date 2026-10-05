@@ -1,4 +1,5 @@
 import type { OutcomeCounts } from './engine';
+import { isThemeChoice, type ThemeChoice } from './theme';
 
 /** The slice of the Web Storage API persistence needs, so tests can pass an in-memory fake. */
 export type KeyValueStore = Pick<Storage, 'getItem' | 'setItem'>;
@@ -9,6 +10,8 @@ export interface Settings {
   readonly sizeNodesByDegree: boolean;
   /** `true`/`false` overrides the system setting; `null` follows `prefers-reduced-motion`. */
   readonly reduceMotion: boolean | null;
+  /** An explicit colour theme; `null` follows `prefers-color-scheme`. */
+  readonly theme: ThemeChoice | null;
 }
 
 /** The moves of today's unfinished or finished daily game, replayed on reload. */
@@ -26,6 +29,7 @@ export interface DailyResult {
 export const DEFAULT_SETTINGS: Settings = Object.freeze({
   sizeNodesByDegree: true,
   reduceMotion: null,
+  theme: null,
 });
 
 /**
@@ -66,19 +70,31 @@ export function browserLocalStorage(): KeyValueStore | undefined {
 }
 
 /**
+ * Reads the stored settings alone, for code that must not wait for the rest of the game: the
+ * script that applies a saved theme before the page first draws. Same validation as
+ * {@link GameStorage.loadSettings}.
+ */
+export function loadSettings(store: KeyValueStore | undefined): Settings {
+  return parseSettings(readStoredJson(store, STORAGE_KEYS.settings));
+}
+
+/** Parsed JSON stored under `key`, or `undefined` if missing, unreadable or not JSON. */
+function readStoredJson(store: KeyValueStore | undefined, key: string): unknown {
+  try {
+    const text = store?.getItem(key) ?? null;
+    return text === null ? undefined : (JSON.parse(text) as unknown);
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * Wraps a key-value store with schema validation. Every read treats stored text as untrusted:
  * malformed values are ignored and defaults returned. Writes that fail (quota, blocked storage)
  * are dropped silently, since losing a save must never break the game.
  */
 export function createGameStorage(store: KeyValueStore | undefined): GameStorage {
-  const readJson = (key: string): unknown => {
-    try {
-      const text = store?.getItem(key) ?? null;
-      return text === null ? undefined : (JSON.parse(text) as unknown);
-    } catch {
-      return undefined;
-    }
-  };
+  const readJson = (key: string): unknown => readStoredJson(store, key);
   const writeJson = (key: string, value: unknown): void => {
     try {
       store?.setItem(key, JSON.stringify(value));
@@ -88,7 +104,7 @@ export function createGameStorage(store: KeyValueStore | undefined): GameStorage
   };
 
   return {
-    loadSettings: () => parseSettings(readJson(STORAGE_KEYS.settings)),
+    loadSettings: () => loadSettings(store),
     saveSettings: (settings) => {
       writeJson(STORAGE_KEYS.settings, settings);
     },
@@ -122,12 +138,14 @@ function parseSettings(value: unknown): Settings {
   if (!isRecord(value)) return DEFAULT_SETTINGS;
   const sizeNodesByDegree = value['sizeNodesByDegree'];
   const reduceMotion = value['reduceMotion'];
+  const theme = value['theme'];
   return {
     sizeNodesByDegree:
       typeof sizeNodesByDegree === 'boolean'
         ? sizeNodesByDegree
         : DEFAULT_SETTINGS.sizeNodesByDegree,
     reduceMotion: typeof reduceMotion === 'boolean' ? reduceMotion : null,
+    theme: isThemeChoice(theme) ? theme : null,
   };
 }
 

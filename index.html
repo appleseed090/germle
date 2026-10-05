@@ -9,7 +9,18 @@
       content="A daily outbreak puzzle. Vaccinate a few people to break up a social network, then quarantine to contain the outbreak. Two minutes a day, no login."
     />
     <link rel="canonical" href="https://germle.com/" />
-    <meta name="theme-color" content="#f7f5f0" />
+    <meta
+      name="theme-color"
+      content="#f7f5f0"
+      media="(prefers-color-scheme: light)"
+      data-scheme="light"
+    />
+    <meta
+      name="theme-color"
+      content="#16191d"
+      media="(prefers-color-scheme: dark)"
+      data-scheme="dark"
+    />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -248,6 +259,28 @@
         <button class="icon-button" type="button" data-close-dialog aria-label="Close">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
         </button>
+      </div>
+      <div
+        class="setting setting--choice"
+        role="radiogroup"
+        aria-labelledby="setting-theme-name"
+        aria-describedby="setting-theme-hint"
+      >
+        <span>
+          <span class="setting-name" id="setting-theme-name">Theme</span>
+          <span class="setting-hint" id="setting-theme-hint">System follows your device.</span>
+        </span>
+        <span class="segmented" id="setting-theme">
+          <label class="segmented-option"
+            ><input type="radio" name="theme" value="system" /><span>System</span></label
+          >
+          <label class="segmented-option"
+            ><input type="radio" name="theme" value="light" /><span>Light</span></label
+          >
+          <label class="segmented-option"
+            ><input type="radio" name="theme" value="dark" /><span>Dark</span></label
+          >
+        </span>
       </div>
       <label class="setting">
         <span>

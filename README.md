@@ -30,13 +30,15 @@ and the About page at `/about`. See `TODO.md` for the backlog.
 | `npm run build`           | Production build into `dist/`                               |
 | `npm run preview`         | Serve the built `dist/` locally                             |
 | `npm run format`          | Rewrite files with Prettier                                 |
-| `npm run e2e`             | Playwright smoke tests against `dist/` (build first)        |
+| `npm run e2e`             | Playwright tests against `dist/` (build first)              |
 | `npm run generate:images` | Re-render favicons, app icons and `og.png` into `public/`   |
 
 `npm run check` must pass before every commit; CI runs the same script on every push and PR, plus
 the Playwright tests in a second job (daily and practice smoke tests on a phone and a desktop
-viewport). Playwright needs a Chromium build: run
-`npx playwright install chromium` once (the version is pinned in `package.json`).
+viewport). `vite preview` serves the headers from `public/_headers`, so the end-to-end tests run
+under the production Content-Security-Policy and fail on any violation. Playwright needs a
+Chromium build: run `npx playwright install chromium` once (the version is pinned in
+`package.json`).
 
 ## Architecture
 
@@ -54,6 +56,12 @@ viewport). Playwright needs a Chromium build: run
   share card, statistics, validated `localStorage` access, practice links and the
   Contained/Spread verdict. Page shells are plain HTML (`index.html`, `about.html`) so nothing shifts
   while scripts load.
+- **Themes:** every colour is a CSS token in `src/styles/main.css`. The dark theme overrides them
+  when the device prefers dark, or when the player picks Dark in Settings (`src/theme.ts` sets
+  `data-theme` on `<html>`). A saved choice is applied before the first paint by
+  `src/theme-before-paint.ts`, which a small plugin in `vite.config.ts` builds into a
+  content-hashed classic script, since the CSP forbids inline scripts. `src/styles/theme.test.ts`
+  checks contrast in both themes.
 - **Docs:** `AGENTS.md` (engineering rules), `DECISIONS.md` (why things are the way they are),
   `TODO.md` (backlog), `DEPLOY.md` (Cloudflare and DNS setup).
 

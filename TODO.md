@@ -9,6 +9,18 @@ External memory for the project: what is pending, constraints to remember, defer
 - [x] M3 — Practice mode. The par solver built for M3 was later dropped for a fixed
       Contained/Spread verdict (see `DECISIONS.md`).
 
+## Waiting on the owner's decision
+
+Recommendations were sent on 2026-10-05; build once decided.
+
+- **Neighbour counts on each person.** Recommended: the count of neighbours still in the network
+  (healthy and infected), always on; retire "Size people by contacts"; dark digits on grey and
+  orange, white on red; screen-reader label uses the live count.
+- **Contagiousness vs R0.** Recommended: keep the slider as β in percent (R0 equals the number of
+  contacts here and does not depend on β); explain β in the setup's info button.
+- **Daily settings in the game.** Recommended: one line in the how-to-play dialog built from
+  `DAILY_PUZZLE_CONFIG` with practice's summary formatter; not in the toolbar or results.
+
 ## Needs the owner
 
 - [x] GitHub default branch switched to `main`.
@@ -32,8 +44,6 @@ External memory for the project: what is pending, constraints to remember, defer
   one-line fact about why that kind of gathering spreads disease.
 - **Real-time mode:** the outbreak advances on a timer instead of per quarantine, for players who
   want pressure.
-- **Dark mode:** colours are already CSS variables; add a `prefers-color-scheme: dark` palette
-  and check contrast for every node state.
 - **Community percentile comparison:** show where a score ranks among everyone who played that
   day's puzzle. Needs a small backend to collect daily scores; today there is none.
 - **Link from the Snackle hub:** add a Germle entry to the owner's Snackle hub so players can
@@ -53,6 +63,11 @@ External memory for the project: what is pending, constraints to remember, defer
 - The About page states the 70% Contained/Spread threshold. Update it whenever
   `CONTAINED_THRESHOLD_PERCENT` (`src/verdict.ts`) changes.
 - Practice link parameters are a public format (people save links); renaming one breaks them.
+- The dark theme's overrides are written twice in `src/styles/main.css` (under
+  `prefers-color-scheme: dark` and under `[data-theme='dark']`), and each page's two `theme-color`
+  metas repeat `--color-page`. `src/styles/theme.test.ts` fails if they drift.
+- The refusers' white cross is 2.5:1 on orange in both themes, below WCAG's 3:1 for marks. The
+  neighbour-count decision above removes or replaces it; otherwise darken the cross.
 
 ## Constraints
 
