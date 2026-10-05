@@ -228,8 +228,7 @@ brief are not repeated here.
   apart.** The owner's call. The how-to-play figures drop the centre dot too, and the legend shows
   a sample number in each colour.
 - **The how-to-play legend and the number's explanation share one paragraph, and phones under
-  400 px get smaller step figures.** It opens with "Start playing" focused, so a dialog taller than
-  the screen would open scrolled past step 1; it fits 360 × 740 and 375 × 667 without scrolling.
+  400 px get smaller step figures,** to keep the dialog short on phones.
 - **Dark digits on grey and orange, white digits on red, in both themes.** Contrast requires it
   anyway (6.3:1 on orange; white would be 2.5:1), and it gives red–green colour-blind players a
   second cue: simulated (Machado 2009, full severity), orange and red differ only in lightness
@@ -256,11 +255,16 @@ brief are not repeated here.
   when you have exhausted all vaccines." / "Once the outbreak starts, you can quarantine one person
   per day." / "The game ends when the outbreak has nowhere left to go. Save as many people as you
   can!" Step 2 says "quarantine", the move the game offers once the vaccines are gone (the owner
-  confirmed it over an earlier "vaccinate"). The shorter steps let the dialog fit 375 × 667
-  without scrolling.
+  confirmed it over an earlier "vaccinate").
 - **The About page is only the Inspiration and Privacy sections, plus the footer.** The owner's
   call. The how-to-play dialog is now the only place that explains the game. Rules the About page
-  used to state and nothing else on the site does: the 70% Contained/Spread threshold, that "35%
-  contagious" is per contact per day, at least one infection a day, refusers can still be
+  used to state and nothing else on the site does: that "35% contagious" is per contact per day, at least one infection a day, refusers can still be
   quarantined, nobody recovers, the same moves give everyone the same outbreak, and people can be
   dragged around.
+- **The Contained threshold is stated under the steps:** "Save 70% or more and the outbreak is
+  **Contained**; below that, it **Spread**." The number is filled in from
+  `CONTAINED_THRESHOLD_PERCENT`, so the rule and the verdict cannot disagree.
+- **Dialogs open scrolled to their top.** `openDialog` resets the scroll after `showModal()`,
+  because the autofocus target (Start playing, Share) would otherwise pull a dialog taller than the
+  screen down past its heading. Focus stays on that target, so Enter still starts the game. Phones
+  with browser toolbars often show less than 600 px of height, where how-to-play has to scroll.

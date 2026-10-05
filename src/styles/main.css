@@ -852,6 +852,7 @@ button {
   stroke-dasharray: 4 3;
 }
 
+.verdict-rule,
 .puzzle-constants {
   margin: 12px 0 0;
   color: var(--color-text-muted);

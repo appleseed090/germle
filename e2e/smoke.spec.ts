@@ -25,6 +25,9 @@ test('plays a full daily game, shares the result and restores it on reload', asy
     'Once the outbreak starts, you can quarantine one person per day.',
     'The game ends when the outbreak has nowhere left to go. Save as many people as you can!',
   ]);
+  await expect(page.locator('.verdict-rule')).toHaveText(
+    'Save 70% or more and the outbreak is Contained; below that, it Spread.',
+  );
   await expect(page.locator('#daily-constants')).toHaveText(
     'Every daily puzzle: 40 people · 4 vaccines · 2 outbreaks · 2 refusers · 35% contagious',
   );
@@ -101,6 +104,21 @@ test.describe('with a fixed clock', () => {
     await expect(page.locator('#countdown')).toHaveText('00:00:10');
     await page.clock.fastForward('00:15');
     await expect(page.getByText('A new Germle is ready.')).toBeVisible();
+  });
+});
+
+test.describe('on a short phone screen', () => {
+  test.use({ viewport: { width: 375, height: 560 } });
+
+  test('opens how to play at its top, with Start playing focused', async ({ page }) => {
+    await page.goto('/');
+    const dialog = page.locator('#how-to-play-dialog');
+    await expect(dialog).toBeVisible();
+    expect(await dialog.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(
+      true,
+    );
+    await expect(page.getByRole('heading', { name: 'How to play' })).toBeInViewport();
+    await expect(page.getByRole('button', { name: 'Start playing' })).toBeFocused();
   });
 });
 

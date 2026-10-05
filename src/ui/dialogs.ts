@@ -13,7 +13,12 @@ export function wireDialog(dialog: HTMLDialogElement): void {
   });
 }
 
-/** Opens a dialog modally unless it is already open. */
+/**
+ * Opens a dialog modally unless it is already open. A dialog taller than the screen opens at its
+ * top, with its heading in view, even when its autofocus target (which keeps focus) sits lower.
+ */
 export function openDialog(dialog: HTMLDialogElement): void {
-  if (!dialog.open) dialog.showModal();
+  if (dialog.open) return;
+  dialog.showModal();
+  dialog.scrollTop = 0;
 }
