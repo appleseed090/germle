@@ -227,8 +227,8 @@ brief are not repeated here.
   digit the same room. Stored settings with `sizeNodesByDegree` still load; the field is ignored
   and dropped on the next save.
 - **Refusers lose their cross and infected people their white centre; colour alone tells them
-  apart.** The owner's call. The how-to-play figures drop the centre dot too, and the legend shows
-  a sample number in each colour.
+  apart.** The owner's call. The how-to-play figures drop the centre dot too, and the legend's
+  dots are plain colour (the owner's call), sized in em so they line up with the text.
 - **The how-to-play legend and the number's explanation share one paragraph, and phones under
   400 px get smaller step figures,** to keep the dialog short on phones.
 - **Dark digits on grey and orange, white digits on red, in both themes.** Contrast requires it

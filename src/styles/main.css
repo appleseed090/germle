@@ -864,34 +864,27 @@ button {
   margin: 12px 0 0;
   color: var(--color-text-muted);
   font-size: 0.85rem;
-  line-height: 1.7;
 }
 
+/* Sized in em and lowered by 0.1em, so its centre sits halfway up a capital letter. */
 .legend-dot {
-  display: inline-grid;
-  place-items: center;
-  width: 18px;
-  height: 18px;
-  vertical-align: -4px;
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  vertical-align: -0.1em;
   border: 1.5px solid var(--color-node-healthy-stroke);
   border-radius: 50%;
   background: var(--color-node-healthy);
-  color: var(--color-node-healthy-count);
-  font-size: 0.72rem;
-  font-weight: 700;
-  line-height: 1;
 }
 
 .legend-dot--refuser {
   border-color: var(--color-node-refuser-stroke);
   background: var(--color-node-refuser);
-  color: var(--color-node-refuser-count);
 }
 
 .legend-dot--infected {
   border-color: var(--color-node-infected-stroke);
   background: var(--color-node-infected);
-  color: var(--color-node-infected-count);
 }
 
 /* Results */
