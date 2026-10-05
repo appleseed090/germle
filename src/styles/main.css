@@ -243,6 +243,8 @@ button {
   border: 0;
   border-radius: 50%;
   background: transparent;
+  color: inherit;
+  text-decoration: none;
   cursor: pointer;
 }
 
@@ -267,6 +269,38 @@ button {
 
 .icon-button .icon-knob {
   fill: var(--color-page);
+}
+
+/* Phones: narrower header buttons and a smaller wordmark keep the header to one row. */
+@media (max-width: 420px) {
+  .app-header {
+    gap: 6px;
+    padding-right: 8px;
+  }
+
+  .puzzle-label {
+    font-size: 0.95rem;
+  }
+
+  .wordmark {
+    gap: 6px;
+    font-size: 1.15rem;
+  }
+
+  .header-actions .icon-button {
+    width: 34px;
+  }
+
+  .header-text-button {
+    padding: 0 8px;
+  }
+}
+
+/* The smallest phones keep only the logo mark; the link's label still says "Germle home". */
+@media (max-width: 340px) {
+  .wordmark > span {
+    display: none;
+  }
 }
 
 /* ---------- Board ---------- */

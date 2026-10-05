@@ -149,3 +149,30 @@ test('can be played with the keyboard alone', async ({ page }) => {
   await expect(page.locator('#phase-label')).toHaveText('Quarantine');
   await expect(page.locator('.node:focus')).toHaveCount(1);
 });
+
+test.describe('on a 360 px phone', () => {
+  test.use({ viewport: { width: 360, height: 740 } });
+
+  test('the header links to practice and about, fits one row, and the dialogs do not', async ({
+    page,
+  }) => {
+    for (const path of ['/', '/practice?seed=header']) {
+      await page.goto(path);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(360);
+      await expect(page.getByRole('button', { name: 'Settings' })).toBeInViewport({ ratio: 1 });
+    }
+    await page.goto('/');
+    const header = page.locator('.app-header');
+    await expect(header.getByRole('link', { name: 'Practice' })).toHaveAttribute(
+      'href',
+      '/practice',
+    );
+    await expect(header.getByRole('link', { name: 'About Germle' })).toHaveAttribute(
+      'href',
+      '/about',
+    );
+    await expect(page.locator('dialog a[href="/practice"], dialog a[href="/about"]')).toHaveCount(
+      0,
+    );
+  });
+});
