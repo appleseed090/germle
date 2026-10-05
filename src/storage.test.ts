@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_SETTINGS, createGameStorage, type KeyValueStore } from './storage';
+import { DEFAULT_SETTINGS, createGameStorage, loadSettings, type KeyValueStore } from './storage';
 
 function createMemoryStore(
   initial: Record<string, string> = {},
@@ -23,8 +23,9 @@ describe('createGameStorage', () => {
   it('round-trips settings, progress, results and the how-to-play flag', () => {
     const storage = createGameStorage(createMemoryStore());
     expect(storage.loadSettings()).toEqual(DEFAULT_SETTINGS);
-    storage.saveSettings({ sizeNodesByDegree: false, reduceMotion: true });
-    expect(storage.loadSettings()).toEqual({ sizeNodesByDegree: false, reduceMotion: true });
+    const settings = { sizeNodesByDegree: false, reduceMotion: true, theme: 'dark' } as const;
+    storage.saveSettings(settings);
+    expect(storage.loadSettings()).toEqual(settings);
 
     expect(storage.loadDailyProgress()).toBeUndefined();
     storage.saveDailyProgress({ puzzleNumber: 3, moves: [1, 2, 3] });
@@ -51,6 +52,30 @@ describe('createGameStorage', () => {
     });
   });
 
+  it('loads settings saved before the theme setting existed as following the device', () => {
+    const store = createMemoryStore({
+      'germle.v1.settings': JSON.stringify({ sizeNodesByDegree: false, reduceMotion: false }),
+    });
+    expect(createGameStorage(store).loadSettings()).toEqual({
+      sizeNodesByDegree: false,
+      reduceMotion: false,
+      theme: null,
+    });
+  });
+
+  it('reads settings on their own exactly as the full storage does', () => {
+    const store = createMemoryStore({
+      'germle.v1.settings': JSON.stringify({ sizeNodesByDegree: true, theme: 'light' }),
+    });
+    expect(loadSettings(store)).toEqual({
+      sizeNodesByDegree: true,
+      reduceMotion: null,
+      theme: 'light',
+    });
+    expect(loadSettings(store)).toEqual(createGameStorage(store).loadSettings());
+    expect(loadSettings(undefined)).toEqual(DEFAULT_SETTINGS);
+  });
+
   it('never overwrites a recorded result', () => {
     const storage = createGameStorage(createMemoryStore());
     storage.saveResult(3, sampleResult);
@@ -61,7 +86,7 @@ describe('createGameStorage', () => {
   it('ignores malformed stored values', () => {
     const storage = createGameStorage(
       createMemoryStore({
-        'germle.v1.settings': '{"sizeNodesByDegree":"yes","reduceMotion":1}',
+        'germle.v1.settings': '{"sizeNodesByDegree":"yes","reduceMotion":1,"theme":"sepia"}',
         'germle.v1.daily-progress': '{"puzzleNumber":3,"moves":[1,"2"]}',
         'germle.v1.results': JSON.stringify({
           '1': sampleResult,

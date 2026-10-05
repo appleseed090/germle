@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { expectVerdictToMatchScore } from './verdict';
 
 test('plays a practice game from a link and offers a replay of the same seed', async ({ page }) => {

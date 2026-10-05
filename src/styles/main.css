@@ -1,5 +1,11 @@
-/* Colours live in variables so a dark theme can be added later by overriding them. */
+/*
+ * Colours are tokens. The light theme is the default; the dark theme replaces some of them when the
+ * device prefers dark (unless the player picked Light) or when the player picked Dark. Both dark
+ * blocks must stay identical (a unit test checks).
+ */
 :root {
+  color-scheme: light;
+
   --color-page: #f7f5f0;
   --color-surface: #ffffff;
   --color-text: #1d2329;
@@ -9,9 +15,13 @@
   --color-accent-strong: #165445;
   --color-on-accent: #ffffff;
   --color-focus: #2563eb;
+  --color-hover: rgb(0 0 0 / 0.05);
+  --color-backdrop: rgb(29 35 41 / 0.45);
+  --color-on-status: #ffffff;
+  --color-spread-text: #b91c1c;
 
   --color-node-healthy: #dde2e7;
-  --color-node-healthy-stroke: #87929e;
+  --color-node-healthy-stroke: #828d99;
   --color-node-refuser: #f0892c;
   --color-node-refuser-stroke: #b05a0c;
   --color-node-refuser-mark: #ffffff;
@@ -20,16 +30,87 @@
   --color-node-infected-core: #ffffff;
   --color-edge: #b8bfc7;
   --color-pathogen: #b91c1c;
+  --color-pathogen-outline: #ffffff;
 
   --color-vaccinated: #2f6fdb;
   --color-quarantined: #d9a21b;
+  --color-quarantined-stripe: #f6e2ae;
   --color-untouched: #dde2e7;
   --color-infected: #d63a3a;
+
+  --color-histogram-bar: #c9ced4;
+  --color-histogram-bar-empty: #e3e6ea;
+  --color-switch-off: #c3c9cf;
+  --color-switch-knob: #ffffff;
 
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --header-height: 52px;
   --radius: 12px;
   --gutter: 16px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --color-page: #16191d;
+    --color-surface: #22272e;
+    --color-text: #e6e9ed;
+    --color-text-muted: #a3acb6;
+    --color-border: #353c44;
+    --color-accent: #5bbf9f;
+    --color-accent-strong: #7dd0b5;
+    --color-on-accent: #0b1f19;
+    --color-focus: #7aa7ff;
+    --color-hover: rgb(255 255 255 / 0.08);
+    --color-backdrop: rgb(0 0 0 / 0.6);
+    --color-spread-text: #ff7b7b;
+
+    --color-node-healthy: #c3cad2;
+    --color-node-healthy-stroke: #8d98a4;
+    --color-edge: #4f5862;
+    --color-pathogen: #f05252;
+    --color-pathogen-outline: #16191d;
+
+    --color-quarantined-stripe: #7a5a0e;
+    --color-untouched: #c3cad2;
+
+    --color-histogram-bar: #4b545e;
+    --color-histogram-bar-empty: #2c3239;
+    --color-switch-off: #4b545e;
+    --color-switch-knob: #f2f4f6;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-page: #16191d;
+  --color-surface: #22272e;
+  --color-text: #e6e9ed;
+  --color-text-muted: #a3acb6;
+  --color-border: #353c44;
+  --color-accent: #5bbf9f;
+  --color-accent-strong: #7dd0b5;
+  --color-on-accent: #0b1f19;
+  --color-focus: #7aa7ff;
+  --color-hover: rgb(255 255 255 / 0.08);
+  --color-backdrop: rgb(0 0 0 / 0.6);
+  --color-spread-text: #ff7b7b;
+
+  --color-node-healthy: #c3cad2;
+  --color-node-healthy-stroke: #8d98a4;
+  --color-edge: #4f5862;
+  --color-pathogen: #f05252;
+  --color-pathogen-outline: #16191d;
+
+  --color-quarantined-stripe: #7a5a0e;
+  --color-untouched: #c3cad2;
+
+  --color-histogram-bar: #4b545e;
+  --color-histogram-bar-empty: #2c3239;
+  --color-switch-off: #4b545e;
+  --color-switch-knob: #f2f4f6;
 }
 
 *,
@@ -160,7 +241,7 @@ button {
 }
 
 .icon-button:hover {
-  background: rgb(0 0 0 / 0.05);
+  background: var(--color-hover);
 }
 
 .icon-button svg {
@@ -226,7 +307,7 @@ button {
 
 .pathogen {
   fill: var(--color-pathogen);
-  stroke: #ffffff;
+  stroke: var(--color-pathogen-outline);
   stroke-width: 1.5;
 }
 
@@ -327,7 +408,7 @@ button {
   padding: 8px 20px;
   border-radius: 999px;
   background: var(--color-node-infected);
-  color: #ffffff;
+  color: var(--color-on-status);
   font-size: 1.35rem;
   font-weight: 800;
   letter-spacing: 0.02em;
@@ -374,7 +455,7 @@ button {
   padding: 3px 9px;
   border-radius: 999px;
   background: var(--color-vaccinated);
-  color: #ffffff;
+  color: var(--color-on-status);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -387,10 +468,12 @@ button {
 
 .phase-pill[data-phase='ended'] {
   background: var(--color-accent);
+  color: var(--color-on-accent);
 }
 
 .phase-pill[data-phase='ended'][data-verdict='spread'] {
   background: var(--color-node-infected);
+  color: var(--color-on-status);
 }
 
 .counter {
@@ -450,7 +533,7 @@ button {
   padding: 10px 16px;
   border-radius: 10px;
   background: var(--color-text);
-  color: #ffffff;
+  color: var(--color-surface);
   font-weight: 600;
   text-align: center;
   transform: translateX(-50%);
@@ -470,8 +553,9 @@ button {
   overscroll-behavior: contain;
 }
 
+/* Older browsers do not let ::backdrop inherit custom properties; they get the light backdrop. */
 .dialog::backdrop {
-  background: rgb(29 35 41 / 0.45);
+  background: var(--color-backdrop, rgb(29 35 41 / 0.45));
 }
 
 .dialog-header {
@@ -564,7 +648,7 @@ button {
 }
 
 .header-text-button:hover {
-  background: rgb(0 0 0 / 0.05);
+  background: var(--color-hover);
 }
 
 .dialog-intro {
@@ -616,6 +700,8 @@ button {
   padding: 0 10px;
   border: 1px solid var(--color-border);
   border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
   font: inherit;
   font-variant-numeric: tabular-nums;
 }
@@ -725,14 +811,28 @@ button {
 .legend-dot--refuser {
   border-color: var(--color-node-refuser-stroke);
   background:
-    linear-gradient(45deg, transparent 43%, #fff 43%, #fff 57%, transparent 57%),
-    linear-gradient(-45deg, transparent 43%, #fff 43%, #fff 57%, transparent 57%),
+    linear-gradient(
+      45deg,
+      transparent 43%,
+      var(--color-node-refuser-mark) 43% 57%,
+      transparent 57%
+    ),
+    linear-gradient(
+      -45deg,
+      transparent 43%,
+      var(--color-node-refuser-mark) 43% 57%,
+      transparent 57%
+    ),
     var(--color-node-refuser);
 }
 
 .legend-dot--infected {
   border-color: var(--color-node-infected-stroke);
-  background: radial-gradient(circle, #fff 0 22%, var(--color-node-infected) 24%);
+  background: radial-gradient(
+    circle,
+    var(--color-node-infected-core) 0 22%,
+    var(--color-node-infected) 24%
+  );
 }
 
 /* Results */
@@ -757,7 +857,7 @@ button {
 }
 
 .result-verdict[data-verdict='spread'] {
-  color: var(--color-pathogen);
+  color: var(--color-spread-text);
 }
 
 .breakdown-bar {
@@ -784,7 +884,11 @@ button {
 
 .breakdown-segment--quarantined,
 .swatch--quarantined {
-  background: repeating-linear-gradient(45deg, var(--color-quarantined) 0 3px, #f6e2ae 3px 6px);
+  background: repeating-linear-gradient(
+    45deg,
+    var(--color-quarantined) 0 3px,
+    var(--color-quarantined-stripe) 3px 6px
+  );
 }
 
 .breakdown-segment--untouched,
@@ -795,8 +899,9 @@ button {
 .breakdown-segment--infected,
 .swatch--infected {
   background:
-    radial-gradient(circle at 50% 50%, #fff 0 1.5px, transparent 2px) 0 0 / 6px 6px,
+    radial-gradient(circle at 50% 50%, var(--color-node-infected-core) 0 1.5px, transparent 2px),
     var(--color-infected);
+  background-size: 6px 6px;
 }
 
 .breakdown-legend {
@@ -852,6 +957,8 @@ button {
   font-family: var(--font-sans);
   font-size: 0.95rem;
   resize: none;
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 
 .result-pending {
@@ -924,14 +1031,14 @@ button {
   min-width: 1.8em;
   padding: 1px 6px;
   border-radius: 4px;
-  background: #c9ced4;
+  background: var(--color-histogram-bar);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
 
 .histogram-bar--empty {
-  background: #e3e6ea;
+  background: var(--color-histogram-bar-empty);
   color: var(--color-text-muted);
   font-weight: 600;
 }
@@ -964,6 +1071,55 @@ button {
   font-size: 0.85rem;
 }
 
+.setting--choice {
+  cursor: default;
+}
+
+.segmented {
+  display: inline-flex;
+  flex: none;
+  padding: 2px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-page);
+}
+
+.segmented-option {
+  position: relative;
+  cursor: pointer;
+}
+
+.segmented-option input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.segmented-option span {
+  display: grid;
+  place-items: center;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.segmented-option input:checked + span {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.segmented-option input:focus-visible + span {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
 .switch {
   appearance: none;
   flex: none;
@@ -972,7 +1128,7 @@ button {
   height: 28px;
   margin: 0;
   border-radius: 999px;
-  background: #c3c9cf;
+  background: var(--color-switch-off);
   cursor: pointer;
   transition: background-color 0.15s;
 }
@@ -985,7 +1141,7 @@ button {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--color-switch-knob);
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
   transition: transform 0.15s;
 }

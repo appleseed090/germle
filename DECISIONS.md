@@ -155,3 +155,41 @@ brief are not repeated here.
 - **The site never links to the GitHub repo.** The repo is private, so the About footer is just
   the copyright line. The About page carries the Vax! credit itself; `CREDITS.md` keeps the full
   licensing notice in the repo.
+
+## Dark mode
+
+- **Follows `prefers-color-scheme`; Settings adds System / Light / Dark.** Stored as
+  `theme: 'light' | 'dark' | null` in `germle.v1.settings`, `null` meaning "follow the device"
+  like `reduceMotion`. Settings saved before this load as `null`. A three-way choice rather than a
+  switch, so a player can go back to following the device (the reduce-motion switch cannot).
+- **Dark overrides are declared twice in `main.css`, guarded by a test.** CSS cannot share one
+  block between a media query and an attribute selector, and `light-dark()` would leave every
+  colour blank on Safari before 17.5. `src/styles/theme.test.ts` fails if the two blocks differ.
+- **Healthy people stay light grey in the dark theme.** Lightness (healthy lightest, then refusers,
+  then infected) is the cue that survives red–green colour blindness: simulated, red turns dark
+  olive, which a dark-grey healthy disc would resemble.
+- **The dark accent is a lighter teal with dark text on it** (`--color-on-accent`), so links and
+  the "Contained" verdict stay readable on dark surfaces; the Contained pill uses the same pair.
+- **A saved theme is applied by a render-blocking classic script, not inline and not a module.**
+  The CSP forbids inline scripts, and module scripts are deferred, so they can run after the first
+  paint. A plugin in `vite.config.ts` builds `src/theme-before-paint.ts` on its own into an IIFE
+  named by content hash under `/assets/`, which `_headers` caches as immutable; it shares the
+  settings parser and theme code with the game instead of copying them. The dev server loads it
+  as a module, so a saved theme may flash there only.
+- **One `theme-color` meta per scheme.** Each carries `media="(prefers-color-scheme: …)"` and
+  `data-scheme`; an explicit choice sets the chosen one to `all` and the other to `not all`. The
+  web manifest keeps the light colour, since manifests cannot vary by scheme.
+- **Contrast is tested in both themes** (WCAG AA: 4.5:1 for text, 3:1 for marks and outlines).
+  The light theme's healthy outline was 2.90:1 against the page and moved from `#87929e` to
+  `#828d99` (3.10:1). Known gap: the refusers' white cross is 2.5:1 on orange (see `TODO.md`).
+  Not tested, by design: edges stay faint (1.7:1 light, 2.4:1 dark); outcome-bar neighbours
+  (untouched next to vaccinated or infected: about 3.6:1 light, 2.8:1 dark) also differ by pattern
+  and the legend gives exact counts.
+- **`::backdrop` reads its colour with a fallback.** Older browsers do not let it inherit custom
+  properties; they get the light backdrop in both themes.
+- **The share preview keeps the text colour.** ■ and □ follow it, so filled squares look light in
+  the dark theme, which is also how the pasted text looks in any dark-mode app.
+- **`vite preview` serves the `/*` headers from `public/_headers`,** and every end-to-end test fails
+  on a Content-Security-Policy console error, so CSP breakage shows up before deploy.
+- **Vitest processes CSS (`css: true`)** so the theme test can import `main.css?raw`; it blanks CSS
+  otherwise.
