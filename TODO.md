@@ -11,11 +11,13 @@ External memory for the project: what is pending, constraints to remember, defer
 ## Needs the owner
 
 - [x] GitHub default branch switched to `main`.
-- [x] Cloudflare Worker connected to the repo; builds from `main` and serves the site on its
-      `workers.dev` address (verified 2026-10-05: headers, routes, full game on phone and desktop).
-- [ ] Move `germle.com` DNS to Cloudflare, attach `germle.com` and `www.germle.com` to the Worker,
-      add the www → apex Redirect Rule: `DEPLOY.md` steps 2–5. `germle.com` still shows Porkbun's
-      parking redirect.
+- [x] Cloudflare Worker connected to the repo; builds and deploys from `main`.
+- [x] `germle.com` DNS on Cloudflare and attached to the Worker (verified 2026-10-05: valid
+      certificate, security headers, routes, full game on a phone viewport).
+- [ ] Turn on **Always Use HTTPS** (SSL/TLS → Edge Certificates): `http://germle.com` still serves
+      the page instead of redirecting.
+- [ ] Confirm `https://www.germle.com/anything` redirects to `https://germle.com/anything` (the
+      agent sandbox cannot reach `www`, so this is unverified).
 
 ## M4 backlog (not scheduled)
 

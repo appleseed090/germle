@@ -1,6 +1,6 @@
 # Germle
 
-A daily outbreak puzzle. Live at [germle.com](https://germle.com) once deployed.
+A daily outbreak puzzle. Live at [germle.com](https://germle.com).
 
 Each day every player gets the same small social network. Spend a handful of vaccines to cut it
 into pieces, then contain an outbreak by quarantining healthy people — every quarantine costs a
