@@ -12,6 +12,7 @@ import {
   startGame,
   type GameState,
 } from '../engine';
+import { describePuzzleConfig } from '../puzzle-summary';
 import type { ShareableResult } from '../share';
 import { computePlayerStats } from '../stats';
 import { browserLocalStorage, createGameStorage } from '../storage';
@@ -40,6 +41,8 @@ const toast = createToast(requireElement('toast', HTMLElement));
 const resultsDialog = createResultsDialog(toast, nextPuzzleStart(today));
 const howToPlayDialog = requireElement('how-to-play-dialog', HTMLDialogElement);
 wireDialog(howToPlayDialog);
+requireElement('daily-constants', HTMLElement).textContent =
+  `Every daily puzzle: ${describePuzzleConfig(DAILY_PUZZLE_CONFIG)}`;
 requireElement('puzzle-label', HTMLElement).textContent = `#${puzzleNumber}`;
 
 const session = mountGameSession({

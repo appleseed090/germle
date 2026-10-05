@@ -852,6 +852,13 @@ button {
   stroke-dasharray: 4 3;
 }
 
+.puzzle-constants {
+  margin: 12px 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
 .legend {
   margin: 12px 0 0;
   color: var(--color-text-muted);

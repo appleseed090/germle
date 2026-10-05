@@ -10,6 +10,7 @@ import {
   type GameStep,
   type Puzzle,
 } from '../engine';
+import { pluralize } from '../pluralize';
 import { verdictForScore } from '../verdict';
 import { createBoard, type Board } from './board';
 import { renderVerdict } from './outcome-breakdown';
@@ -172,9 +173,4 @@ export function mountGameSession(options: GameSessionOptions): GameSession {
       elements.boardContainer.classList.toggle('board--reduced-motion', display.reduceMotion);
     },
   };
-}
-
-/** `1 vaccine`, `3 vaccines`. */
-export function pluralize(count: number, singular: string, plural: string): string {
-  return `${count} ${count === 1 ? singular : plural}`;
 }
