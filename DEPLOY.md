@@ -8,13 +8,14 @@ These steps need someone logged in to the Cloudflare and Porkbun accounts. Do th
 
 ## Checklist
 
-- [ ] 0. Make `main` the default branch on GitHub
-- [ ] 1. Connect the repo to Cloudflare Workers
-- [ ] 2. Move DNS for `germle.com` to Cloudflare
-- [ ] 3. Point Porkbun's nameservers at Cloudflare
-- [ ] 4. Attach `germle.com` and `www.germle.com` to the Worker, and add the www → apex redirect rule
-- [ ] 5. Verify
-- [ ] 6. Optional: Web Analytics and preview deployments
+- [x] 0. Make `main` the default branch on GitHub
+- [x] 1. Connect the repo to Cloudflare Workers
+- [x] 2. Move DNS for `germle.com` to Cloudflare
+- [x] 3. Point Porkbun's nameservers at Cloudflare
+- [x] 4. Attach `germle.com` and `www.germle.com` to the Worker, and add the www → apex redirect rule
+- [x] 5. Verify (2026-10-05; the `workers.dev` address was not checked)
+- [ ] 6. Optional: Web Analytics and preview deployments. Previews work (2026-10-05); Web
+      Analytics is not on: the live page has no Cloudflare beacon script.
 
 ## 0. Make `main` the default branch
 
