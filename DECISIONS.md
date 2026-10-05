@@ -104,7 +104,8 @@ brief are not repeated here.
   without scrolling, so it has no footer.
 - **After midnight the countdown becomes a "new Germle is ready" link; the page never reloads by
   itself.** A game in progress is never yanked away.
-- **Reduce motion: an explicit choice in Settings overrides the device; until then the switch
+- **Skip animations (first called "Reduce motion"; renamed, without a description, by the owner):
+  an explicit choice in Settings overrides the device; until then the switch
   follows `prefers-reduced-motion`.**
 - **Native `<dialog>`, closed by buttons, not `<form method="dialog">`.** Avoids any interaction
   with the CSP's `form-action 'none'`.
