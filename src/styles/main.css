@@ -852,6 +852,11 @@ button {
   stroke-dasharray: 4 3;
 }
 
+/* Each clause stays on one line, so a narrow screen breaks between them. */
+.verdict-rule span {
+  white-space: nowrap;
+}
+
 .verdict-rule,
 .puzzle-constants {
   margin: 12px 0 0;

@@ -263,9 +263,13 @@ brief are not repeated here.
   used to state and nothing else on the site does: that "35% contagious" is per contact per day, at least one infection a day, refusers can still be
   quarantined, nobody recovers, the same moves give everyone the same outbreak, and people can be
   dragged around.
-- **The Contained threshold is stated under the steps:** "Save 70% or more and the outbreak is
-  **Contained**; below that, it **Spread**." The number is filled in from
-  `CONTAINED_THRESHOLD_PERCENT`, so the rule and the verdict cannot disagree.
+- **The Contained threshold is stated under the steps, in the verdict's own words:**
+  "**Contained**: 70% or more saved. **Spread**: below 70%." The owner chose this over "Save 70% or
+  more and the outbreak is Contained; below that, it Spread", which used "Spread" awkwardly as a
+  verb, and over renaming the verdicts Success/Failed: most players would see "Failed" most days,
+  and "Spread" describes the outbreak, not the player. `renderVerdictRule` builds the line from
+  `CONTAINED_THRESHOLD_PERCENT` and the `Verdict` names, so the rule and the verdict cannot
+  disagree.
 - **Dialogs open at their top, then focus their main control without scrolling.** The owner saw
   how-to-play open scrolled to the bottom on an iPhone: `autofocus` scrolls the dialog to Start
   playing. The four dialogs now mark that control with `data-initial-focus`, and `openDialog`
