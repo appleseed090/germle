@@ -152,5 +152,6 @@ brief are not repeated here.
 - **Footer name is "Jonathan Liu".** The brief says to use the git author name; in this
   environment the local git author is the coding agent, so the name comes from the repo owner's
   GitHub profile (`appleseed090`).
-- **The About footer links to `CREDITS.md` on GitHub (`main`), not a copy on the site.** One
-  source of truth for the licensing notice; the repo is public.
+- **The site never links to the GitHub repo.** The repo is private, so the About footer is just
+  the copyright line. The About page carries the Vax! credit itself; `CREDITS.md` keeps the full
+  licensing notice in the repo.

@@ -70,9 +70,7 @@ test('the about page credits the inspiration and states the privacy policy', asy
     'href',
     'https://creativecommons.org/licenses/by-sa/3.0/',
   );
-  await expect(
-    page.locator('.content-footer').getByRole('link', { name: 'Credits' }),
-  ).toHaveAttribute('href', 'https://github.com/appleseed090/germle/blob/main/CREDITS.md');
+  await expect(page.locator('.content-footer')).toHaveText('© 2026 Jonathan Liu');
   await expect(
     page.getByText('No accounts, no tracking in the game; progress is stored in your browser.'),
   ).toBeVisible();
