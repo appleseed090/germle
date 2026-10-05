@@ -8,14 +8,15 @@ export interface ShareableResult {
 }
 
 /**
- * Squares for the share bar, one per outcome. They differ in fill pattern, not just colour, so
- * the bar reads correctly in monochrome. None of them has an emoji presentation.
+ * Colour square emojis for the share bar, one per outcome, in the colours of the results bar:
+ * blue vaccinated, yellow quarantined, white untouched, red infected. Each is a single code point
+ * with emoji presentation by default, so no variation selector is needed.
  */
 export const SHARE_SQUARES = Object.freeze({
-  vaccinated: '▣',
-  quarantined: '▨',
-  untouched: '□',
-  infected: '■',
+  vaccinated: '🟦',
+  quarantined: '🟨',
+  untouched: '⬜',
+  infected: '🟥',
 });
 
 const SHARE_BAR_LENGTH = 10;
@@ -26,7 +27,7 @@ const SHARE_DOMAIN = 'germle.com';
  *
  * ```
  * Germle #12 · 78% saved
- * ▣▨▨□□□□□■■
+ * 🟦🟨🟨⬜⬜⬜⬜⬜🟥🟥
  * germle.com
  * ```
  *

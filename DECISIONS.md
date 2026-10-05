@@ -77,8 +77,9 @@ brief are not repeated here.
   fills desktop screens and changes nothing in the game.
 - **Node radii scale with the board but are clamped to 0.75–1.5× logical size.** Keeps people
   tappable on small phones and not cartoonish on large monitors.
-- **Share squares are ▣ vaccinated, ▨ quarantined, □ untouched, ■ infected.** They differ in fill
-  pattern, so the bar reads in monochrome, and none has an emoji presentation. The
+- **Share squares are colour emojis: 🟦 vaccinated, 🟨 quarantined, ⬜ untouched, 🟥 infected.**
+  The owner's call; they replace ▣ ▨ □ ■. The colours follow the results bar, and red, yellow and
+  white also differ in lightness, which colour-blind players can still read. The
   saved/infected split rounds like the score; the saved squares are split by largest remainder.
 - **Share uses `navigator.share` whenever it exists** (as the brief says, desktop included), then
   the clipboard, then a visible, pre-selected text box.
