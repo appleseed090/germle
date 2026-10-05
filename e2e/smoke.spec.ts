@@ -2,20 +2,27 @@ import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures';
 import { expectVerdictToMatchScore } from './verdict';
 
-const SHARE_FIRST_LINE = /^Germle #\d+ · \d+% saved$/m;
+const SHARE_FIRST_LINE = /^Germle #\d+ · \d+% saved$/;
+const SHARE_SQUARES_LINE = /^[🟦🟨⬜🟥]{10}$/u;
 
 async function tapFirstTappablePerson(page: Page): Promise<void> {
   await page.locator('.node[data-tappable="true"]').first().click();
   await expect(page.locator('#board')).toHaveAttribute('data-animating', 'false');
 }
 
-test('plays a full daily game, shares the result and restores it on reload', async ({
+/** Clicks Share and returns what landed on the clipboard (the projects all run Chromium). */
+async function copyResult(page: Page): Promise<string> {
+  await page.getByRole('button', { name: 'Share' }).click();
+  await expect(page.locator('#share-status')).toHaveText('Copied to clipboard');
+  await expect(page.locator('#share-status')).toBeInViewport();
+  return page.evaluate(() => navigator.clipboard.readText());
+}
+
+test('plays a full daily game, copies the result and restores it on reload', async ({
   page,
   context,
-  browserName,
 }) => {
-  if (browserName === 'chromium')
-    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
 
@@ -52,20 +59,29 @@ test('plays a full daily game, shares the result and restores it on reload', asy
   await expect(page.locator('#phase-label')).toHaveAttribute('data-phase', 'ended');
   await expectVerdictToMatchScore(page);
 
-  const preview = (await page.locator('#share-preview').textContent()) ?? '';
-  expect(preview).toMatch(SHARE_FIRST_LINE);
-  expect(preview.split('\n')).toHaveLength(3);
-
-  await page.getByRole('button', { name: 'Share' }).click();
-  if (browserName === 'chromium' && !(await page.evaluate(() => 'share' in navigator))) {
-    await expect(page.locator('#toast')).toHaveText('Copied to clipboard');
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(preview);
-  }
+  const copied = await copyResult(page);
+  const [firstLine, squares, domain, ...extraLines] = copied.split('\n');
+  expect(firstLine).toMatch(SHARE_FIRST_LINE);
+  expect(firstLine).toContain(
+    ` · ${(await page.locator('#result-score').textContent()) ?? ''} saved`,
+  );
+  expect(squares).toMatch(SHARE_SQUARES_LINE);
+  expect(domain).toBe('germle.com');
+  expect(extraLines).toEqual([]);
 
   await page.reload();
   await expect(resultsDialog).toBeVisible();
-  await expect(page.locator('#share-preview')).toHaveText(preview);
   await expect(page.locator('#stat-played')).toHaveText('1');
+  expect(await copyResult(page)).toBe(copied);
+
+  // Without a clipboard (an insecure context, an old browser) the text is shown, selected.
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true });
+  });
+  await page.getByRole('button', { name: 'Share' }).click();
+  await expect(page.locator('#share-fallback-text')).toBeVisible();
+  await expect(page.locator('#share-fallback-text')).toHaveValue(copied);
+  await expect(page.locator('#share-fallback-text')).toBeFocused();
 });
 
 test('the about page credits the inspiration and states the privacy policy', async ({ page }) => {

@@ -991,15 +991,13 @@ button {
   border-radius: 3px;
 }
 
-.share-preview {
-  margin: 16px 0 0;
-  padding: 12px;
-  border-radius: 10px;
-  background: var(--color-page);
-  font-family: var(--font-sans);
-  font-size: 0.88rem;
-  line-height: 1.55;
-  white-space: pre-wrap;
+/* Always one line tall, so the dialog does not jump when the status appears. */
+.share-status {
+  min-height: 1.45em;
+  margin: 8px 0 0;
+  color: var(--color-accent);
+  font-weight: 700;
+  text-align: center;
 }
 
 .share-fallback {

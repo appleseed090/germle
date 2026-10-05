@@ -81,8 +81,11 @@ brief are not repeated here.
   The owner's call; they replace ▣ ▨ □ ■. The colours follow the results bar, and red, yellow and
   white also differ in lightness, which colour-blind players can still read. The
   saved/infected split rounds like the score; the saved squares are split by largest remainder.
-- **Share uses `navigator.share` whenever it exists** (as the brief says, desktop included), then
-  the clipboard, then a visible, pre-selected text box.
+- **Share copies the result straight to the clipboard, with no share sheet and no preview.** The
+  owner's call; it replaces `navigator.share` first, which opened the system share sheet. Where
+  the clipboard is missing or refuses, a pre-selected text box shows the result to copy by hand.
+  "Copied to clipboard" appears in the results dialog's own status line: the page's toast sits
+  behind a modal dialog, so players never saw it there.
 - **Played and streak count finished games only.** An unfinished game from an earlier day is
   dropped, never counted.
 - **Progress is stored as the move list and replayed on load.** Determinism makes this exact;
@@ -202,8 +205,6 @@ brief are not repeated here.
   and the legend gives exact counts.
 - **`::backdrop` reads its colour with a fallback.** Older browsers do not let it inherit custom
   properties; they get the light backdrop in both themes.
-- **The share preview keeps the text colour.** ■ and □ follow it, so filled squares look light in
-  the dark theme, which is also how the pasted text looks in any dark-mode app.
 - **`vite preview` serves the `/*` headers from `public/_headers`,** and every end-to-end test fails
   on a Content-Security-Policy console error, so CSP breakage shows up before deploy.
 - **Vitest processes CSS (`css: true`)** so the theme test can import `main.css?raw`; it blanks CSS
