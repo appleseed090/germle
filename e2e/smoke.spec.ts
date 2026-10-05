@@ -127,7 +127,7 @@ test.describe('with a fixed clock', () => {
 test.describe('on a short phone screen', () => {
   test.use({ viewport: { width: 375, height: 560 } });
 
-  test('opens how to play at its top, with Start playing focused', async ({ page }) => {
+  test('opens how to play at its top, with its heading focused', async ({ page }) => {
     await page.goto('/');
     const dialog = page.locator('#how-to-play-dialog');
     await expect(dialog).toBeVisible();
@@ -135,14 +135,14 @@ test.describe('on a short phone screen', () => {
       true,
     );
     await expect(page.getByRole('heading', { name: 'How to play' })).toBeInViewport();
-    await expect(page.getByRole('button', { name: 'Start playing' })).toBeFocused();
+    await expect(page.getByRole('heading', { name: 'How to play' })).toBeFocused();
   });
 });
 
 test('can be played with the keyboard alone', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  await page.keyboard.press('Enter');
+  await page.keyboard.press('Escape');
   await expect(page.getByRole('heading', { name: 'How to play' })).not.toBeVisible();
   await page.locator('.node[data-tappable="true"]').first().focus();
   for (let vaccine = 0; vaccine < 4; vaccine++) await page.keyboard.press('Enter');
