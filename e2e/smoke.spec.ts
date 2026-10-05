@@ -33,8 +33,9 @@ test('plays a full daily game, copies the result and restores it on reload', asy
     'The game ends when the outbreak has nowhere left to go. Save as many people as you can!',
   ]);
   await expect(page.locator('.verdict-rule')).toHaveText(
-    'Save 70% or more and the outbreak is Contained; below that, it Spread.',
+    'Contained: 70% or more saved. Spread: below 70%.',
   );
+  await expect(page.locator('.verdict-rule strong')).toHaveText(['Contained', 'Spread']);
   await expect(page.locator('#daily-constants')).toHaveText(
     'Every daily puzzle: 40 people · 4 vaccines · 2 outbreaks · 2 refusers · 35% contagious',
   );
