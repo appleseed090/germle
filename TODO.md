@@ -16,9 +16,8 @@ External memory for the project: what is pending, constraints to remember, defer
       certificate, security headers, routes, full game on a phone viewport).
 - [x] **Always Use HTTPS** on: `http://germle.com/…` returns 301 to `https://`, query kept
       (verified 2026-10-05).
-- [ ] www → apex Redirect Rule is deployed and both `germle.com` and `www` Worker records exist;
-      confirm in a browser that `https://www.germle.com/practice?seed=abc` lands on
-      `https://germle.com/practice?seed=abc` (the agent sandbox cannot reach `www`).
+- [x] www → apex Redirect Rule: `https://www.germle.com/practice?seed=abc&people=60` returns 301
+      to `https://germle.com/practice?seed=abc&people=60` from Cloudflare (verified 2026-10-05).
 
 ## M4 backlog (not scheduled)
 
