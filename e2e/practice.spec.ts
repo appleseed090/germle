@@ -43,3 +43,47 @@ test('sanitises link parameters and starts a bare visit on the setup', async ({ 
   await expect(page).toHaveURL(/people=25.*seed=typedseed/);
   await expect(page.locator('.node')).toHaveCount(25);
 });
+
+test('explains every setup field on tap or keyboard, and to screen readers', async ({ page }) => {
+  await page.goto('/practice');
+  const setup = page.locator('#setup-dialog');
+  for (const field of [
+    'People',
+    'Neighbours',
+    'Vaccines',
+    'Outbreaks',
+    'Refusers',
+    'Contagiousness',
+    'Seed',
+  ]) {
+    await expect(setup.getByRole('button', { name: `About ${field}` })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
+  }
+
+  const contagionInfo = setup.getByRole('button', { name: 'About Contagiousness' });
+  const contagionText = page.locator('#setup-contagion-info');
+  await expect(contagionText).toBeHidden();
+  await contagionInfo.click();
+  await expect(contagionInfo).toHaveAttribute('aria-expanded', 'true');
+  await expect(contagionText).toHaveText(
+    'The chance, each day, that the infection passes along each contact between an infected and a healthy person.',
+  );
+  await contagionInfo.click();
+  await expect(contagionText).toBeHidden();
+
+  const seedInfo = setup.getByRole('button', { name: 'About Seed' });
+  await seedInfo.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#setup-seed-info')).toBeVisible();
+  await page.keyboard.press('Space');
+  await expect(page.locator('#setup-seed-info')).toBeHidden();
+
+  await expect(setup.getByRole('slider', { name: 'People' })).toHaveAccessibleDescription(
+    'How many people are in the network.',
+  );
+  await expect(setup.getByRole('textbox', { name: 'Seed' })).toHaveAccessibleDescription(
+    'Any word: the same seed and settings always make the same network and outbreak.',
+  );
+});
