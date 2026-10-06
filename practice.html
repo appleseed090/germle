@@ -99,6 +99,28 @@
       <p class="dialog-intro">
         Build any network you like. Practice games never count toward your stats.
       </p>
+      <div
+        class="setting setting--choice"
+        role="radiogroup"
+        aria-labelledby="setup-preset-name"
+        aria-describedby="setup-preset-hint"
+      >
+        <span>
+          <span class="setting-name" id="setup-preset-name">Difficulty</span>
+          <span class="setting-hint" id="setup-preset-hint">Medium is the daily puzzle.</span>
+        </span>
+        <span class="segmented" id="setup-preset">
+          <label class="segmented-option"
+            ><input type="radio" name="preset" value="easy" /><span>Easy</span></label
+          >
+          <label class="segmented-option"
+            ><input type="radio" name="preset" value="medium" /><span>Medium</span></label
+          >
+          <label class="segmented-option"
+            ><input type="radio" name="preset" value="hard" /><span>Hard</span></label
+          >
+        </span>
+      </div>
       <div class="slider-field">
         <label for="setup-people">People</label>
         <button
@@ -226,13 +248,7 @@
         </p>
       </div>
       <button class="primary-button" type="button" id="setup-start">Start</button>
-      <p class="dialog-footnote">
-        <button class="link-button" type="button" id="setup-daily-defaults">
-          Reset to daily settings
-        </button>
-        ·
-        <a href="/">Today's puzzle</a>
-      </p>
+      <p class="dialog-footnote"><a href="/">Today's puzzle</a></p>
     </dialog>
 
     <dialog class="dialog" id="results-dialog" aria-labelledby="results-title">
