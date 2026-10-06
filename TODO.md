@@ -23,6 +23,12 @@ External memory for the project: what is pending, constraints to remember, defer
       (verified 2026-10-05).
 - [x] www → apex Redirect Rule: `https://www.germle.com/practice?seed=abc&people=60` returns 301
       to `https://germle.com/practice?seed=abc&people=60` from Cloudflare (verified 2026-10-05).
+- [x] Porkbun's default URL forward to `germle-com.l.ink` deleted and Porkbun's own records
+      pointed at Cloudflare (2026-10-06; see `DEPLOY.md` step 3a). iMessage previews on the
+      owner's Wi-Fi then showed the Germle card again.
+- [ ] **After 2026-10-20:** in Porkbun → `germle.com` → DNS Records, delete the four A and four
+      AAAA records added on 2026-10-06 (for `germle.com` and `www`). Keep the nameservers on
+      Cloudflare, and answer "No, thank you." if Porkbun offers to switch them.
 
 ## M4 backlog (not scheduled)
 
