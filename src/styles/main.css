@@ -439,6 +439,16 @@ button {
   stroke: var(--color-node-infected-stroke);
 }
 
+/* Refusers fade to healthy as the outbreak starts; becoming infected stays instant. */
+.node-disc {
+  transition: fill 0.6s ease-out;
+}
+
+.node--infected .node-disc,
+.board--reduced-motion .node-disc {
+  transition: none;
+}
+
 .node-halo,
 .node-ring,
 .node-focus {
