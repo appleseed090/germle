@@ -8,11 +8,14 @@ import {
   type PuzzleConfig,
 } from '../engine';
 import {
+  PRACTICE_PRESETS,
   PRACTICE_RANGES,
+  isPracticePresetName,
   normaliseSeed,
   parsePracticeParameters,
   practiceParameters,
   practiceSeedKey,
+  presetMatching,
   randomSeed,
   type PracticeSetup,
 } from '../practice-setup';
@@ -133,46 +136,50 @@ function bindSetupDialog(initial: PracticeSetup): HTMLDialogElement {
     contagion: slider('contagion', PRACTICE_RANGES.contagiousnessPercent, (value) => `${value}%`),
   };
   const seedInput = requireElement('setup-seed', HTMLInputElement);
+  const presetInputs = requireElement(
+    'setup-preset',
+    HTMLElement,
+  ).querySelectorAll<HTMLInputElement>('input[name="preset"]');
 
-  const showConfig = (config: PuzzleConfig, seed: string): void => {
+  const showConfig = (config: PuzzleConfig): void => {
     sliders.people.input.value = String(config.nodeCount);
     sliders.neighbours.input.value = String(config.ringNeighbourCount);
     sliders.vaccines.input.value = String(config.vaccineCount);
     sliders.outbreaks.input.value = String(config.indexPatientCount);
     sliders.refusers.input.value = String(config.refuserCount);
     sliders.contagion.input.value = String(Math.round(config.transmissionProbability * 100));
-    seedInput.value = seed;
     refreshOutputs();
   };
+  const configFromSliders = (): PuzzleConfig => ({
+    ...DAILY_PUZZLE_CONFIG,
+    nodeCount: Number(sliders.people.input.value),
+    ringNeighbourCount: Number(sliders.neighbours.input.value),
+    vaccineCount: Number(sliders.vaccines.input.value),
+    indexPatientCount: Number(sliders.outbreaks.input.value),
+    refuserCount: Number(sliders.refusers.input.value),
+    transmissionProbability: Number(sliders.contagion.input.value) / 100,
+  });
+  // A preset stays selected only while every slider still matches it.
   const refreshOutputs = (): void => {
     for (const { input, output, format } of Object.values(sliders))
       output.value = format(Number(input.value));
+    const matchingPreset = presetMatching(configFromSliders());
+    for (const presetInput of presetInputs)
+      presetInput.checked = presetInput.value === matchingPreset;
   };
   for (const { input } of Object.values(sliders)) input.addEventListener('input', refreshOutputs);
+  for (const presetInput of presetInputs) {
+    presetInput.addEventListener('change', () => {
+      if (isPracticePresetName(presetInput.value)) showConfig(PRACTICE_PRESETS[presetInput.value]);
+    });
+  }
 
   requireElement('setup-random-seed', HTMLButtonElement).addEventListener('click', () => {
     seedInput.value = randomSeed();
   });
-  requireElement('setup-daily-defaults', HTMLButtonElement).addEventListener('click', () => {
-    showConfig(
-      parsePracticeParameters(new URLSearchParams(), () => seedInput.value).config,
-      seedInput.value,
-    );
-  });
   requireElement('setup-start', HTMLButtonElement).addEventListener('click', () => {
     const seed = normaliseSeed(seedInput.value) ?? randomSeed();
-    const draft: PracticeSetup = {
-      config: {
-        ...DAILY_PUZZLE_CONFIG,
-        nodeCount: Number(sliders.people.input.value),
-        ringNeighbourCount: Number(sliders.neighbours.input.value),
-        vaccineCount: Number(sliders.vaccines.input.value),
-        indexPatientCount: Number(sliders.outbreaks.input.value),
-        refuserCount: Number(sliders.refusers.input.value),
-        transmissionProbability: Number(sliders.contagion.input.value) / 100,
-      },
-      seed,
-    };
+    const draft: PracticeSetup = { config: configFromSliders(), seed };
     // Round-trip through the URL format so the cross-field limits (vaccines and outbreaks that
     // fit the network) apply exactly as they will on load.
     window.location.assign(
@@ -180,6 +187,7 @@ function bindSetupDialog(initial: PracticeSetup): HTMLDialogElement {
     );
   });
 
-  showConfig(initial.config, initial.seed);
+  showConfig(initial.config);
+  seedInput.value = initial.seed;
   return dialog;
 }

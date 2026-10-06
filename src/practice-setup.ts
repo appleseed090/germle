@@ -16,6 +16,58 @@ export const PRACTICE_RANGES = Object.freeze({
   contagiousnessPercent: { minimum: 15, maximum: 60, step: 1 },
 });
 
+/** A practice difficulty. Presets only fill in the sliders; the link records the settings. */
+export type PracticePresetName = 'easy' | 'medium' | 'hard';
+
+/**
+ * Starting settings for each difficulty. Medium is the daily puzzle. Easy and Hard were tuned
+ * with a simulated player so that typical scores step down clearly between levels (see
+ * DECISIONS.md). Each fits within {@link PRACTICE_RANGES}.
+ */
+export const PRACTICE_PRESETS: Readonly<Record<PracticePresetName, PuzzleConfig>> = Object.freeze({
+  easy: Object.freeze({
+    ...DAILY_PUZZLE_CONFIG,
+    nodeCount: 30,
+    indexPatientCount: 1,
+    refuserCount: 0,
+  }),
+  medium: DAILY_PUZZLE_CONFIG,
+  hard: Object.freeze({
+    ...DAILY_PUZZLE_CONFIG,
+    nodeCount: 50,
+    vaccineCount: 5,
+    indexPatientCount: 3,
+    refuserCount: 5,
+  }),
+});
+
+/** Narrows untrusted input (form values) to a preset name. */
+export function isPracticePresetName(value: unknown): value is PracticePresetName {
+  return value === 'easy' || value === 'medium' || value === 'hard';
+}
+
+/**
+ * The preset whose settings the config matches, comparing contagiousness in whole percent as the
+ * slider does; `undefined` for any other combination.
+ */
+export function presetMatching(config: PuzzleConfig): PracticePresetName | undefined {
+  const contagiousnessPercent = (candidate: PuzzleConfig): number =>
+    Math.round(candidate.transmissionProbability * 100);
+  const names = Object.keys(PRACTICE_PRESETS).filter(isPracticePresetName);
+  return names.find((name) => {
+    const preset = PRACTICE_PRESETS[name];
+    return (
+      preset.nodeCount === config.nodeCount &&
+      preset.ringNeighbourCount === config.ringNeighbourCount &&
+      preset.rewireProbability === config.rewireProbability &&
+      preset.refuserCount === config.refuserCount &&
+      preset.vaccineCount === config.vaccineCount &&
+      preset.indexPatientCount === config.indexPatientCount &&
+      contagiousnessPercent(preset) === contagiousnessPercent(config)
+    );
+  });
+}
+
 const SEED_PATTERN = /^[a-z0-9-]{1,24}$/;
 
 /**

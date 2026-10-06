@@ -149,6 +149,24 @@ brief are not repeated here.
   strategy, 51% of days at 15% infected only the guaranteed one person, against 25% at 35%. The
   "i" text explains β, with "the chance the infection passes along each contact" in bold (the
   owner's wording); the `contagion` link parameter is unchanged.
+- **Easy, Medium and Hard presets fill in the practice sliders; Medium is the daily puzzle.**
+  The owner's call, after deciding the daily stays a single puzzle whose difficulty varies by day.
+  A preset only sets the sliders, so links keep their format and record the actual settings; the
+  preset stays selected while every slider matches it. "Reset to daily settings" went, since
+  Medium does the same. Values were tuned with a simulated player (vaccinate whoever has the most
+  contacts, quarantine the healthy person touching the most infected) over 400 seeds each, giving
+  its median score and how often it scored Contained (70% or more):
+
+  | Preset | Settings                                                         | Median | ≥ 70% |
+  | ------ | ---------------------------------------------------------------- | ------ | ----- |
+  | Easy   | 30 people, 4 neighbors, 4 vaccines, 1 outbreak, 0 refusers, 35%  | 87%    | 99%   |
+  | Medium | 40 people, 4 neighbors, 4 vaccines, 2 outbreaks, 2 refusers, 35% | 70%    | 51%   |
+  | Hard   | 50 people, 4 neighbors, 5 vaccines, 3 outbreaks, 5 refusers, 35% | 54%    | 14%   |
+
+  Outbreaks and vaccines move difficulty most; people and refusers barely do. One, two and three
+  outbreaks follow Vax!'s Easy, Medium and Hard. Hard stays at 50 people so the board is usable on
+  a phone. A Hard with 6 neighbors scored 28%, barely above random tapping (26%), so skill stopped
+  mattering; it was rejected.
 
 ## Par removed; a fixed verdict instead
 

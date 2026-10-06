@@ -44,6 +44,37 @@ test('sanitises link parameters and starts a bare visit on the setup', async ({ 
   await expect(page.locator('.node')).toHaveCount(25);
 });
 
+test('fills the setup from the Easy, Medium and Hard presets', async ({ page }) => {
+  await page.goto('/practice');
+  const difficulty = page.getByRole('radiogroup', { name: 'Difficulty' });
+  const preset = (name: string) => difficulty.getByRole('radio', { name });
+  await expect(preset('Medium')).toBeChecked();
+
+  await preset('Hard').check();
+  const hardValues = {
+    people: '50',
+    neighbours: '4',
+    vaccines: '5',
+    outbreaks: '3',
+    refusers: '5',
+    contagion: '35%',
+  };
+  for (const [field, value] of Object.entries(hardValues))
+    await expect(page.locator(`#setup-${field}-value`)).toHaveText(value);
+
+  await page.locator('#setup-vaccines').fill('6');
+  for (const name of ['Easy', 'Medium', 'Hard']) await expect(preset(name)).not.toBeChecked();
+
+  await preset('Easy').check();
+  await page.getByRole('button', { name: 'Start' }).click();
+  await expect(page).toHaveURL(
+    /people=30&neighbours=4&vaccines=4&outbreaks=1&refusers=0&contagion=35&seed=/,
+  );
+  await expect(page.locator('.node')).toHaveCount(30);
+  await page.getByRole('button', { name: 'Setup' }).click();
+  await expect(preset('Easy')).toBeChecked();
+});
+
 test('explains every setup field on tap or keyboard, and to screen readers', async ({ page }) => {
   await page.goto('/practice');
   const setup = page.locator('#setup-dialog');

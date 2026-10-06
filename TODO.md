@@ -8,6 +8,8 @@ External memory for the project: what is pending, constraints to remember, defer
 - [x] M2 — Playable daily game, Playwright smoke test, `LAUNCH_DATE` = 2026-10-04.
 - [x] M3 — Practice mode. The par solver built for M3 was later dropped for a fixed
       Contained/Spread verdict (see `DECISIONS.md`).
+- [x] Published puzzles locked by a snapshot test.
+- [x] Practice presets: Easy, Medium (the daily settings) and Hard.
 
 ## Needs the owner
 

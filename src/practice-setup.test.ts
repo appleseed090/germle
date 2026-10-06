@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { DAILY_PUZZLE_CONFIG, validatePuzzleConfig } from './engine';
 import {
+  PRACTICE_PRESETS,
+  isPracticePresetName,
   normaliseSeed,
   parsePracticeParameters,
   practiceParameters,
   practiceSeedKey,
+  presetMatching,
   randomSeed,
 } from './practice-setup';
 
@@ -56,6 +59,33 @@ describe('parsePracticeParameters', () => {
     );
     expect(setup.config.vaccineCount).toBe(10);
     expect(() => validatePuzzleConfig(setup.config)).not.toThrow();
+  });
+});
+
+describe('practice presets', () => {
+  const presetNames = Object.keys(PRACTICE_PRESETS).filter(isPracticePresetName);
+
+  it('offers Easy, Medium and Hard, with Medium as the daily puzzle', () => {
+    expect(presetNames).toEqual(['easy', 'medium', 'hard']);
+    expect(PRACTICE_PRESETS.medium).toEqual(DAILY_PUZZLE_CONFIG);
+  });
+
+  it.each(presetNames)('keeps %s a practice link that loads unchanged', (name) => {
+    const setup = { config: PRACTICE_PRESETS[name], seed: 'preset' };
+    expect(parsePracticeParameters(practiceParameters(setup), fixedSeed)).toEqual(setup);
+  });
+
+  it('names the preset a config matches, and nothing once a setting differs', () => {
+    for (const name of presetNames) expect(presetMatching(PRACTICE_PRESETS[name])).toBe(name);
+    const fromSliders = { ...PRACTICE_PRESETS.hard, transmissionProbability: 35 / 100 };
+    expect(presetMatching(fromSliders)).toBe('hard');
+    expect(presetMatching({ ...PRACTICE_PRESETS.easy, vaccineCount: 5 })).toBeUndefined();
+  });
+
+  it('rejects anything but a preset name', () => {
+    expect(isPracticePresetName('hard')).toBe(true);
+    expect(isPracticePresetName('Hard')).toBe(false);
+    expect(isPracticePresetName(undefined)).toBe(false);
   });
 });
 

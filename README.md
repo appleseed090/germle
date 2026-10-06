@@ -12,8 +12,8 @@ licensing notice.
 
 ## Status
 
-Milestone M3: the daily game at `/` (with stats and sharing), practice mode at `/practice`
-and the About page at `/about`. See `TODO.md` for the backlog.
+Milestone M3: the daily game at `/` (with stats and sharing), practice mode at `/practice` (with
+Easy, Medium and Hard presets) and the About page at `/about`. See `TODO.md` for the backlog.
 
 ## Prerequisites
 

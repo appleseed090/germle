@@ -694,16 +694,6 @@ button {
   margin-top: 10px;
 }
 
-.link-button {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--color-accent);
-  font-size: inherit;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
 .header-text-button {
   min-height: 44px;
   padding: 0 12px;
