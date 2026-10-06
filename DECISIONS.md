@@ -302,3 +302,23 @@ brief are not repeated here.
   still labelled "Germle home". Five buttons need about 406 px otherwise, which pushed the page
   wider than the screen and cut off Settings. An e2e test fails if the page is wider than a
   360 px phone.
+
+## Locked puzzles
+
+- **A snapshot test locks every daily puzzle from #1 to #365, plus five practice links.** For each
+  puzzle it records digests of the network, the refusers, the layout, the first 40 turns of
+  transmission rolls and a game played by a fixed scripted player, one line per puzzle in
+  `src/engine/frozen-puzzles.snapshot.txt`. Determinism tests only proved that a build agrees with
+  itself; nothing stopped a refactor from quietly changing every puzzle. Players compare scores by
+  puzzle number, saved games are replayed move by move, and an archive replays past days, so a
+  published puzzle must never change by accident.
+- **The layout is locked exactly, not rounded.** It uses only IEEE 754 arithmetic and
+  `Math.sqrt`, so every browser computes the same positions; a change to them is a change to the
+  board people saw.
+- **Changing a puzzle on purpose takes one command and a note here.** Run
+  `npx vitest run -u src/engine/frozen-puzzles.test.ts` and record why. CI never writes
+  snapshots, so a deleted snapshot fails there too.
+- **The owner kept Germle's rules where they differ from Vax!** A turn that would infect nobody
+  infects only the single most likely person (Vax! re-rolls at 100%, infecting everyone exposed),
+  and the first infections are kept apart when possible (Vax! places them at random). Deaths and
+  recovery stay out, as in Vax!.

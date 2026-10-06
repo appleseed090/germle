@@ -17,6 +17,9 @@ left a choice open, the choice made is stated here and logged in `DECISIONS.md`.
   shift another.
 - Changing anything in this section, or any constant in `DAILY_PUZZLE_CONFIG`, changes every
   daily puzzle.
+- `src/engine/frozen-puzzles.test.ts` locks daily puzzles #1–#365 and a few practice links: each
+  puzzle's network, refusers, layout, transmission rolls and a scripted game are compared against
+  `frozen-puzzles.snapshot.txt`, so any change to them fails the tests.
 
 ## Puzzle
 

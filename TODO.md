@@ -47,6 +47,9 @@ External memory for the project: what is pending, constraints to remember, defer
 - The share card's first line (`Germle #<n> · <score>% saved`) is matched by the e2e tests and by
   anyone parsing pasted results.
 - Practice link parameters are a public format (people save links); renaming one breaks them.
+- Published puzzles are locked by `src/engine/frozen-puzzles.test.ts` (daily #1–#365 and five
+  practice links). Every day uses the same generator, so a year of samples guards later days
+  too; a change that only affects later numbers would need code that branches on the number.
 - The dark theme's overrides are written twice in `src/styles/main.css` (under
   `prefers-color-scheme: dark` and under `[data-theme='dark']`), and each page's two `theme-color`
   metas repeat `--color-page`. `src/styles/theme.test.ts` fails if they drift.
