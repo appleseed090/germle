@@ -1,3 +1,4 @@
+import { archivePuzzlePath } from './archive';
 import type { OutcomeCounts } from './engine';
 
 /** Everything the share card shows about a finished daily game. */
@@ -5,6 +6,8 @@ export interface ShareableResult {
   readonly puzzleNumber: number;
   readonly score: number;
   readonly counts: OutcomeCounts;
+  /** Played on the puzzle's own day, or later from the archive. */
+  readonly playedFrom: 'daily' | 'archive';
 }
 
 /**
@@ -31,14 +34,17 @@ const SHARE_DOMAIN = 'germle.com';
  * germle.com
  * ```
  *
- * The first line's format is a public contract (people paste it, tests match it); change it
- * deliberately.
+ * A game played from the archive ends with a link to that puzzle instead
+ * (`germle.com/?puzzle=12`), so it is not mistaken for today's and friends can play it. The first
+ * line's format is a public contract (people paste it, tests match it); change it deliberately.
  */
 export function buildShareText(result: ShareableResult): string {
   return [
     `Germle #${result.puzzleNumber} · ${result.score}% saved`,
     buildShareBar(result.counts),
-    SHARE_DOMAIN,
+    result.playedFrom === 'daily'
+      ? SHARE_DOMAIN
+      : `${SHARE_DOMAIN}${archivePuzzlePath(result.puzzleNumber)}`,
   ].join('\n');
 }
 

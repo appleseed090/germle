@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import aboutHtml from '../../about.html?raw';
+import archiveHtml from '../../archive.html?raw';
 import dailyHtml from '../../index.html?raw';
 import practiceHtml from '../../practice.html?raw';
 import stylesheet from './main.css?raw';
@@ -58,6 +59,7 @@ const TEXT_PAIRS: readonly (readonly [string, string])[] = [
   ['--color-on-accent', '--color-accent'],
   ['--color-on-accent', '--color-accent-strong'],
   ['--color-spread-text', '--color-surface'],
+  ['--color-spread-text', '--color-page'],
   ['--color-on-status', '--color-vaccinated'],
   ['--color-on-status', '--color-node-infected'],
   ['--color-surface', '--color-text'],
@@ -117,6 +119,7 @@ describe.each([
   ['index.html', dailyHtml],
   ['practice.html', practiceHtml],
   ['about.html', aboutHtml],
+  ['archive.html', archiveHtml],
 ])('%s', (_, html) => {
   it('colours the browser UI like the page in each theme', () => {
     const metas = [...html.matchAll(/<meta\s+name="theme-color"([^>]*)>/g)].map(

@@ -103,6 +103,11 @@
         </nav>
       </header>
 
+      <p class="archive-banner" id="archive-banner" hidden>
+        <a href="/archive">Archive</a> · <time id="archive-date"></time> ·
+        <a href="/">Today's puzzle</a>
+      </p>
+
       <main class="board" id="board">
         <p class="outbreak-banner" id="outbreak-banner" hidden>Outbreak!</p>
         <noscript><p class="noscript">Germle needs JavaScript to run.</p></noscript>
@@ -187,7 +192,10 @@
         <span class="legend-dot legend-dot--infected"></span> infected.
       </p>
       <button class="primary-button" type="button" data-close-dialog>Start playing</button>
-      <p class="dialog-footnote">A new puzzle every day at midnight.</p>
+      <p class="dialog-footnote">
+        A new puzzle every day at midnight. Missed one? Play it in the
+        <a href="/archive">archive</a>.
+      </p>
     </dialog>
 
     <dialog class="dialog" id="results-dialog" aria-labelledby="results-title">
@@ -228,7 +236,10 @@
       <p class="countdown" id="new-puzzle-ready" hidden>
         A new Germle is ready. <a href="/">Play it</a>
       </p>
-      <section class="stats" aria-labelledby="stats-title">
+      <p class="countdown" id="archive-links" hidden>
+        <a href="/archive">More past puzzles</a> · <a href="/">Today's puzzle</a>
+      </p>
+      <section class="stats" id="stats" aria-labelledby="stats-title">
         <h3 id="stats-title">Statistics</h3>
         <dl class="stats-grid">
           <div>
@@ -247,6 +258,9 @@
         <h3>Scores</h3>
         <ol class="histogram" id="histogram"></ol>
       </section>
+      <p class="dialog-footnote" id="results-archive-footnote">
+        Missed a day? Play past puzzles in the <a href="/archive">archive</a>.
+      </p>
     </dialog>
 
     <dialog class="dialog" id="settings-dialog" aria-labelledby="settings-title">

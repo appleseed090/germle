@@ -340,3 +340,30 @@ brief are not repeated here.
   infects only the single most likely person (Vax! re-rolls at 100%, infecting everyone exposed),
   and the first infections are kept apart when possible (Vax! places them at random). Deaths and
   recovery stay out, as in Vax!.
+
+## Archive
+
+- **Every past daily puzzle can be played, on the game page itself.** `/archive` lists them,
+  newest first, each with your score (green Contained, red Spread), "In progress" or "Play". A row
+  opens `/?puzzle=<n>` on the daily page, so the archive reuses the board, toolbar and dialogs, and
+  past puzzles stay exactly as they were (see Locked puzzles). Today's row links to `/`.
+- **Archive games are kept apart.** Their moves and results live in `germle.v1.archive-progress`
+  and `germle.v1.archive-results`, never in the daily results, so they never count towards played,
+  streak, best score or the histogram. Each past puzzle gets one game, like the daily: reopening
+  it shows your finished game. A puzzle played on its own day keeps that score in the list; its
+  daily moves are not kept past the day, so opening it later starts a fresh archive game.
+- **A past puzzle is marked on the board and in its results.** A strip under the header reads
+  "Archive · Tue, Oct 6, 2026 · Today's puzzle", in the player's locale; it stays one line on a
+  360 px phone, and an e2e test checks that. The results dialog drops the countdown and the
+  statistics and offers "More past puzzles · Today's puzzle" instead. The tab title says the
+  puzzle is from the archive.
+- **Sharing an archive game keeps the first line and links the puzzle.** The third line becomes
+  `germle.com/?puzzle=<n>`, so it is not mistaken for today's, the first line still matches
+  `Germle #<n> · <score>% saved`, and a friend can tap it to play the same puzzle.
+- **Bad or future links play today's puzzle.** Only a plain whole number from 1 to yesterday
+  opens the archive; a later number shows "Puzzle #n isn't out yet. Here's today's.", and the
+  address bar is reset to `/` whenever today's puzzle is played. The game page still switches at
+  each player's local midnight, so a number one player sees as tomorrow's is already out elsewhere.
+- **Players find it from today's game.** How to play ends with "Missed one? Play it in the
+  archive", and today's results end with "Missed a day? Play past puzzles in the archive". The
+  header was left alone: its five icons already need the tightened phone layout to fit 360 px.

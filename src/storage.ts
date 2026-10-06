@@ -44,6 +44,8 @@ const STORAGE_KEYS = Object.freeze({
   dailyProgress: 'germle.v1.daily-progress',
   results: 'germle.v1.results',
   seenHowToPlay: 'germle.v1.seen-how-to-play',
+  archiveProgress: 'germle.v1.archive-progress',
+  archiveResults: 'germle.v1.archive-results',
 });
 
 /** Typed, validated access to everything Germle keeps in the browser. */
@@ -58,6 +60,16 @@ export interface GameStorage {
   saveResult(puzzleNumber: number, result: DailyResult): void;
   hasSeenHowToPlay(): boolean;
   markHowToPlaySeen(): void;
+  /** Moves of past puzzles played from the archive, keyed by puzzle number, finished or not. */
+  loadArchiveProgress(): Map<number, readonly number[]>;
+  saveArchiveProgress(puzzleNumber: number, moves: readonly number[]): void;
+  /**
+   * Finished archive games keyed by puzzle number, kept apart from daily results so they never
+   * count towards stats or the streak.
+   */
+  loadArchiveResults(): Map<number, DailyResult>;
+  /** Records a finished archive game; an existing result for that puzzle is kept. */
+  saveArchiveResult(puzzleNumber: number, result: DailyResult): void;
 }
 
 /**
@@ -126,6 +138,19 @@ export function createGameStorage(store: KeyValueStore | undefined): GameStorage
     markHowToPlaySeen: () => {
       writeJson(STORAGE_KEYS.seenHowToPlay, true);
     },
+    loadArchiveProgress: () => parseArchiveProgress(readJson(STORAGE_KEYS.archiveProgress)),
+    saveArchiveProgress: (puzzleNumber, moves) => {
+      const progress = parseArchiveProgress(readJson(STORAGE_KEYS.archiveProgress));
+      progress.set(puzzleNumber, moves);
+      writeJson(STORAGE_KEYS.archiveProgress, Object.fromEntries(progress));
+    },
+    loadArchiveResults: () => parseResults(readJson(STORAGE_KEYS.archiveResults)),
+    saveArchiveResult: (puzzleNumber, result) => {
+      const results = parseResults(readJson(STORAGE_KEYS.archiveResults));
+      if (results.has(puzzleNumber)) return;
+      results.set(puzzleNumber, result);
+      writeJson(STORAGE_KEYS.archiveResults, Object.fromEntries(results));
+    },
   };
 }
 
@@ -166,14 +191,27 @@ function parseDailyProgress(value: unknown): DailyProgress | undefined {
   return { puzzleNumber, moves };
 }
 
+function isPuzzleNumberKey(key: string): boolean {
+  const puzzleNumber = Number(key);
+  return Number.isInteger(puzzleNumber) && puzzleNumber >= 1;
+}
+
+function parseArchiveProgress(value: unknown): Map<number, readonly number[]> {
+  const progress = new Map<number, readonly number[]>();
+  if (!isRecord(value)) return progress;
+  for (const [key, moves] of Object.entries(value)) {
+    if (isPuzzleNumberKey(key) && Array.isArray(moves) && moves.every(isNonNegativeInteger))
+      progress.set(Number(key), moves);
+  }
+  return progress;
+}
+
 function parseResults(value: unknown): Map<number, DailyResult> {
   const results = new Map<number, DailyResult>();
   if (!isRecord(value)) return results;
   for (const [key, entry] of Object.entries(value)) {
-    const puzzleNumber = Number(key);
     const result = parseResult(entry);
-    if (Number.isInteger(puzzleNumber) && puzzleNumber >= 1 && result !== undefined)
-      results.set(puzzleNumber, result);
+    if (isPuzzleNumberKey(key) && result !== undefined) results.set(Number(key), result);
   }
   return results;
 }

@@ -86,6 +86,7 @@ export default defineConfig({
       input: {
         daily: 'index.html',
         about: 'about.html',
+        archive: 'archive.html',
         practice: 'practice.html',
       },
     },

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Germle archive — a daily outbreak puzzle</title>
+    <meta
+      name="description"
+      content="Every Germle daily outbreak puzzle so far. Play any day you missed."
+    />
+    <link rel="canonical" href="https://germle.com/archive" />
+    <meta
+      name="theme-color"
+      content="#f7f5f0"
+      media="(prefers-color-scheme: light)"
+      data-scheme="light"
+    />
+    <meta
+      name="theme-color"
+      content="#16191d"
+      media="(prefers-color-scheme: dark)"
+      data-scheme="dark"
+    />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Germle" />
+    <meta property="og:title" content="Germle archive" />
+    <meta property="og:description" content="Every Germle so far. Play any day you missed." />
+    <meta property="og:url" content="https://germle.com/archive" />
+    <meta property="og:image" content="https://germle.com/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://germle.com/og.png" />
+    <script type="module" src="/src/pages/archive.ts"></script>
+  </head>
+  <body class="page-content">
+    <header class="app-header">
+      <a class="wordmark" href="/" aria-label="Germle home">
+        <svg class="wordmark-mark" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 7L17 5M6 7L8 18M17 5L18 16M8 18L18 16M6 7L18 16" />
+          <circle cx="6" cy="7" r="3" />
+          <circle cx="17" cy="5" r="3" />
+          <circle cx="8" cy="18" r="3" />
+          <circle class="wordmark-mark-infected" cx="18" cy="16" r="3.4" />
+        </svg>
+        <span>Germle</span>
+      </a>
+      <a class="play-link" href="/">Play today's puzzle</a>
+    </header>
+    <main class="content">
+      <h1>Archive</h1>
+      <p>
+        Every Germle so far, newest first. Past puzzles keep their own scores and never count toward
+        your streak.
+      </p>
+      <noscript><p>The archive needs JavaScript to list the puzzles.</p></noscript>
+      <ol class="archive-list" id="archive-list"></ol>
+    </main>
+  </body>
+</html>

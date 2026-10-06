@@ -12,8 +12,9 @@ licensing notice.
 
 ## Status
 
-Milestone M3: the daily game at `/` (with stats and sharing), practice mode at `/practice` (with
-Easy, Medium and Hard presets) and the About page at `/about`. See `TODO.md` for the backlog.
+Milestone M3: the daily game at `/` (with stats and sharing), the archive of past puzzles at
+`/archive` (each played at `/?puzzle=<n>`), practice mode at `/practice` (with Easy, Medium and
+Hard presets) and the About page at `/about`. See `TODO.md` for the backlog.
 
 ## Prerequisites
 
@@ -51,11 +52,13 @@ Chromium build: run `npx playwright install chromium` once (the version is pinne
   Watts–Strogatz network, layout, game rules and scoring. Its rules are specified in
   `docs/ENGINE.md`; unit tests sit next to each module (`*.test.ts`).
 - **UI:** `src/pages/` holds one entry per page; `src/ui/` the SVG board (rendering, hit
-  testing, drag, animations), dialogs, disclosure buttons and toolbar; `src/share.ts`, `src/stats.ts`,
-  `src/storage.ts`, `src/practice-setup.ts`, `src/puzzle-summary.ts` and `src/verdict.ts` are
-  pure, tested modules for the share card, statistics, validated `localStorage` access, practice
-  links, the one-line puzzle summary and the Contained/Spread verdict. Page shells are plain HTML (`index.html`, `about.html`) so nothing shifts
-  while scripts load.
+  testing, drag, animations), dialogs, disclosure buttons and toolbar; `src/share.ts`,
+  `src/stats.ts`, `src/storage.ts`, `src/archive.ts`, `src/practice-setup.ts`,
+  `src/puzzle-summary.ts` and `src/verdict.ts` are pure, tested modules for the share card,
+  statistics, validated `localStorage` access, archive links and listing, practice links, the
+  one-line puzzle summary and the Contained/Spread verdict. Page shells are plain HTML
+  (`index.html`, `archive.html`, `practice.html`, `about.html`) so nothing shifts while scripts
+  load.
 - **Themes:** every colour is a CSS token in `src/styles/main.css`. The dark theme overrides them
   when the device prefers dark, or when the player picks Dark in Settings (`src/theme.ts` sets
   `data-theme` on `<html>`). A saved choice is applied before the first paint by

@@ -33,6 +33,14 @@ export function puzzleNumberForDate(date: CalendarDate): number {
   return daysBetween(LAUNCH_DATE, date) + 1;
 }
 
+/** The calendar day a daily puzzle belongs to; the inverse of {@link puzzleNumberForDate}. */
+export function calendarDateForPuzzleNumber(puzzleNumber: number): CalendarDate {
+  const day = new Date(
+    Date.UTC(LAUNCH_DATE.year, LAUNCH_DATE.month - 1, LAUNCH_DATE.day + puzzleNumber - 1),
+  );
+  return { year: day.getUTCFullYear(), month: day.getUTCMonth() + 1, day: day.getUTCDate() };
+}
+
 /** The seed key of a daily puzzle: its number in decimal. Part of the frozen seed derivation. */
 export function dailySeedKey(puzzleNumber: number): string {
   return String(puzzleNumber);
