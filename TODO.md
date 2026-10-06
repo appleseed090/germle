@@ -10,6 +10,7 @@ External memory for the project: what is pending, constraints to remember, defer
       Contained/Spread verdict (see `DECISIONS.md`).
 - [x] Published puzzles locked by a snapshot test.
 - [x] Practice presets: Easy, Medium (the daily settings) and Hard.
+- [x] Archive: every past daily puzzle at `/archive`, played at `/?puzzle=<n>`.
 
 ## Needs the owner
 
@@ -41,13 +42,17 @@ External memory for the project: what is pending, constraints to remember, defer
 
 ## Deferred cleanups
 
-- The three page shells repeat the header, toolbar and settings dialog markup. A small Vite HTML
-  transform could share it if a fourth page appears.
+- The page shells repeat markup: the two game pages (daily, practice) share the header, toolbar
+  and settings dialog; all four pages share the `<head>` (icons, theme-color metas). The archive
+  page, the fourth, only copies About's head and header, so the cleanup was left for now; a small
+  Vite HTML transform could share it if another game page appears.
 
 ## Remember
 
 - The share card's first line (`Germle #<n> · <score>% saved`) is matched by the e2e tests and by
-  anyone parsing pasted results.
+  anyone parsing pasted results. Archive results keep it and end with `germle.com/?puzzle=<n>`.
+- `/?puzzle=<n>` is a public link format (shared results link to it); `germle.v1.archive-progress`
+  and `germle.v1.archive-results` are storage keys returning players depend on.
 - Practice link parameters are a public format (people save links); renaming one breaks them.
 - Published puzzles are locked by `src/engine/frozen-puzzles.test.ts` (daily #1–#365 and five
   practice links). Every day uses the same generator, so a year of samples guards later days

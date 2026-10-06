@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   LAUNCH_DATE,
+  calendarDateForPuzzleNumber,
   dailySeedKey,
   daysBetween,
   localCalendarDate,
@@ -17,6 +18,20 @@ describe('puzzleNumberForDate', () => {
 
   it('goes below 1 before launch', () => {
     expect(puzzleNumberForDate({ year: 2026, month: 10, day: 3 })).toBe(0);
+  });
+});
+
+describe('calendarDateForPuzzleNumber', () => {
+  it('names the day of each puzzle, across month, year and leap-day boundaries', () => {
+    expect(calendarDateForPuzzleNumber(1)).toEqual(LAUNCH_DATE);
+    expect(calendarDateForPuzzleNumber(29)).toEqual({ year: 2026, month: 11, day: 1 });
+    expect(calendarDateForPuzzleNumber(90)).toEqual({ year: 2027, month: 1, day: 1 });
+    expect(calendarDateForPuzzleNumber(514)).toEqual({ year: 2028, month: 2, day: 29 });
+  });
+
+  it('inverts puzzleNumberForDate for every puzzle of the first four years', () => {
+    for (let puzzleNumber = 1; puzzleNumber <= 1461; puzzleNumber++)
+      expect(puzzleNumberForDate(calendarDateForPuzzleNumber(puzzleNumber))).toBe(puzzleNumber);
   });
 });
 

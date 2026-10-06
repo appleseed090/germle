@@ -303,6 +303,27 @@ button {
   }
 }
 
+/* ---------- Archive strip ---------- */
+
+.archive-banner {
+  margin: 0;
+  padding: 6px var(--gutter);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.archive-banner time {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+/* The archive banner is a fourth row; the board keeps the flexible one. */
+.playing-archive .app {
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+}
+
 /* ---------- Board ---------- */
 
 .board {
@@ -1328,6 +1349,52 @@ button {
   border-top: 1px solid var(--color-border);
   color: var(--color-text-muted);
   font-size: 0.9rem;
+}
+
+.archive-list {
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.archive-entry {
+  display: grid;
+  grid-template-columns: 6ch 1fr auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 4px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.archive-entry:hover .archive-date {
+  color: var(--color-text);
+}
+
+.archive-number {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.archive-date {
+  color: var(--color-text-muted);
+}
+
+.archive-status {
+  color: var(--color-accent);
+  font-weight: 700;
+  text-align: right;
+}
+
+.archive-status[data-verdict='spread'] {
+  color: var(--color-spread-text);
+}
+
+.archive-status[data-state='in-progress'] {
+  color: var(--color-text-muted);
+  font-weight: 600;
 }
 
 .play-link {

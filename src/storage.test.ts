@@ -123,6 +123,46 @@ describe('createGameStorage', () => {
     expect(storage.hasSeenHowToPlay()).toBe(false);
   });
 
+  it('keeps archive games apart from daily results and progress', () => {
+    const store = createMemoryStore();
+    const storage = createGameStorage(store);
+    storage.saveArchiveProgress(2, [5, 9]);
+    storage.saveArchiveProgress(1, [3]);
+    storage.saveArchiveProgress(2, [5, 9, 11]);
+    storage.saveArchiveResult(2, sampleResult);
+    storage.saveArchiveResult(2, { ...sampleResult, score: 100 });
+    expect(storage.loadArchiveProgress()).toEqual(
+      new Map([
+        [2, [5, 9, 11]],
+        [1, [3]],
+      ]),
+    );
+    expect(storage.loadArchiveResults().get(2)?.score).toBe(78);
+    expect(storage.loadResults().size).toBe(0);
+    expect(storage.loadDailyProgress()).toBeUndefined();
+    expect([...store.data.keys()].sort()).toEqual([
+      'germle.v1.archive-progress',
+      'germle.v1.archive-results',
+    ]);
+  });
+
+  it('ignores malformed archive entries one by one', () => {
+    const storage = createGameStorage(
+      createMemoryStore({
+        'germle.v1.archive-progress': JSON.stringify({
+          '4': [1, 2],
+          '5': [1, -2],
+          '6': 'moves',
+          '0': [1],
+          '2.5': [1],
+        }),
+        'germle.v1.archive-results': JSON.stringify({ '7': sampleResult, '8': { score: 'high' } }),
+      }),
+    );
+    expect(storage.loadArchiveProgress()).toEqual(new Map([[4, [1, 2]]]));
+    expect([...storage.loadArchiveResults().keys()]).toEqual([7]);
+  });
+
   it('works without any store and survives a store that throws', () => {
     const missing = createGameStorage(undefined);
     missing.saveResult(1, sampleResult);

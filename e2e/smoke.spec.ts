@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures';
+import { expectOnOneLine } from './layout';
 import { expectVerdictToMatchScore } from './verdict';
 
 const SHARE_FIRST_LINE = /^Germle #\d+ · \d+% saved$/;
@@ -156,11 +157,15 @@ test.describe('on a 360 px phone', () => {
   test('the header links to practice and about, fits one row, and the dialogs do not', async ({
     page,
   }) => {
-    for (const path of ['/', '/practice?seed=header']) {
+    for (const path of ['/', '/?puzzle=1', '/practice?seed=header']) {
       await page.goto(path);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(360);
       await expect(page.getByRole('button', { name: 'Settings' })).toBeInViewport({ ratio: 1 });
     }
+    await page.goto('/?puzzle=1');
+    await expectOnOneLine(page.locator('#archive-banner'));
+    await page.goto('/archive');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(360);
     await page.goto('/');
     const header = page.locator('.app-header');
     await expect(header.getByRole('link', { name: 'Practice' })).toHaveAttribute(

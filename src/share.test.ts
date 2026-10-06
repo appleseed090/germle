@@ -7,9 +7,20 @@ describe('buildShareText', () => {
       puzzleNumber: 12,
       score: 78,
       counts: { vaccinated: 4, quarantined: 7, untouched: 20, infected: 9 },
+      playedFrom: 'daily',
     });
     expect(text).toBe('Germle #12 · 78% saved\n🟦🟨🟨⬜⬜⬜⬜⬜🟥🟥\ngermle.com');
     expect(text.split('\n')[0]).toMatch(/^Germle #\d+ · \d+% saved$/);
+  });
+
+  it('ends an archive game with a link to its puzzle, keeping the first line', () => {
+    const text = buildShareText({
+      puzzleNumber: 3,
+      score: 78,
+      counts: { vaccinated: 4, quarantined: 7, untouched: 20, infected: 9 },
+      playedFrom: 'archive',
+    });
+    expect(text).toBe('Germle #3 · 78% saved\n🟦🟨🟨⬜⬜⬜⬜⬜🟥🟥\ngermle.com/?puzzle=3');
   });
 });
 

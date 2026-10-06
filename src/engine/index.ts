@@ -7,6 +7,7 @@ export {
 } from './config';
 export {
   LAUNCH_DATE,
+  calendarDateForPuzzleNumber,
   dailySeedKey,
   daysBetween,
   localCalendarDate,

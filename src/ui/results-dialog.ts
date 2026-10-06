@@ -5,33 +5,30 @@ import { openDialog, wireDialog } from './dialogs';
 import { requireElement } from './dom';
 import { renderOutcomeBreakdown, renderVerdict } from './outcome-breakdown';
 
-/** The results and statistics dialog of the daily page. */
-export interface ResultsDialog {
+/** The results and statistics dialog of today's game. */
+export interface DailyResultsDialog {
   open(): void;
   /** Shows today's result (or the "finish first" note when `undefined`) and the stats. */
   update(result: ShareableResult | undefined, stats: PlayerStats): void;
 }
 
+/** The results dialog of a past puzzle played from the archive: no countdown, no stats. */
+export interface ArchiveResultsDialog {
+  open(): void;
+  /** Shows the result, or the "finish first" note when `undefined`. */
+  update(result: ShareableResult | undefined): void;
+}
+
 /**
- * Binds the dialog markup in the page shell. Share copies the result to the clipboard and says so
- * in the dialog's own status line: the page's toast would sit behind the modal dialog.
+ * Binds the dialog markup in the page shell for today's game. Share copies the result to the
+ * clipboard and says so in the dialog's own status line: the page's toast would sit behind the
+ * modal dialog.
  *
  * @param nextPuzzleAt - When the next daily puzzle unlocks; after that the countdown is replaced
  *   by a link to it, for pages left open past midnight.
  */
-export function createResultsDialog(nextPuzzleAt: Date): ResultsDialog {
-  const dialog = requireElement('results-dialog', HTMLDialogElement);
-  const title = requireElement('results-title', HTMLElement);
-  const summary = requireElement('result-summary', HTMLElement);
-  const pending = requireElement('result-pending', HTMLElement);
-  const score = requireElement('result-score', HTMLElement);
-  const verdict = requireElement('result-verdict', HTMLElement);
-  const breakdownBar = requireElement('breakdown-bar', HTMLElement);
-  const breakdownLegend = requireElement('breakdown-legend', HTMLElement);
-  const shareButton = requireElement('share-button', HTMLButtonElement);
-  const shareStatus = requireElement('share-status', HTMLElement);
-  const shareFallback = requireElement('share-fallback', HTMLElement);
-  const shareFallbackText = requireElement('share-fallback-text', HTMLTextAreaElement);
+export function createResultsDialog(nextPuzzleAt: Date): DailyResultsDialog {
+  const { dialog, showResult } = bindResultSummary();
   const countdown = requireElement('countdown', HTMLElement);
   const countdownLine = requireElement('countdown-line', HTMLElement);
   const newPuzzleReady = requireElement('new-puzzle-ready', HTMLElement);
@@ -39,26 +36,7 @@ export function createResultsDialog(nextPuzzleAt: Date): ResultsDialog {
   const streak = requireElement('stat-streak', HTMLElement);
   const best = requireElement('stat-best', HTMLElement);
   const histogram = requireElement('histogram', HTMLOListElement);
-  let shareText: string | undefined;
   let countdownTimer: number | undefined;
-
-  wireDialog(dialog);
-
-  shareButton.addEventListener('click', () => {
-    if (shareText === undefined) return;
-    const text = shareText;
-    shareStatus.textContent = '';
-    const clipboard = 'clipboard' in navigator ? navigator.clipboard : undefined;
-    void copyShareText(text, clipboard).then((outcome) => {
-      shareStatus.textContent = outcome === 'copied' ? 'Copied to clipboard' : '';
-      if (outcome === 'manual') {
-        shareFallback.hidden = false;
-        shareFallbackText.value = text;
-        shareFallbackText.focus();
-        shareFallbackText.select();
-      }
-    });
-  });
 
   const renderCountdown = (): void => {
     const remaining = nextPuzzleAt.getTime() - Date.now();
@@ -78,6 +56,80 @@ export function createResultsDialog(nextPuzzleAt: Date): ResultsDialog {
       openDialog(dialog);
     },
     update(result, stats) {
+      showResult(result);
+      played.textContent = String(stats.played);
+      streak.textContent = String(stats.currentStreak);
+      best.textContent = stats.bestScore === undefined ? '–' : `${stats.bestScore}%`;
+      renderHistogram(
+        histogram,
+        stats,
+        result === undefined ? undefined : histogramBand(result.score),
+      );
+    },
+  };
+}
+
+/**
+ * Binds the same dialog markup for a past puzzle: the countdown, statistics and archive footnote
+ * are hidden, and links to more past puzzles and today's take the countdown's place.
+ */
+export function createArchiveResultsDialog(): ArchiveResultsDialog {
+  const { dialog, showResult } = bindResultSummary();
+  for (const id of ['countdown-line', 'new-puzzle-ready', 'stats', 'results-archive-footnote'])
+    requireElement(id, HTMLElement).hidden = true;
+  requireElement('archive-links', HTMLElement).hidden = false;
+  requireElement('result-pending', HTMLElement).textContent =
+    'Finish this puzzle to see your score.';
+  return {
+    open() {
+      openDialog(dialog);
+    },
+    update(result) {
+      showResult(result);
+    },
+  };
+}
+
+/** The parts both kinds of results share: score, verdict, breakdown and Share. */
+function bindResultSummary(): {
+  readonly dialog: HTMLDialogElement;
+  readonly showResult: (result: ShareableResult | undefined) => void;
+} {
+  const dialog = requireElement('results-dialog', HTMLDialogElement);
+  const title = requireElement('results-title', HTMLElement);
+  const summary = requireElement('result-summary', HTMLElement);
+  const pending = requireElement('result-pending', HTMLElement);
+  const score = requireElement('result-score', HTMLElement);
+  const verdict = requireElement('result-verdict', HTMLElement);
+  const breakdownBar = requireElement('breakdown-bar', HTMLElement);
+  const breakdownLegend = requireElement('breakdown-legend', HTMLElement);
+  const shareButton = requireElement('share-button', HTMLButtonElement);
+  const shareStatus = requireElement('share-status', HTMLElement);
+  const shareFallback = requireElement('share-fallback', HTMLElement);
+  const shareFallbackText = requireElement('share-fallback-text', HTMLTextAreaElement);
+  let shareText: string | undefined;
+
+  wireDialog(dialog);
+
+  shareButton.addEventListener('click', () => {
+    if (shareText === undefined) return;
+    const text = shareText;
+    shareStatus.textContent = '';
+    const clipboard = 'clipboard' in navigator ? navigator.clipboard : undefined;
+    void copyShareText(text, clipboard).then((outcome) => {
+      shareStatus.textContent = outcome === 'copied' ? 'Copied to clipboard' : '';
+      if (outcome === 'manual') {
+        shareFallback.hidden = false;
+        shareFallbackText.value = text;
+        shareFallbackText.focus();
+        shareFallbackText.select();
+      }
+    });
+  });
+
+  return {
+    dialog,
+    showResult(result) {
       summary.hidden = result === undefined;
       pending.hidden = result !== undefined;
       shareFallback.hidden = true;
@@ -89,14 +141,6 @@ export function createResultsDialog(nextPuzzleAt: Date): ResultsDialog {
         renderOutcomeBreakdown(breakdownBar, breakdownLegend, result.counts);
         shareText = buildShareText(result);
       }
-      played.textContent = String(stats.played);
-      streak.textContent = String(stats.currentStreak);
-      best.textContent = stats.bestScore === undefined ? '–' : `${stats.bestScore}%`;
-      renderHistogram(
-        histogram,
-        stats,
-        result === undefined ? undefined : histogramBand(result.score),
-      );
     },
   };
 }

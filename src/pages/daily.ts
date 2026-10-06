@@ -1,7 +1,9 @@
 import '../styles/main.css';
+import { formatPuzzleDate, requestedPuzzle } from '../archive';
 import { nextPuzzleStart } from '../countdown';
 import {
   DAILY_PUZZLE_CONFIG,
+  calendarDateForPuzzleNumber,
   countOutcomes,
   createPuzzle,
   dailySeedKey,
@@ -15,31 +17,49 @@ import {
 import { describePuzzleConfig } from '../puzzle-summary';
 import type { ShareableResult } from '../share';
 import { computePlayerStats } from '../stats';
-import { browserLocalStorage, createGameStorage } from '../storage';
+import { browserLocalStorage, createGameStorage, type DailyResult } from '../storage';
 import { openDialog, wireDialog } from '../ui/dialogs';
 import { requireElement } from '../ui/dom';
 import { mountGameSession } from '../ui/game-session';
 import { renderVerdictRule } from '../ui/outcome-breakdown';
-import { createResultsDialog } from '../ui/results-dialog';
+import { createArchiveResultsDialog, createResultsDialog } from '../ui/results-dialog';
 import { connectSettingsDialog, displayOptionsFor } from '../ui/settings-dialog';
 import { createToast } from '../ui/toast';
 
 const RESULTS_DELAY_AFTER_END = 700;
 
+/** Where this page's game is saved and how its results are shown: today's game or a past one. */
+interface PlayedPuzzle {
+  readonly puzzleNumber: number;
+  readonly playedFrom: ShareableResult['playedFrom'];
+  readonly savedMoves: readonly number[] | undefined;
+  saveMoves(moves: readonly number[]): void;
+  saveResult(result: DailyResult): void;
+  openResults(): void;
+  refreshResults(result: ShareableResult | undefined): void;
+}
+
 const storage = createGameStorage(browserLocalStorage());
 const today = localCalendarDate(new Date());
 // A device clock set before launch still gets a playable puzzle: #1.
-const puzzleNumber = Math.max(1, puzzleNumberForDate(today));
+const todayPuzzleNumber = Math.max(1, puzzleNumberForDate(today));
+const toast = createToast(requireElement('toast', HTMLElement));
+
+const requested = requestedPuzzle(new URLSearchParams(window.location.search), todayPuzzleNumber);
+if (requested.kind !== 'past' && window.location.search !== '') {
+  // Keep the address bar in step with the game: a bad or future number plays today's puzzle.
+  window.history.replaceState(null, '', '/');
+}
+if (requested.kind === 'not-out-yet')
+  toast.show(`Puzzle #${requested.puzzleNumber} isn't out yet. Here's today's.`);
+const played = requested.kind === 'past' ? pastPuzzle(requested.puzzleNumber) : todaysPuzzle();
+const { puzzleNumber } = played;
+
 const puzzle = createPuzzle(DAILY_PUZZLE_CONFIG, dailySeedKey(puzzleNumber));
-const savedProgress = storage.loadDailyProgress();
 const restoredState =
-  savedProgress?.puzzleNumber === puzzleNumber
-    ? replayMoves(puzzle, savedProgress.moves)
-    : undefined;
+  played.savedMoves === undefined ? undefined : replayMoves(puzzle, played.savedMoves);
 const initialState = restoredState ?? startGame(puzzle).state;
 
-const toast = createToast(requireElement('toast', HTMLElement));
-const resultsDialog = createResultsDialog(nextPuzzleStart(today));
 const howToPlayDialog = requireElement('how-to-play-dialog', HTMLDialogElement);
 wireDialog(howToPlayDialog);
 renderVerdictRule(requireElement('verdict-rule', HTMLElement));
@@ -63,30 +83,79 @@ const session = mountGameSession({
     announcer: requireElement('announcer', HTMLElement),
   },
   onMove: (step) => {
-    storage.saveDailyProgress({ puzzleNumber, moves: step.state.moves });
+    played.saveMoves(step.state.moves);
     if (step.state.phase === 'ended') {
       const counts = countOutcomes(step.state);
-      storage.saveResult(puzzleNumber, { score: scorePercent(counts), counts });
+      played.saveResult({ score: scorePercent(counts), counts });
     }
   },
   onGameEnded: (state) => {
-    refreshResults(state);
+    played.refreshResults(shareableResult(state));
     window.setTimeout(() => {
-      resultsDialog.open();
+      played.openResults();
     }, RESULTS_DELAY_AFTER_END);
   },
   onShowResults: () => {
-    resultsDialog.open();
+    played.openResults();
   },
 });
 
-function refreshResults(state: GameState): void {
-  let result: ShareableResult | undefined;
-  if (state.phase === 'ended') {
-    const counts = countOutcomes(state);
-    result = { puzzleNumber, score: scorePercent(counts), counts };
-  }
-  resultsDialog.update(result, computePlayerStats(storage.loadResults(), puzzleNumber));
+function shareableResult(state: GameState): ShareableResult | undefined {
+  if (state.phase !== 'ended') return undefined;
+  const counts = countOutcomes(state);
+  return { puzzleNumber, score: scorePercent(counts), counts, playedFrom: played.playedFrom };
+}
+
+function todaysPuzzle(): PlayedPuzzle {
+  const resultsDialog = createResultsDialog(nextPuzzleStart(today));
+  const progress = storage.loadDailyProgress();
+  return {
+    puzzleNumber: todayPuzzleNumber,
+    playedFrom: 'daily',
+    savedMoves: progress?.puzzleNumber === todayPuzzleNumber ? progress.moves : undefined,
+    saveMoves: (moves) => {
+      storage.saveDailyProgress({ puzzleNumber: todayPuzzleNumber, moves });
+    },
+    saveResult: (result) => {
+      storage.saveResult(todayPuzzleNumber, result);
+    },
+    openResults: () => {
+      resultsDialog.open();
+    },
+    refreshResults: (result) => {
+      resultsDialog.update(result, computePlayerStats(storage.loadResults(), todayPuzzleNumber));
+    },
+  };
+}
+
+function pastPuzzle(pastPuzzleNumber: number): PlayedPuzzle {
+  const resultsDialog = createArchiveResultsDialog();
+  const date = calendarDateForPuzzleNumber(pastPuzzleNumber);
+  const dateElement = requireElement('archive-date', HTMLTimeElement);
+  dateElement.dateTime = [date.year, date.month, date.day]
+    .map((part, index) => String(part).padStart(index === 0 ? 4 : 2, '0'))
+    .join('-');
+  dateElement.textContent = formatPuzzleDate(date);
+  requireElement('archive-banner', HTMLElement).hidden = false;
+  document.documentElement.classList.add('playing-archive');
+  document.title = `Germle #${pastPuzzleNumber} — from the archive`;
+  return {
+    puzzleNumber: pastPuzzleNumber,
+    playedFrom: 'archive',
+    savedMoves: storage.loadArchiveProgress().get(pastPuzzleNumber),
+    saveMoves: (moves) => {
+      storage.saveArchiveProgress(pastPuzzleNumber, moves);
+    },
+    saveResult: (result) => {
+      storage.saveArchiveResult(pastPuzzleNumber, result);
+    },
+    openResults: () => {
+      resultsDialog.open();
+    },
+    refreshResults: (result) => {
+      resultsDialog.update(result);
+    },
+  };
 }
 
 const settingsDialog = connectSettingsDialog(storage, session);
@@ -95,8 +164,8 @@ requireElement('open-how-to-play', HTMLButtonElement).addEventListener('click', 
   openDialog(howToPlayDialog);
 });
 requireElement('open-results', HTMLButtonElement).addEventListener('click', () => {
-  refreshResults(session.getState());
-  resultsDialog.open();
+  played.refreshResults(shareableResult(session.getState()));
+  played.openResults();
 });
 requireElement('open-settings', HTMLButtonElement).addEventListener('click', () => {
   openDialog(settingsDialog);
@@ -105,6 +174,6 @@ howToPlayDialog.addEventListener('close', () => {
   storage.markHowToPlaySeen();
 });
 
-refreshResults(initialState);
-if (initialState.phase === 'ended') resultsDialog.open();
+played.refreshResults(shareableResult(initialState));
+if (initialState.phase === 'ended') played.openResults();
 else if (!storage.hasSeenHowToPlay()) openDialog(howToPlayDialog);
