@@ -12,6 +12,8 @@ These steps need someone logged in to the Cloudflare and Porkbun accounts. Do th
 - [x] 1. Connect the repo to Cloudflare Workers
 - [x] 2. Move DNS for `germle.com` to Cloudflare
 - [x] 3. Point Porkbun's nameservers at Cloudflare
+- [x] 3a. Clear Porkbun's own parking: URL forward deleted and Porkbun's records pointed at
+      Cloudflare (2026-10-06, after iMessage previews showed Porkbun's page)
 - [x] 4. Attach `germle.com` and `www.germle.com` to the Worker, and add the www → apex redirect rule
 - [x] 5. Verify (2026-10-05; the `workers.dev` address was not checked)
 - [ ] 6. Optional: Web Analytics and preview deployments. Previews work (2026-10-05); Web
@@ -65,6 +67,37 @@ Porkbun → **Domain Management** → `germle.com` → **Nameservers** (pencil i
 
 Propagation is usually minutes, up to 24 hours. Cloudflare emails you when the zone is active.
 Domain lock and auto-renew can stay on; changing nameservers does not need the lock removed.
+
+### 3a. Clear Porkbun's own parking
+
+A new Porkbun domain comes with a URL forward (`germle.com` → `http://germle-com.l.ink`, a 302
+with wildcard and path) and parking records. Changing the nameservers does not remove them, and
+Porkbun's nameservers keep answering for the domain. Any network that still asks Porkbun, because
+it cached Porkbun as the domain's nameserver before the switch (the `.com` registry lets that
+last up to 48 hours, and some routers hold on longer), is sent to Porkbun's "A Brand New Domain!"
+pig page. iMessage builds link previews on the sender's phone, so those cards show the pig
+too. That happened here on 2026-10-06 on the owner's home Wi-Fi.
+
+So, right after step 3, in Porkbun → `germle.com`:
+
+1. **URL Forwarding** (pencil icon) → delete the forward under **Current Forwards**. Add nothing.
+2. **DNS Records** → delete any parking records (pointing at `pixie`, `uixie` or
+   `lixie.porkbun.com`, including `*`). Leave the MX, SPF and `_acme-challenge` records. Then add
+   Cloudflare's addresses for `germle.com` and for `www`: two A and two AAAA records each, with a
+   TTL of 600 seconds. Read the current addresses from a public resolver, for example
+   `dig +short germle.com A @1.1.1.1` and `dig +short germle.com AAAA @1.1.1.1` (on 2026-10-06:
+   `104.21.9.13`, `172.67.188.223`, `2606:4700:3035::6815:90d`, `2606:4700:3036::ac43:bcdf`).
+   A lookup that still reaches Porkbun then lands on the real site, because Cloudflare serves
+   `germle.com` on those addresses whichever DNS server gave them out.
+3. Whenever Porkbun shows the red **"Oh no!"** box offering to switch to its nameservers, choose
+   **No, thank you.** "Yes" moves the nameservers back to Porkbun and takes the site offline.
+
+The records in point 2 are only for the changeover; delete them a couple of weeks later (see
+`TODO.md`).
+
+**Spotting it:** links open fine, but on one network `curl -sI https://germle.com` answers
+`302` with `server: openresty` and a `location` on `l.ink`, while `nslookup germle.com` already
+shows Cloudflare's addresses. A link sent from the same phone over cellular gets the right card.
 
 ## 4. Attach the domains to the Worker
 
