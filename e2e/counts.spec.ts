@@ -60,23 +60,51 @@ test('shows live contact counts that only your moves change, and reads them out'
   expect(movesThatAlsoInfected).toBeGreaterThan(0);
 });
 
-test('people carry a cross or dot until Settings shows the numbers instead', async ({ page }) => {
+test('refusers carry a cross while vaccinating and infected people a dot, until Settings shows numbers', async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(
-    '/practice?people=30&neighbours=4&vaccines=1&outbreaks=2&refusers=4&contagion=35&seed=marks',
+    '/practice?people=30&neighbours=4&vaccines=2&outbreaks=2&refusers=4&contagion=35&seed=marks',
   );
-  await page.locator('.node[data-tappable="true"]').first().click();
-  await expect(page.locator('#board')).toHaveAttribute('data-animating', 'false');
-  const counts = page.locator('.node:not(.node--removed) .node-count');
-  const crosses = page.locator(
-    '.node--refuser:not(.node--infected):not(.node--removed) .node-cross',
+  const crosses = page.locator('.node-cross:visible');
+  const refusers = page.locator('.node--refuser');
+  await expect(refusers).toHaveCount(4);
+  await expect(crosses).toHaveCount(4);
+  await expect(refusers.first()).toHaveAttribute('aria-label', /, refuses vaccines, /);
+  const refuserIds = await refusers.evaluateAll((nodes) =>
+    nodes.map((node) => node.getAttribute('data-node-id')),
   );
+
+  // Spending the last vaccine starts the outbreak: refusing no longer matters, so the
+  // refusers look and read like anyone healthy.
+  for (let vaccine = 0; vaccine < 2; vaccine++) {
+    await page.locator('.node[data-tappable="true"]').first().click();
+    await expect(page.locator('#board')).toHaveAttribute('data-animating', 'false');
+  }
+  await expect(page.locator('#phase-label')).not.toHaveAttribute('data-phase', 'vaccinate');
+  await expect(refusers).toHaveCount(0);
+  await expect(crosses).toHaveCount(0);
+  const healthyFill = await page
+    .locator('.node[data-status="susceptible"] .node-disc')
+    .first()
+    .evaluate((disc) => getComputedStyle(disc).fill);
+  let healthyFormerRefusers = 0;
+  for (const id of refuserIds) {
+    const formerRefuser = page.locator(`.node[data-node-id="${id ?? ''}"]`);
+    if ((await formerRefuser.getAttribute('data-status')) !== 'susceptible') continue;
+    healthyFormerRefusers++;
+    await expect(formerRefuser).not.toHaveAttribute('aria-label', /refuses vaccines/);
+    expect(
+      await formerRefuser.locator('.node-disc').evaluate((disc) => getComputedStyle(disc).fill),
+    ).toBe(healthyFill);
+  }
+  expect(healthyFormerRefusers).toBeGreaterThan(0);
   const dots = page.locator('.node--infected .node-core');
-  await expect(crosses).not.toHaveCount(0);
   await expect(dots).not.toHaveCount(0);
-  for (const count of await counts.all()) await expect(count).toBeHidden();
-  for (const cross of await crosses.all()) await expect(cross).toBeVisible();
   for (const dot of await dots.all()) await expect(dot).toBeVisible();
+  const counts = page.locator('.node:not(.node--removed) .node-count');
+  for (const count of await counts.all()) await expect(count).toBeHidden();
 
   const showNumbers = page.getByRole('checkbox', { name: 'Show contact numbers' });
   await page.getByRole('button', { name: 'Settings' }).click();
@@ -85,7 +113,7 @@ test('people carry a cross or dot until Settings shows the numbers instead', asy
   await expect(page.locator('.node-cross:visible, .node-core:visible')).toHaveCount(0);
   for (const count of await counts.all()) await expect(count).toBeVisible();
 
-  // Reloading restarts the practice game from its link, so all 30 people are back.
+  // Reloading restarts the practice game from its link, so all 30 people are back, vaccinating.
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-contact-counts', 'shown');
   await expect(page.locator('.node-count:visible')).toHaveCount(30);
@@ -93,5 +121,19 @@ test('people carry a cross or dot until Settings shows the numbers instead', asy
   await expect(showNumbers).toBeChecked();
   await showNumbers.uncheck();
   await expect(page.locator('.node-count:visible')).toHaveCount(0);
-  await expect(page.locator('.node--refuser .node-cross:visible')).not.toHaveCount(0);
+  await expect(crosses).toHaveCount(4);
+});
+
+test('refusers fade to healthy over 0.6 s, and at once with Skip animations', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/practice?refusers=4&seed=fade');
+  const discFade = () =>
+    page
+      .locator('.node-disc')
+      .first()
+      .evaluate((disc) => getComputedStyle(disc).transitionDuration);
+  expect(await discFade()).toBe('0.6s');
+  await page.getByRole('button', { name: 'Settings' }).click();
+  await page.getByRole('checkbox', { name: 'Skip animations' }).check();
+  expect(await discFade()).toBe('0s');
 });

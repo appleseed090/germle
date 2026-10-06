@@ -243,8 +243,8 @@ brief are not repeated here.
   people it would read as "healthy people I can still infect", pointing at the frontier, which
   players should find themselves. Computed by `contactsStillInNetwork` in the engine.
 - **Hidden by default; Settings → "Show contact numbers" turns them on.** First always on, then
-  the owner added the switch and made off the default. Off shows the refusers' white cross and
-  the infected people's white centre dot, so the board matches `og.png` and the icons. Stored as
+  the owner added the switch and made off the default. Off shows the refusers' white cross (while
+  vaccinating) and the infected people's white centre dot, so the board matches `og.png` and the icons. Stored as
   `showContactCounts`, default `false`; settings saved before it load with numbers hidden. The
   switch sets `data-contact-counts="shown"` on `<html>`; without it the stylesheet draws the cross
   and dot, so the page's default matches the setting's. The how-to-play legend follows too.
@@ -260,6 +260,14 @@ brief are not repeated here.
   legend's dots are plain colour (with the cross and dot when numbers are off), sized in em so
   they line up with the text. The legend does not explain the numbers; the Settings switch does
   ("The number on each person counts their contacts still in the network."), as the owner asked.
+- **Refusers look like anyone healthy once the outbreak starts.** The owner's call. Refusing only
+  rules out a vaccine: from the outbreak on, refusers can be quarantined and infected like
+  everyone else, so the orange carried nothing, and the cross read as "can't tap" just when they
+  became tappable. Vax! kept them orange all game. The board marks refusers only in the
+  vaccinate phase, and the outbreak animation switches to the quarantine phase as the first
+  people fall ill: the cross goes at once and the orange fades over 0.6 s. Becoming infected
+  stays instant, and Skip animations or a reduced-motion device make the fade instant too.
+  Screen readers stop hearing "refuses vaccines" at the same moment. Puzzles are unchanged.
 - **Phones under 400 px get smaller how-to-play step figures,** to keep the dialog short.
 - **Dark digits on grey and orange, white digits on red, in both themes.** Contrast requires it
   anyway (6.3:1 on orange; white would be 2.5:1), and it gives red–green colour-blind players a

@@ -11,6 +11,7 @@ External memory for the project: what is pending, constraints to remember, defer
 - [x] Published puzzles locked by a snapshot test.
 - [x] Practice presets: Easy, Medium (the daily settings) and Hard.
 - [x] Archive: every past daily puzzle at `/archive`, played at `/?puzzle=<n>`.
+- [x] Refusers look healthy once the outbreak starts.
 
 ## Needs the owner
 

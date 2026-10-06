@@ -2,6 +2,7 @@ import {
   contactsStillInNetwork,
   isTappable,
   type GameEvent,
+  type GamePhase,
   type GameState,
   type GameStep,
   type LayoutBounds,
@@ -204,6 +205,9 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
     // tabindex changes, so afterwards the focused person would already be lost.
     const focusedNode = nodeElements.findIndex(({ group }) => group === document.activeElement);
     const contacts = contactsStillInNetwork(graph, statuses);
+    // Refusing only rules out a vaccine. Once the outbreak starts refusers are healthy people like
+    // any other, and their cross would wrongly read as "can't tap", so they look healthy too.
+    const refusalMatters = displayedState.phase === 'vaccinate';
     statuses.forEach((status, node) => {
       const { group, body, count } = elementsOf(node);
       const contactCount = contacts[node] as number;
@@ -213,10 +217,10 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
       group.dataset['tappable'] = String(tappable);
       group.classList.toggle('node--removed', isRemoved);
       group.classList.toggle('node--infected', status === 'infected');
-      group.classList.toggle('node--refuser', puzzle.isRefuser[node] === true);
+      group.classList.toggle('node--refuser', refusalMatters && puzzle.isRefuser[node] === true);
       group.classList.toggle('node--tappable', tappable);
       count.textContent = String(contactCount);
-      group.setAttribute('aria-label', describeNode(node, status, contactCount));
+      group.setAttribute('aria-label', describeNode(node, status, contactCount, refusalMatters));
       group.setAttribute('aria-disabled', String(!tappable));
       group.setAttribute('tabindex', isRemoved ? '-1' : '0');
       body.removeAttribute('transform');
@@ -244,9 +248,14 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
     }
   }
 
-  function describeNode(node: number, status: NodeStatus, contactCount: number): string {
+  function describeNode(
+    node: number,
+    status: NodeStatus,
+    contactCount: number,
+    refusalMatters: boolean,
+  ): string {
     const contacts = contactCount === 1 ? '1 contact' : `${contactCount} contacts`;
-    const refusal = puzzle.isRefuser[node] === true ? ', refuses vaccines' : '';
+    const refusal = refusalMatters && puzzle.isRefuser[node] === true ? ', refuses vaccines' : '';
     const statusText = status === 'susceptible' ? 'healthy' : status;
     return `Person ${node + 1}: ${statusText}${refusal}, ${contacts}`;
   }
@@ -290,9 +299,16 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
     };
   }
 
-  function phasesForEvent(event: GameEvent, statuses: NodeStatus[]): AnimationPhase[] {
+  /** What an animation has shown so far: the statuses and phase as of its latest event. */
+  interface ShownSoFar {
+    readonly statuses: NodeStatus[];
+    phase: GamePhase;
+  }
+
+  function phasesForEvent(event: GameEvent, shown: ShownSoFar): AnimationPhase[] {
+    const { statuses } = shown;
     const showStatuses = (): void => {
-      applyStatuses(statuses, { ...state, nodeStatuses: statuses });
+      applyStatuses(statuses, { ...state, nodeStatuses: statuses, phase: shown.phase });
     };
     switch (event.kind) {
       case 'vaccinated':
@@ -315,6 +331,7 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
             durationMilliseconds: 0,
             finish: () => {
               for (const node of event.indexPatients) statuses[node] = 'infected';
+              shown.phase = 'quarantine';
               showStatuses();
             },
           },
@@ -355,8 +372,8 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
 
   function animateStep(step: GameStep): Promise<void> {
     runningAnimation?.skip();
-    const statuses = state.nodeStatuses.slice();
-    const phases = step.events.flatMap((event) => phasesForEvent(event, statuses));
+    const shown: ShownSoFar = { statuses: state.nodeStatuses.slice(), phase: state.phase };
+    const phases = step.events.flatMap((event) => phasesForEvent(event, shown));
     phases.push({
       durationMilliseconds: 0,
       finish: () => {
