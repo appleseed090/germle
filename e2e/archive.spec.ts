@@ -59,7 +59,7 @@ test('plays a past puzzle from the archive without touching daily stats', async 
     '\n',
   );
   expect(firstLine).toMatch(/^Germle #3 · \d+% saved$/);
-  expect(link).toBe('germle.com/?puzzle=3');
+  expect(link).toBe('https://germle.com/?puzzle=3');
   const score = (await page.locator('#result-score').textContent()) ?? '';
   const verdict = (await page.locator('#result-verdict').textContent()) ?? '';
 
