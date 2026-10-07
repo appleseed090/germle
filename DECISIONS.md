@@ -194,6 +194,11 @@ brief are not repeated here.
 - **Footer name is "Jonathan Liu".** The brief says to use the git author name; in this
   environment the local git author is the coding agent, so the name comes from the repo owner's
   GitHub profile (`appleseed090`).
+- **The About page links to a playable Vax!** ("Play it here!"), the owner's call. The original
+  site on Heroku is gone; the link goes to a 2024 rebuild on GitHub Pages
+  (`stemcodingohio.github.io/vaxgame/`) by an Ohio education project, which says it left the
+  game unchanged (announced in the VaxGame repo's issue #41). The credit link still goes to the
+  original repo.
 - **The site never links to the GitHub repo.** The repo is private, so the About footer is just
   the copyright line. The About page carries the Vax! credit itself; `CREDITS.md` keeps the full
   licensing notice in the repo.

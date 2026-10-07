@@ -97,6 +97,10 @@ test('the about page credits the inspiration and states the privacy policy', asy
     'href',
     'https://github.com/digitalepidemiologylab/VaxGame',
   );
+  await expect(page.getByRole('link', { name: 'Play it here!' })).toHaveAttribute(
+    'href',
+    'https://stemcodingohio.github.io/vaxgame/',
+  );
   await expect(page.getByRole('link', { name: 'CC BY-SA 3.0' })).toHaveAttribute(
     'href',
     'https://creativecommons.org/licenses/by-sa/3.0/',
