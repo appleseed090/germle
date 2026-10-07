@@ -68,6 +68,8 @@ External memory for the project: what is pending, constraints to remember, defer
 - The dark theme's overrides are written twice in `src/styles/main.css` (under
   `prefers-color-scheme: dark` and under `[data-theme='dark']`), and each page's two `theme-color`
   metas repeat `--color-page`. `src/styles/theme.test.ts` fails if they drift.
+- The About page's "Play it here!" links to someone else's copy of Vax!
+  (`stemcodingohio.github.io/vaxgame/`, free GitHub Pages). If it goes down, remove the line.
 
 ## Constraints
 
