@@ -57,7 +57,8 @@ External memory for the project: what is pending, constraints to remember, defer
 ## Remember
 
 - The share card's first line (`Germle #<n> · <score>% saved`) is matched by the e2e tests and by
-  anyone parsing pasted results. Archive results keep it and end with `germle.com/?puzzle=<n>`.
+  anyone parsing pasted results. Its last line is `https://germle.com` (the scheme makes Discord
+  link it); archive results keep the first line and end with `https://germle.com/?puzzle=<n>`.
 - `/?puzzle=<n>` is a public link format (shared results link to it); `germle.v1.archive-progress`
   and `germle.v1.archive-results` are storage keys returning players depend on.
 - Practice link parameters are a public format (people save links); renaming one breaks them.

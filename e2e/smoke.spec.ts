@@ -62,13 +62,13 @@ test('plays a full daily game, copies the result and restores it on reload', asy
   await expectVerdictToMatchScore(page);
 
   const copied = await copyResult(page);
-  const [firstLine, squares, domain, ...extraLines] = copied.split('\n');
+  const [firstLine, squares, link, ...extraLines] = copied.split('\n');
   expect(firstLine).toMatch(SHARE_FIRST_LINE);
   expect(firstLine).toContain(
     ` · ${(await page.locator('#result-score').textContent()) ?? ''} saved`,
   );
   expect(squares).toMatch(SHARE_SQUARES_LINE);
-  expect(domain).toBe('germle.com');
+  expect(link).toBe('https://germle.com');
   expect(extraLines).toEqual([]);
 
   await page.reload();

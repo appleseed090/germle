@@ -23,7 +23,7 @@ export const SHARE_SQUARES = Object.freeze({
 });
 
 const SHARE_BAR_LENGTH = 10;
-const SHARE_DOMAIN = 'germle.com';
+const SHARE_LINK = 'https://germle.com';
 
 /**
  * The three-line share text:
@@ -31,20 +31,21 @@ const SHARE_DOMAIN = 'germle.com';
  * ```
  * Germle #12 · 78% saved
  * 🟦🟨🟨⬜⬜⬜⬜⬜🟥🟥
- * germle.com
+ * https://germle.com
  * ```
  *
  * A game played from the archive ends with a link to that puzzle instead
- * (`germle.com/?puzzle=12`), so it is not mistaken for today's and friends can play it. The first
- * line's format is a public contract (people paste it, tests match it); change it deliberately.
+ * (`https://germle.com/?puzzle=12`), so it is not mistaken for today's and friends can play it.
+ * The link keeps its scheme because Discord only links URLs that have one. The first line's format
+ * is a public contract (people paste it, tests match it); change it deliberately.
  */
 export function buildShareText(result: ShareableResult): string {
   return [
     `Germle #${result.puzzleNumber} · ${result.score}% saved`,
     buildShareBar(result.counts),
     result.playedFrom === 'daily'
-      ? SHARE_DOMAIN
-      : `${SHARE_DOMAIN}${archivePuzzlePath(result.puzzleNumber)}`,
+      ? SHARE_LINK
+      : `${SHARE_LINK}${archivePuzzlePath(result.puzzleNumber)}`,
   ].join('\n');
 }
 

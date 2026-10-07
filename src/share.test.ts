@@ -9,7 +9,7 @@ describe('buildShareText', () => {
       counts: { vaccinated: 4, quarantined: 7, untouched: 20, infected: 9 },
       playedFrom: 'daily',
     });
-    expect(text).toBe('Germle #12 · 78% saved\n🟦🟨🟨⬜⬜⬜⬜⬜🟥🟥\ngermle.com');
+    expect(text).toBe('Germle #12 · 78% saved\n🟦🟨🟨⬜⬜⬜⬜⬜🟥🟥\nhttps://germle.com');
     expect(text.split('\n')[0]).toMatch(/^Germle #\d+ · \d+% saved$/);
   });
 
@@ -20,7 +20,7 @@ describe('buildShareText', () => {
       counts: { vaccinated: 4, quarantined: 7, untouched: 20, infected: 9 },
       playedFrom: 'archive',
     });
-    expect(text).toBe('Germle #3 · 78% saved\n🟦🟨🟨⬜⬜⬜⬜⬜🟥🟥\ngermle.com/?puzzle=3');
+    expect(text).toBe('Germle #3 · 78% saved\n🟦🟨🟨⬜⬜⬜⬜⬜🟥🟥\nhttps://germle.com/?puzzle=3');
   });
 });
 

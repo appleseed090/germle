@@ -81,6 +81,8 @@ brief are not repeated here.
   The owner's call; they replace ▣ ▨ □ ■. The colours follow the results bar, and red, yellow and
   white also differ in lightness, which colour-blind players can still read. The
   saved/infected split rounds like the score; the saved squares are split by largest remainder.
+- **The share card's last line is a full URL, `https://germle.com`.** The owner's call; it was the
+  bare `germle.com`, which Discord shows as plain text because it only links URLs with a scheme.
 - **Share copies the result straight to the clipboard, with no share sheet and no preview.** The
   owner's call; it replaces `navigator.share` first, which opened the system share sheet. Where
   the clipboard is missing or refuses, a pre-selected text box shows the result to copy by hand.
@@ -366,7 +368,7 @@ brief are not repeated here.
   statistics and offers "More past puzzles · Today's puzzle" instead. The tab title says the
   puzzle is from the archive.
 - **Sharing an archive game keeps the first line and links the puzzle.** The third line becomes
-  `germle.com/?puzzle=<n>`, so it is not mistaken for today's, the first line still matches
+  `https://germle.com/?puzzle=<n>`, so it is not mistaken for today's, the first line still matches
   `Germle #<n> · <score>% saved`, and a friend can tap it to play the same puzzle.
 - **Bad or future links play today's puzzle.** Only a plain whole number from 1 to yesterday
   opens the archive; a later number shows "Puzzle #n isn't out yet. Here's today's.", and the
