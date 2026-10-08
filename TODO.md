@@ -66,11 +66,6 @@ External memory for the project: what is pending, constraints to remember, defer
 
 ## Follow-ups
 
-- **Keyboard e2e test fails on some days, on `main` too.** "can be played with the keyboard
-  alone" (`e2e/smoke.spec.ts`) plays today's puzzle without a fixed clock. After a vaccination,
-  focus moves to the next person in the network; on puzzles #5 and #6 that is a refuser
-  (index 1), so Enter only shows a toast. Seen on 2026-10-08. Pin the clock in the test, or ask
-  the owner whether focus should skip people who cannot be tapped.
 - **A preview database, if previews should show the comparison.** Previews have no `DB` binding
   now (the API answers 503 there). A second D1 database under `previews.d1_databases` would let
   them exercise the API without touching production.
