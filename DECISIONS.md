@@ -498,3 +498,11 @@ moves }`, rebuilds the puzzle with `createPuzzle(DAILY_PUZZLE_CONFIG, dailySeedK
 - **The share text is unchanged.** Its format is a public boundary; adding the percentile to it is
   left to the owner.
 - **Page weight:** the daily page went from 21.4 KB to 23.3 KB gzipped (HTML, CSS and scripts).
+- **The About page's privacy section lists exactly what the server keeps.** The owner's wording:
+  no account and no name, progress in the browser, a random ID the browser generates that is not
+  tied to a name or account, moves sent when a daily puzzle is finished, then a list of the four
+  things kept (puzzle number, random ID, score, the date and time Germle received the score), and
+  that clearing site data gives a new ID while scores already sent stay. "The time" is the
+  server's receipt time in UTC, not the player's local time; the page says so to make clear it
+  reveals no location. It replaces "No accounts, no tracking in the game", which stopped being the
+  whole truth once scores leave the browser. The meta description now reads "No account needed".
