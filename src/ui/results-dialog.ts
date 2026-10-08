@@ -1,6 +1,7 @@
 import { formatCountdown } from '../countdown';
 import { buildShareText, copyShareText, type ShareableResult } from '../share';
-import { histogramBand, type PlayerStats } from '../stats';
+import { histogramBand, histogramBandLabel } from '../score-bands';
+import type { PlayerStats } from '../stats';
 import { openDialog, wireDialog } from './dialogs';
 import { requireElement } from './dom';
 import { renderOutcomeBreakdown, renderVerdict } from './outcome-breakdown';
@@ -157,8 +158,7 @@ function renderHistogram(
     if (band === highlightedBand) row.classList.add('histogram-row--today');
     const label = document.createElement('span');
     label.className = 'histogram-label';
-    label.textContent =
-      band === stats.histogram.length - 1 ? `${band * 10}–100` : `${band * 10}–${band * 10 + 9}`;
+    label.textContent = histogramBandLabel(band);
     const track = document.createElement('span');
     track.className = 'histogram-track';
     const bar = document.createElement('span');

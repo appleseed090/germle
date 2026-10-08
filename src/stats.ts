@@ -1,3 +1,4 @@
+import { HISTOGRAM_BAND_COUNT, histogramBand } from './score-bands';
 import type { DailyResult } from './storage';
 
 /** Summary statistics over a player's finished daily games. */
@@ -8,13 +9,6 @@ export interface PlayerStats {
   readonly bestScore: number | undefined;
   /** Games per score band: `[0–9, 10–19, …, 80–89, 90–100]`. */
   readonly histogram: readonly number[];
-}
-
-export const HISTOGRAM_BAND_COUNT = 10;
-
-/** Index into {@link PlayerStats.histogram} for a score. */
-export function histogramBand(score: number): number {
-  return Math.min(HISTOGRAM_BAND_COUNT - 1, Math.floor(score / 10));
 }
 
 /**

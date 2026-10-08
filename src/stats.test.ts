@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computePlayerStats, histogramBand } from './stats';
+import { computePlayerStats } from './stats';
 import type { DailyResult } from './storage';
 
 function resultsFor(entries: [number, number][]): Map<number, DailyResult> {
@@ -46,14 +46,5 @@ describe('computePlayerStats', () => {
     expect(stats.played).toBe(4);
     expect(stats.bestScore).toBe(100);
     expect(stats.histogram).toEqual([1, 1, 0, 0, 0, 0, 0, 0, 0, 2]);
-  });
-});
-
-describe('histogramBand', () => {
-  it('puts 100 in the top band', () => {
-    expect(histogramBand(0)).toBe(0);
-    expect(histogramBand(89)).toBe(8);
-    expect(histogramBand(90)).toBe(9);
-    expect(histogramBand(100)).toBe(9);
   });
 });
