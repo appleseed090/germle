@@ -180,4 +180,65 @@ describe('createGameStorage', () => {
     }).not.toThrow();
     expect(throwing.loadSettings()).toEqual(DEFAULT_SETTINGS);
   });
+
+  it('creates a player ID once, keeps it, and replaces a malformed one', () => {
+    const store = createMemoryStore();
+    const storage = createGameStorage(store);
+    const ids = ['3f1c2a9e-5b7d-4c8e-9a1f-2b3c4d5e6f70', '9b2d7c41-0e3a-4f6b-8c5d-1a2b3c4d5e6f'];
+    const createPlayerId = (): string => ids.shift() ?? 'unexpected';
+    expect(storage.loadOrCreatePlayerId(createPlayerId)).toBe(
+      '3f1c2a9e-5b7d-4c8e-9a1f-2b3c4d5e6f70',
+    );
+    expect(storage.loadOrCreatePlayerId(createPlayerId)).toBe(
+      '3f1c2a9e-5b7d-4c8e-9a1f-2b3c4d5e6f70',
+    );
+    expect(store.data.get('germle.v1.player-id')).toBe('"3f1c2a9e-5b7d-4c8e-9a1f-2b3c4d5e6f70"');
+
+    store.data.set('germle.v1.player-id', '"not-a-uuid"');
+    expect(storage.loadOrCreatePlayerId(createPlayerId)).toBe(
+      '9b2d7c41-0e3a-4f6b-8c5d-1a2b3c4d5e6f',
+    );
+    expect(store.data.get('germle.v1.player-id')).toBe('"9b2d7c41-0e3a-4f6b-8c5d-1a2b3c4d5e6f"');
+  });
+
+  it('has no player ID where it cannot be kept', () => {
+    const createPlayerId = (): string => crypto.randomUUID();
+    expect(createGameStorage(undefined).loadOrCreatePlayerId(createPlayerId)).toBeUndefined();
+    const full = createGameStorage({
+      getItem: () => null,
+      setItem: () => {
+        throw new Error('quota');
+      },
+    });
+    expect(full.loadOrCreatePlayerId(createPlayerId)).toBeUndefined();
+  });
+
+  it('caches community numbers per puzzle and drops malformed ones', () => {
+    const standing = {
+      players: 12,
+      below: 7,
+      best: 88,
+      bestCount: 2,
+      histogram: [0, 0, 1, 0, 2, 3, 0, 4, 2, 0],
+      counted: true,
+    };
+    const store = createMemoryStore({
+      'germle.v1.community-standings': JSON.stringify({
+        '1': { score: 60, standing },
+        '2': { score: 60, standing: { ...standing, players: 99 } },
+        '3': { score: 101, standing },
+        '4': { standing },
+      }),
+    });
+    const storage = createGameStorage(store);
+    expect(storage.loadCommunityStandings()).toEqual(new Map([[1, { score: 60, standing }]]));
+    storage.saveCommunityStanding(5, { score: 70, standing });
+    storage.saveCommunityStanding(1, { score: 65, standing: { ...standing, counted: false } });
+    expect(storage.loadCommunityStandings()).toEqual(
+      new Map([
+        [1, { score: 65, standing: { ...standing, counted: false } }],
+        [5, { score: 70, standing }],
+      ]),
+    );
+  });
 });
