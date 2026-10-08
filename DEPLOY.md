@@ -19,7 +19,7 @@ These steps need someone logged in to the Cloudflare and Porkbun accounts. Do th
 - [x] 5. Verify (2026-10-05; the `workers.dev` address was not checked)
 - [ ] 6. Optional: Web Analytics and preview deployments. Previews work (2026-10-05); Web
       Analytics is not on: the live page has no Cloudflare beacon script.
-- [ ] 7. Create the D1 database and put its ID into `wrangler.jsonc` (blocks merging)
+- [x] 7. Create the D1 database and put its ID into `wrangler.jsonc` (2026-10-08, in the dashboard)
 - [ ] 8. Apply the migrations to the production database (blocks the API working)
 - [ ] 9. Add the migrations to the Workers Builds deploy command (blocks future schema changes)
 - [ ] 10. Merge, then check the API on `germle.com`
@@ -159,7 +159,10 @@ Use HTTPS**, so plain `http://` visits are redirected before the HSTS header can
 
 ## 7. Create the D1 database
 
-From a checkout of the branch, logged in to Cloudflare (`npx wrangler login` once):
+Done on 2026-10-08 in the dashboard: **Storage & databases** → **D1 SQLite Database** →
+**Create**, name `germle`, location left automatic, no jurisdiction. The **Database ID** on the
+database's **Overview** page is in `wrangler.jsonc`. To do the same from a terminal, logged in to
+Cloudflare (`npx wrangler login` once):
 
 ```sh
 npx wrangler d1 create germle
@@ -167,13 +170,15 @@ npx wrangler d1 create germle
 
 It prints a config snippet with a `"database_id"` (a UUID) and asks **"Would you like Wrangler to
 add it on your behalf?"**: answer **No**, since `wrangler.jsonc` already has the `DB` binding.
-Paste the ID over `REPLACE-WITH-THE-ID-FROM-wrangler-d1-create` in `wrangler.jsonc` and commit.
+Put the ID into `database_id` in `wrangler.jsonc` and commit.
 
-This blocks merging: with the placeholder, `wrangler deploy` fails and Workers Builds publishes
-nothing (the live site keeps its last good version). Wrangler would otherwise create a database
-of its own on deploy, so the placeholder is there on purpose.
+Until the ID was filled in, `wrangler.jsonc` held a placeholder, so that a deploy failed instead
+of Wrangler creating a database of its own. A wrong ID fails the deploy the same way.
 
 ## 8. Apply the migrations
+
+The deploy command in step 9 does this on the first deploy, so this step is only needed if you
+apply migrations by hand. From a terminal:
 
 ```sh
 npx wrangler d1 migrations apply germle --remote

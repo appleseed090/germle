@@ -463,10 +463,11 @@ moves }`, rebuilds the puzzle with `createPuzzle(DAILY_PUZZLE_CONFIG, dailySeedK
   preview's `DB` is absent and the API answers 503 there; the page then shows no comparison.
   Checked under `wrangler dev` with the binding removed. A separate preview database is a
   follow-up in `TODO.md`.
-- **The production database ID is a placeholder until the owner creates the database.** Any
-  non-empty `database_id` stops Wrangler from creating a database of its own on deploy (its
-  "auto-provisioning"), so a deploy with the placeholder fails instead of quietly binding a new,
-  empty database. The owner's steps are in `DEPLOY.md` 7–11 and `TODO.md`.
+- **The production database ID was a placeholder until the owner created the database** (in the
+  dashboard, 2026-10-08). Any non-empty `database_id` stops Wrangler from creating a database of
+  its own on deploy (its "auto-provisioning"), so a deploy with the placeholder failed instead of
+  quietly binding a new, empty database. The remaining steps are in `DEPLOY.md` 8–11 and
+  `TODO.md`.
 - **Migrations run in the Workers Builds deploy command, before `wrangler deploy`.** A deploy then
   never runs code that needs a table that does not exist yet, and a deploy with nothing new to
   apply is a no-op. Wrangler auto-confirms `migrations apply` when not interactive (checked).
