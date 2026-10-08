@@ -1,16 +1,33 @@
-// Cloudflare Workers static assets: an assets-only Worker (no script) that serves dist/.
+// Cloudflare Workers static assets plus a small Worker for the community score API.
 // The Worker name must match the project name chosen in the Cloudflare dashboard.
 {
   "name": "germle",
+  // Handles /api/* only; see run_worker_first below.
+  "main": "worker/index.ts",
   "compatibility_date": "2026-10-01",
   "assets": {
     "directory": "./dist",
+    // Lets the Worker hand any non-API request that reaches it back to the static assets.
+    "binding": "ASSETS",
+    // Only /api/* runs the Worker first; every other path is served from dist/ as before.
+    "run_worker_first": ["/api/*"],
     // /about serves about.html; /about.html redirects to /about.
     "html_handling": "auto-trailing-slash",
     // Unknown paths get a plain 404 rather than the game page.
     "not_found_handling": "none",
   },
+  // Community scores (migrations/). The ID is the production database's; see DEPLOY.md step 7.
+  // Until it is filled in, a deploy fails instead of creating a database of its own.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "germle",
+      "database_id": "REPLACE-WITH-THE-ID-FROM-wrangler-d1-create",
+      "migrations_dir": "migrations",
+    },
+  ],
   // Workers Builds runs `npx wrangler preview` for every non-main branch, which refuses to run
-  // without this block. Empty: previews use the settings above and need no extra bindings.
+  // without this block. Bindings are not inherited by previews, so previews get no DB binding
+  // and the API answers 503 there: preview deployments never touch the production database.
   "previews": {},
 }

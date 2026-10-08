@@ -10,7 +10,7 @@ export default defineConfig(
   {
     languageOptions: {
       parserOptions: {
-        project: ['./tsconfig.json', './tsconfig.node.json'],
+        project: ['./tsconfig.json', './tsconfig.node.json', './tsconfig.worker.json'],
         tsconfigRootDir: import.meta.dirname,
       },
     },
