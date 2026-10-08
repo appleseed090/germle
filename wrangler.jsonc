@@ -16,13 +16,13 @@
     // Unknown paths get a plain 404 rather than the game page.
     "not_found_handling": "none",
   },
-  // Community scores (migrations/). The ID is the production database's; see DEPLOY.md step 7.
-  // Until it is filled in, a deploy fails instead of creating a database of its own.
+  // Community scores (migrations/): the production database, created 2026-10-08 (DEPLOY.md
+  // step 7). Previews never get this binding; see "previews" below.
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "germle",
-      "database_id": "REPLACE-WITH-THE-ID-FROM-wrangler-d1-create",
+      "database_id": "80b7e28e-0581-4ac1-ba16-874e9c3fc441",
       "migrations_dir": "migrations",
     },
   ],

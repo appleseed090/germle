@@ -35,11 +35,10 @@ External memory for the project: what is pending, constraints to remember, defer
 
 ### Community scores: setup in Cloudflare (details and expected output in `DEPLOY.md` 7–11)
 
-1. [ ] `npx wrangler d1 create germle`; answer **No** to "add it on your behalf". **Blocks
-       merging:** with the placeholder ID in `wrangler.jsonc`, every deploy fails.
-2. [ ] Paste the printed `database_id` into `wrangler.jsonc` and commit to the branch. **Blocks
-       merging**, as above.
-3. [ ] `npx wrangler d1 migrations apply germle --remote`. **Blocks the API:** without the table
+1. [x] D1 database `germle` created in the dashboard (2026-10-08).
+2. [x] Its ID is in `wrangler.jsonc` (2026-10-08).
+3. [ ] Create the table: done by the deploy command in item 4 on the first deploy, or by hand with
+       `npx wrangler d1 migrations apply germle --remote`. **Blocks the API:** without the table
        every submission answers 500 and the comparison stays hidden (the game is unaffected).
 4. [ ] Workers Builds deploy command:
        `npx wrangler d1 migrations apply germle --remote && npx wrangler deploy`; keep
