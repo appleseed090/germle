@@ -81,6 +81,8 @@ const MARK_PAIRS: readonly (readonly [string, string])[] = [
   ['--color-pathogen', '--color-page'],
   ['--color-focus', '--color-page'],
   ['--color-focus', '--color-surface'],
+  ['--color-chart-bar', '--color-surface'],
+  ['--color-accent', '--color-surface'],
 ];
 
 /** Each person's disc must stand out from the board through its fill or its outline. */

@@ -1,21 +1,31 @@
+import type { CommunityStanding } from '../community-api';
 import { formatCountdown } from '../countdown';
 import { buildShareText, copyShareText, type ShareableResult } from '../share';
 import { histogramBand, histogramBandLabel } from '../score-bands';
 import type { PlayerStats } from '../stats';
+import { bindCommunityComparison } from './community-comparison';
 import { openDialog, wireDialog } from './dialogs';
 import { requireElement } from './dom';
 import { renderOutcomeBreakdown, renderVerdict } from './outcome-breakdown';
 
-/** The results and statistics dialog of today's game. */
-export interface DailyResultsDialog {
+/** What both kinds of results dialog offer. */
+interface ResultsDialog {
   open(): void;
+  /**
+   * Shows how a score compares with everyone who played the puzzle, or hides the comparison
+   * for `undefined` or too few players.
+   */
+  showCommunity(standing: CommunityStanding | undefined, score: number): void;
+}
+
+/** The results and statistics dialog of today's game. */
+export interface DailyResultsDialog extends ResultsDialog {
   /** Shows today's result (or the "finish first" note when `undefined`) and the stats. */
   update(result: ShareableResult | undefined, stats: PlayerStats): void;
 }
 
 /** The results dialog of a past puzzle played from the archive: no countdown, no stats. */
-export interface ArchiveResultsDialog {
-  open(): void;
+export interface ArchiveResultsDialog extends ResultsDialog {
   /** Shows the result, or the "finish first" note when `undefined`. */
   update(result: ShareableResult | undefined): void;
 }
@@ -29,7 +39,7 @@ export interface ArchiveResultsDialog {
  *   by a link to it, for pages left open past midnight.
  */
 export function createResultsDialog(nextPuzzleAt: Date): DailyResultsDialog {
-  const { dialog, showResult } = bindResultSummary();
+  const { dialog, showResult, showCommunity } = bindResultSummary();
   const countdown = requireElement('countdown', HTMLElement);
   const countdownLine = requireElement('countdown-line', HTMLElement);
   const newPuzzleReady = requireElement('new-puzzle-ready', HTMLElement);
@@ -56,6 +66,7 @@ export function createResultsDialog(nextPuzzleAt: Date): DailyResultsDialog {
       countdownTimer = window.setInterval(renderCountdown, 1000);
       openDialog(dialog);
     },
+    showCommunity,
     update(result, stats) {
       showResult(result);
       played.textContent = String(stats.played);
@@ -75,7 +86,7 @@ export function createResultsDialog(nextPuzzleAt: Date): DailyResultsDialog {
  * are hidden, and links to more past puzzles and today's take the countdown's place.
  */
 export function createArchiveResultsDialog(): ArchiveResultsDialog {
-  const { dialog, showResult } = bindResultSummary();
+  const { dialog, showResult, showCommunity } = bindResultSummary();
   for (const id of ['countdown-line', 'new-puzzle-ready', 'stats', 'results-archive-footnote'])
     requireElement(id, HTMLElement).hidden = true;
   requireElement('archive-links', HTMLElement).hidden = false;
@@ -85,16 +96,18 @@ export function createArchiveResultsDialog(): ArchiveResultsDialog {
     open() {
       openDialog(dialog);
     },
+    showCommunity,
     update(result) {
       showResult(result);
     },
   };
 }
 
-/** The parts both kinds of results share: score, verdict, breakdown and Share. */
+/** The parts both kinds of results share: score, verdict, breakdown, Share and the community. */
 function bindResultSummary(): {
   readonly dialog: HTMLDialogElement;
   readonly showResult: (result: ShareableResult | undefined) => void;
+  readonly showCommunity: ResultsDialog['showCommunity'];
 } {
   const dialog = requireElement('results-dialog', HTMLDialogElement);
   const title = requireElement('results-title', HTMLElement);
@@ -130,6 +143,7 @@ function bindResultSummary(): {
 
   return {
     dialog,
+    showCommunity: bindCommunityComparison(),
     showResult(result) {
       summary.hidden = result === undefined;
       pending.hidden = result !== undefined;

@@ -1,3 +1,4 @@
+import { isPlayerId, parseCommunityStanding, type CommunityStanding } from './community-api';
 import type { OutcomeCounts } from './engine';
 import { isThemeChoice, type ThemeChoice } from './theme';
 
@@ -29,6 +30,15 @@ export interface DailyResult {
   readonly counts: OutcomeCounts;
 }
 
+/**
+ * The community numbers last received for a puzzle, and the score they compare. They are shown
+ * only beside that same score: an archive replay with another score needs numbers of its own.
+ */
+export interface CachedStanding {
+  readonly score: number;
+  readonly standing: CommunityStanding;
+}
+
 export const DEFAULT_SETTINGS: Settings = Object.freeze({
   reduceMotion: null,
   theme: null,
@@ -46,6 +56,8 @@ const STORAGE_KEYS = Object.freeze({
   seenHowToPlay: 'germle.v1.seen-how-to-play',
   archiveProgress: 'germle.v1.archive-progress',
   archiveResults: 'germle.v1.archive-results',
+  playerId: 'germle.v1.player-id',
+  communityStandings: 'germle.v1.community-standings',
 });
 
 /** Typed, validated access to everything Germle keeps in the browser. */
@@ -70,6 +82,18 @@ export interface GameStorage {
   loadArchiveResults(): Map<number, DailyResult>;
   /** Records a finished archive game; an existing result for that puzzle is kept. */
   saveArchiveResult(puzzleNumber: number, result: DailyResult): void;
+  /**
+   * The browser's anonymous player ID for community scores. A missing or malformed one is
+   * replaced by a new ID from `createPlayerId`.
+   *
+   * @returns The ID, or `undefined` if it cannot be kept (blocked or full storage): a browser
+   *   that forgets its ID would be counted as a new player every time, so it must not submit.
+   */
+  loadOrCreatePlayerId(createPlayerId: () => string): string | undefined;
+  /** The community numbers last received, keyed by puzzle number. */
+  loadCommunityStandings(): Map<number, CachedStanding>;
+  /** Replaces the cached community numbers for a puzzle. */
+  saveCommunityStanding(puzzleNumber: number, cached: CachedStanding): void;
 }
 
 /**
@@ -151,6 +175,20 @@ export function createGameStorage(store: KeyValueStore | undefined): GameStorage
       results.set(puzzleNumber, result);
       writeJson(STORAGE_KEYS.archiveResults, Object.fromEntries(results));
     },
+    loadOrCreatePlayerId: (createPlayerId) => {
+      const stored = readJson(STORAGE_KEYS.playerId);
+      if (isPlayerId(stored)) return stored;
+      const created = createPlayerId();
+      writeJson(STORAGE_KEYS.playerId, created);
+      return readJson(STORAGE_KEYS.playerId) === created ? created : undefined;
+    },
+    loadCommunityStandings: () =>
+      parseCommunityStandings(readJson(STORAGE_KEYS.communityStandings)),
+    saveCommunityStanding: (puzzleNumber, cached) => {
+      const standings = parseCommunityStandings(readJson(STORAGE_KEYS.communityStandings));
+      standings.set(puzzleNumber, cached);
+      writeJson(STORAGE_KEYS.communityStandings, Object.fromEntries(standings));
+    },
   };
 }
 
@@ -230,4 +268,17 @@ function parseResult(value: unknown): DailyResult | undefined {
     return undefined;
   }
   return { score, counts: { vaccinated, quarantined, untouched, infected } };
+}
+
+function parseCommunityStandings(value: unknown): Map<number, CachedStanding> {
+  const standings = new Map<number, CachedStanding>();
+  if (!isRecord(value)) return standings;
+  for (const [key, entry] of Object.entries(value)) {
+    if (!isPuzzleNumberKey(key) || !isRecord(entry)) continue;
+    const score = entry['score'];
+    const standing = parseCommunityStanding(entry['standing']);
+    if (isNonNegativeInteger(score) && score <= 100 && standing !== undefined)
+      standings.set(Number(key), { score, standing });
+  }
+  return standings;
 }

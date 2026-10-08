@@ -228,6 +228,13 @@
           <label for="share-fallback-text">Copy your result:</label>
           <textarea id="share-fallback-text" rows="3" readonly></textarea>
         </div>
+        <section class="community" id="community" aria-labelledby="community-title" hidden>
+          <h3 id="community-title">Everyone's scores</h3>
+          <p class="community-rank" id="community-rank"></p>
+          <p class="community-top-score" id="community-top-score"></p>
+          <ol class="community-chart" id="community-chart" aria-label="Everyone's scores"></ol>
+          <p class="community-axis" aria-hidden="true"><span>0%</span><span>100%</span></p>
+        </section>
       </section>
       <p class="result-pending" id="result-pending">Finish today's puzzle to see your score.</p>
       <p class="countdown" id="countdown-line">

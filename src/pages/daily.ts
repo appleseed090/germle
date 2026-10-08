@@ -1,5 +1,7 @@
 import '../styles/main.css';
 import { formatPuzzleDate, requestedPuzzle } from '../archive';
+import { createCommunityApi, createCommunityComparison } from '../community';
+import type { CommunityStanding } from '../community-api';
 import { nextPuzzleStart } from '../countdown';
 import {
   DAILY_PUZZLE_CONFIG,
@@ -37,6 +39,7 @@ interface PlayedPuzzle {
   saveResult(result: DailyResult): void;
   openResults(): void;
   refreshResults(result: ShareableResult | undefined): void;
+  showCommunity(standing: CommunityStanding | undefined, score: number): void;
 }
 
 const storage = createGameStorage(browserLocalStorage());
@@ -54,6 +57,17 @@ if (requested.kind === 'not-out-yet')
   toast.show(`Puzzle #${requested.puzzleNumber} isn't out yet. Here's today's.`);
 const played = requested.kind === 'past' ? pastPuzzle(requested.puzzleNumber) : todaysPuzzle();
 const { puzzleNumber } = played;
+
+// Every numbered puzzle is compared, today's or one from the archive; practice never is.
+const community = createCommunityComparison({
+  puzzleNumber,
+  api: createCommunityApi((url, init) => window.fetch(url, init)),
+  storage,
+  createPlayerId: () => crypto.randomUUID(),
+  onStanding: (standing, score) => {
+    played.showCommunity(standing, score);
+  },
+});
 
 const puzzle = createPuzzle(DAILY_PUZZLE_CONFIG, dailySeedKey(puzzleNumber));
 const restoredState =
@@ -87,6 +101,7 @@ const session = mountGameSession({
     if (step.state.phase === 'ended') {
       const counts = countOutcomes(step.state);
       played.saveResult({ score: scorePercent(counts), counts });
+      compareWithCommunity(step.state);
     }
   },
   onGameEnded: (state) => {
@@ -96,9 +111,15 @@ const session = mountGameSession({
     }, RESULTS_DELAY_AFTER_END);
   },
   onShowResults: () => {
+    compareWithCommunity(session.getState());
     played.openResults();
   },
 });
+
+/** Shows the comparison of a finished game, cached at once and fresh when the server answers. */
+function compareWithCommunity(state: GameState): void {
+  if (state.phase === 'ended') community.refresh(state.moves, scorePercent(countOutcomes(state)));
+}
 
 function shareableResult(state: GameState): ShareableResult | undefined {
   if (state.phase !== 'ended') return undefined;
@@ -124,6 +145,9 @@ function todaysPuzzle(): PlayedPuzzle {
     },
     refreshResults: (result) => {
       resultsDialog.update(result, computePlayerStats(storage.loadResults(), todayPuzzleNumber));
+    },
+    showCommunity: (standing, score) => {
+      resultsDialog.showCommunity(standing, score);
     },
   };
 }
@@ -155,6 +179,9 @@ function pastPuzzle(pastPuzzleNumber: number): PlayedPuzzle {
     refreshResults: (result) => {
       resultsDialog.update(result);
     },
+    showCommunity: (standing, score) => {
+      resultsDialog.showCommunity(standing, score);
+    },
   };
 }
 
@@ -165,6 +192,7 @@ requireElement('open-how-to-play', HTMLButtonElement).addEventListener('click', 
 });
 requireElement('open-results', HTMLButtonElement).addEventListener('click', () => {
   played.refreshResults(shareableResult(session.getState()));
+  compareWithCommunity(session.getState());
   played.openResults();
 });
 requireElement('open-settings', HTMLButtonElement).addEventListener('click', () => {
@@ -175,5 +203,6 @@ howToPlayDialog.addEventListener('close', () => {
 });
 
 played.refreshResults(shareableResult(initialState));
+compareWithCommunity(initialState);
 if (initialState.phase === 'ended') played.openResults();
 else if (!storage.hasSeenHowToPlay()) openDialog(howToPlayDialog);

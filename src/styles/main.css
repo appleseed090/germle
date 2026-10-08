@@ -44,6 +44,7 @@
 
   --color-histogram-bar: #c9ced4;
   --color-histogram-bar-empty: #e3e6ea;
+  --color-chart-bar: #8a939c;
   --color-switch-off: #c3c9cf;
   --color-switch-knob: #ffffff;
 
@@ -82,6 +83,7 @@
 
     --color-histogram-bar: #4b545e;
     --color-histogram-bar-empty: #2c3239;
+    --color-chart-bar: #7d8791;
     --color-switch-off: #4b545e;
     --color-switch-knob: #f2f4f6;
   }
@@ -115,6 +117,7 @@
 
   --color-histogram-bar: #4b545e;
   --color-histogram-bar-empty: #2c3239;
+  --color-chart-bar: #7d8791;
   --color-switch-off: #4b545e;
   --color-switch-knob: #f2f4f6;
 }
@@ -1130,6 +1133,78 @@ button {
   resize: none;
   background: var(--color-surface);
   color: var(--color-text);
+}
+
+/* Below Share, so numbers that arrive late never move the button. */
+.community h3 {
+  margin-top: 4px;
+}
+
+.community p {
+  margin: 0;
+}
+
+.community-rank {
+  font-weight: 700;
+}
+
+.community-top-score {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+}
+
+.community-reached-by {
+  white-space: nowrap;
+}
+
+.community-chart {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 3px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.community-band {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.community-bar-track {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  height: 44px;
+  border-bottom: 1px solid var(--color-chart-bar);
+}
+
+.community-bar {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  background: var(--color-chart-bar);
+}
+
+.community-band--yours .community-bar {
+  background: var(--color-accent);
+}
+
+/* One line tall in every band, so the chart keeps its height whichever band is yours. */
+.community-band-marker {
+  min-height: 1.4em;
+  color: var(--color-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.community-axis {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
 }
 
 .result-pending {

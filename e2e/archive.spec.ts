@@ -1,6 +1,6 @@
-import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures';
 import { expectOnOneLine } from './layout';
+import { playToTheEnd } from './play';
 import { expectVerdictToMatchScore } from './verdict';
 
 // 10 October 2026 in UTC is puzzle #7.
@@ -9,17 +9,6 @@ test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date('2026-10-10T12:00:00Z') });
   await page.emulateMedia({ reducedMotion: 'reduce' });
 });
-
-async function playToTheEnd(page: Page): Promise<void> {
-  for (
-    let move = 0;
-    move < 60 && (await page.locator('#phase-label').getAttribute('data-phase')) !== 'ended';
-    move++
-  ) {
-    await page.locator('.node[data-tappable="true"]').first().click();
-    await expect(page.locator('#board')).toHaveAttribute('data-animating', 'false');
-  }
-}
 
 test('plays a past puzzle from the archive without touching daily stats', async ({
   page,
