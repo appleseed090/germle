@@ -1,7 +1,8 @@
 # Deploying Germle
 
-Germle is a static site, served by Cloudflare as Workers static assets: an assets-only Worker
-with no script, configured in `wrangler.jsonc`. Workers Builds builds it from `main` on every
+Germle is a static site served by Cloudflare as Workers static assets, plus a small Worker script
+that answers `/api/*` for the community score comparison and keeps its data in a Cloudflare D1
+database. Both are configured in `wrangler.jsonc`. Workers Builds builds it from `main` on every
 push. Nothing in the repo holds secrets, and the build needs no environment variables.
 
 These steps need someone logged in to the Cloudflare and Porkbun accounts. Do them in order.
@@ -18,6 +19,11 @@ These steps need someone logged in to the Cloudflare and Porkbun accounts. Do th
 - [x] 5. Verify (2026-10-05; the `workers.dev` address was not checked)
 - [ ] 6. Optional: Web Analytics and preview deployments. Previews work (2026-10-05); Web
       Analytics is not on: the live page has no Cloudflare beacon script.
+- [ ] 7. Create the D1 database and put its ID into `wrangler.jsonc` (blocks merging)
+- [ ] 8. Apply the migrations to the production database (blocks the API working)
+- [ ] 9. Add the migrations to the Workers Builds deploy command (blocks future schema changes)
+- [ ] 10. Merge, then check the API on `germle.com`
+- [ ] 11. Optional, only if abuse appears: a rate-limiting rule for `/api/*`
 
 ## 0. Make `main` the default branch
 
@@ -35,7 +41,7 @@ authorise GitHub (choose **Only select repositories** → `germle`) → select `
 | --------------------- | ------------------------------------------------ |
 | Project name          | `germle` (must match `name` in `wrangler.jsonc`) |
 | Build command         | `npm run build`                                  |
-| Deploy command        | `npx wrangler deploy` (the default)              |
+| Deploy command        | see step 9                                       |
 | Non-production deploy | `npx wrangler preview` (the default)             |
 | Root directory / path | `/` (leave blank)                                |
 | Environment variables | none                                             |
@@ -145,7 +151,92 @@ Use HTTPS**, so plain `http://` visits are redirected before the HSTS header can
 - **Preview URLs:** builds for non-production branches run `npx wrangler preview` (Worker
   Previews, in open beta), which needs the `previews` block in `wrangler.jsonc`; it is there and
   empty. Turn branch builds on or off under Worker → **Settings** → **Build** → **Branch
-  control**.
+  control**. Previews do not inherit bindings, so they have no database: their `/api/*` answers
+  503 and the game shows no comparison. Leave it that way, and do not add the `DB` binding to the
+  Worker's preview settings in the dashboard: previews would then write to the production
+  database. `npx wrangler preview` prints a warning that `DB` is "configured for your production
+  Worker but not for Previews"; that is expected.
+
+## 7. Create the D1 database
+
+From a checkout of the branch, logged in to Cloudflare (`npx wrangler login` once):
+
+```sh
+npx wrangler d1 create germle
+```
+
+It prints a config snippet with a `"database_id"` (a UUID) and asks **"Would you like Wrangler to
+add it on your behalf?"**: answer **No**, since `wrangler.jsonc` already has the `DB` binding.
+Paste the ID over `REPLACE-WITH-THE-ID-FROM-wrangler-d1-create` in `wrangler.jsonc` and commit.
+
+This blocks merging: with the placeholder, `wrangler deploy` fails and Workers Builds publishes
+nothing (the live site keeps its last good version). Wrangler would otherwise create a database
+of its own on deploy, so the placeholder is there on purpose.
+
+## 8. Apply the migrations
+
+```sh
+npx wrangler d1 migrations apply germle --remote
+```
+
+Expected: a table listing `0001_create_results.sql` with ✅. Running it again prints
+"✅ No migrations to apply!". Check the table:
+
+```sh
+npx wrangler d1 execute germle --remote --command "SELECT COUNT(*) AS games FROM results"
+```
+
+Expected: one row, `games` 0 (before anyone plays). Until this step is done, every submission
+answers 500 and the game simply shows no comparison; nothing else breaks.
+
+## 9. Run migrations on deploy
+
+Worker → **Settings** → **Build** → **Deploy command**:
+
+```sh
+npx wrangler d1 migrations apply germle --remote && npx wrangler deploy
+```
+
+Leave the non-production deploy command as `npx wrangler preview`: previews have no database.
+Migrations run before the new code, and a deploy with nothing new to apply only prints "No
+migrations to apply". If the build fails at the migration step with an authentication or
+permission error, the build's API token cannot edit D1: give it **D1 Edit** under the Worker's
+build settings (API token), or go back to `npx wrangler deploy` and run step 8 by hand before
+merging any change that adds a file to `migrations/`. Not verified from here: whether the
+default Workers Builds token already has D1 access.
+
+Step 8 by hand is enough for the first release, so this step only blocks later schema changes.
+
+## 10. Check the API
+
+After merging and once the build is green:
+
+```sh
+# The site itself is unchanged: expect 200, then a CSP header.
+curl -s -o /dev/null -w '%{http_code}\n' https://germle.com/about
+curl -sI https://germle.com/about | grep -i '^content-security-policy'
+
+# The database answers: expect 404 (no score for this made-up player).
+# 503 means the DB binding is missing; 500 means step 8 was skipped.
+curl -s -o /dev/null -w '%{http_code}\n' \
+  'https://germle.com/api/standing?puzzle=1&player=00000000-0000-4000-8000-000000000000'
+
+# Validation: expect 400 (an unfinished game; nothing is stored) and 405 (wrong method).
+curl -s -o /dev/null -w '%{http_code}\n' -X POST -H 'Content-Type: application/json' \
+  --data '{"puzzleNumber":1,"playerId":"00000000-0000-4000-8000-000000000000","moves":[]}' \
+  https://germle.com/api/results
+curl -s -o /dev/null -w '%{http_code}\n' https://germle.com/api/results
+```
+
+Then finish a daily puzzle in a browser and run the count from step 8 again: `games` should be
+
+1. The comparison itself stays hidden until 10 people have played a puzzle.
+
+## 11. Rate limiting, if needed
+
+The API has no captcha and no rate limiting in code. If abuse shows up (a flood of rows in
+`results`), add a rate-limiting rule in the `germle.com` zone: **Security** → **WAF** → **Rate
+limiting rules**, matching URI path starts with `/api/`.
 
 ## Fallback: keeping DNS at Porkbun
 
