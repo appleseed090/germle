@@ -12,6 +12,9 @@ External memory for the project: what is pending, constraints to remember, defer
 - [x] Practice presets: Easy, Medium (the daily settings) and Hard.
 - [x] Archive: every past daily puzzle at `/archive`, played at `/?puzzle=<n>`.
 - [x] Refusers look healthy once the outbreak starts.
+- [x] Community comparison (from the M4 backlog): finished daily and archive games are compared
+      with everyone who played the puzzle, through a Worker API and a D1 database. Code done on
+      `claude/optimistic-ptolemy-q8qpjc`; live only after the owner's steps below.
 
 ## Needs the owner
 
@@ -30,6 +33,22 @@ External memory for the project: what is pending, constraints to remember, defer
       AAAA records added on 2026-10-06 (for `germle.com` and `www`). Keep the nameservers on
       Cloudflare, and answer "No, thank you." if Porkbun offers to switch them.
 
+### Community scores: setup in Cloudflare (details and expected output in `DEPLOY.md` 7–11)
+
+1. [ ] `npx wrangler d1 create germle`; answer **No** to "add it on your behalf". **Blocks
+       merging:** with the placeholder ID in `wrangler.jsonc`, every deploy fails.
+2. [ ] Paste the printed `database_id` into `wrangler.jsonc` and commit to the branch. **Blocks
+       merging**, as above.
+3. [ ] `npx wrangler d1 migrations apply germle --remote`. **Blocks the API:** without the table
+       every submission answers 500 and the comparison stays hidden (the game is unaffected).
+4. [ ] Workers Builds deploy command:
+       `npx wrangler d1 migrations apply germle --remote && npx wrangler deploy`; keep
+       `npx wrangler preview` for other branches. **Blocks only later schema changes**; if the
+       build token lacks D1 access, add it or apply migrations by hand (`DEPLOY.md` step 9).
+5. [ ] Merge, then run the curl checks in `DEPLOY.md` step 10 (expect 200, CSP present, 404,
+       400, 405), finish a puzzle in a browser and check that `results` has a row.
+6. [ ] Only if abuse appears: a rate-limiting rule for `/api/*` (`DEPLOY.md` step 11).
+
 ## M4 backlog (not scheduled)
 
 - **Level editor with levels encoded in the URL:** draw or edit a network, pick vaccines and
@@ -42,10 +61,22 @@ External memory for the project: what is pending, constraints to remember, defer
   one-line fact about why that kind of gathering spreads disease.
 - **Real-time mode:** the outbreak advances on a timer instead of per quarantine, for players who
   want pressure.
-- **Community percentile comparison:** show where a score ranks among everyone who played that
-  day's puzzle. Needs a small backend to collect daily scores; today there is none.
+- [x] **Community percentile comparison:** done; see "Now" and the owner's setup above.
 - **Link from the Snackle hub:** add a Germle entry to the owner's Snackle hub so players can
   find it alongside the other games.
+
+## Follow-ups
+
+- **Keyboard e2e test fails on some days, on `main` too.** "can be played with the keyboard
+  alone" (`e2e/smoke.spec.ts`) plays today's puzzle without a fixed clock. After a vaccination,
+  focus moves to the next person in the network; on puzzles #5 and #6 that is a refuser
+  (index 1), so Enter only shows a toast. Seen on 2026-10-08. Pin the clock in the test, or ask
+  the owner whether focus should skip people who cannot be tapped.
+- **A preview database, if previews should show the comparison.** Previews have no `DB` binding
+  now (the API answers 503 there). A second D1 database under `previews.d1_databases` would let
+  them exercise the API without touching production.
+- **"Better than 0% of 318 players"** is what the lowest score (or a tie at the bottom) reads.
+  Kept as specified; revisit if it reads badly in practice.
 
 ## Deferred cleanups
 
@@ -68,6 +99,13 @@ External memory for the project: what is pending, constraints to remember, defer
 - The dark theme's overrides are written twice in `src/styles/main.css` (under
   `prefers-color-scheme: dark` and under `[data-theme='dark']`), and each page's two `theme-color`
   metas repeat `--color-page`. `src/styles/theme.test.ts` fails if they drift.
+- The community API is a boundary between the deployed page and Worker: paths, field names and the
+  player ID format live in `src/community-api.ts`. Pages stay cached in open tabs, so a Worker
+  change must keep answering the previous page's requests. `germle.v1.player-id` and
+  `germle.v1.community-standings` are storage keys; the D1 schema changes only through a new file
+  in `migrations/`.
+- The Worker shares the engine: a change that alters a published puzzle would also change the
+  scores the server computes. `src/engine/frozen-puzzles.test.ts` guards both.
 - The About page's "Play it here!" links to someone else's copy of Vax!
   (`stemcodingohio.github.io/vaxgame/`, free GitHub Pages). If it goes down, remove the line.
 

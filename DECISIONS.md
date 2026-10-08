@@ -382,3 +382,119 @@ brief are not repeated here.
 - **Players find it from today's game.** How to play ends with "Missed one? Play it in the
   archive", and today's results end with "Missed a day? Play past puzzles in the archive". The
   header was left alone: its five icons already need the tightened phone layout to fit 360 px.
+
+## Community scores (M4)
+
+- **Modelled on chainle.io: no accounts, a random player ID, moves sent instead of scores.** The
+  browser makes `crypto.randomUUID()` once and keeps it in `germle.v1.player-id`; it is checked
+  against the UUID v4 format on read and replaced if missing or malformed. It only tells a
+  browser's first finished game from repeats. A browser that cannot keep it (blocked or full
+  storage, no `crypto.randomUUID`) sends nothing, since it would count as a new player each time.
+- **The server scores games itself.** `POST /api/results` takes `{ puzzleNumber, playerId,
+moves }`, rebuilds the puzzle with `createPuzzle(DAILY_PUZZLE_CONFIG, dailySeedKey(n))`, replays
+  the moves with `replayMoves`, rejects anything that does not end the game, and scores it with
+  `countOutcomes` and `scorePercent`. The Worker imports the engine unchanged, so a made-up score
+  is impossible and `best` is always a score a real game reached. Rebuilding and replaying took
+  0.11 ms at the median and 0.88 ms at worst over puzzles #1–#365 (Node, development machine; not
+  measured on Cloudflare).
+- **Every numbered puzzle counts, whenever it is played; practice never does.** Today's game and
+  archive games both submit, so past puzzles build up a curve too. Accepted numbers run from 1 to
+  one above the number of the server's current UTC date, because the game switches at each
+  player's local midnight and time zones east of UTC are a day ahead for part of the UTC day.
+- **The curve mixes games played on the day with later archive games, on purpose.** Without
+  archive games, a puzzle's curve would be frozen at whoever happened to play on its day, and
+  every puzzle from before the comparison existed would stay empty. Both kinds of game have the
+  same rules, the same network and no published answer, so they measure the same skill. Archive
+  players may have seen friends' results, but share cards show squares, not moves. The first
+  game per player counts in both cases, so nobody can improve their entry by replaying.
+  `submitted_at` is stored, so the two kinds can be told apart later (a game submitted on its
+  puzzle's calendar day, give or take the time-zone window, was played on the day) without a
+  separate column.
+- **Only a player's first game counts; repeats are answered, never counted.** The table's primary
+  key is (puzzle number, player ID), and the insert is `ON CONFLICT DO NOTHING`; the answer says
+  `counted: true` or `false`. This covers a puzzle played on its day and again from the archive
+  (the archive starts a fresh game): the first score stays. Because a repeat is harmless, the page
+  resends whenever it has a finished game but no numbers stored for it: the game ended offline,
+  or the request failed.
+- **A repeat is compared with everyone else, not with the player's own counted game.** `below`
+  is relative to the score being shown (the submitted one for `POST`) and leaves out the player's
+  own row, so an archive replay at 90% is not "better than" the same player's 80% from the day.
+- **"Better than X%" is `below / (players − 1)`, rounded down.** Equal scores do not count as
+  beaten, and the player is not compared with themselves. The comparison is hidden until 10
+  players have a counted score (chainle waits for 12; the owner chose 10).
+- **Reopening the results fetches fresh numbers.** The page keeps the last numbers per puzzle,
+  with the score they compare, in `germle.v1.community-standings` and shows them at once. If they
+  are for this score and it was counted, it asks `GET /api/standing?puzzle=<n>&player=<id>` for
+  fresh ones (404 if the server has no score from that player, and the page then resends the
+  moves). Otherwise, as for an archive replay with a different score, it sends the moves again,
+  which answers the same numbers and stores nothing new. One request runs at a time.
+- **The game never depends on the API.** Network errors, a 6-second timeout, error statuses and
+  bodies that fail validation (types, histogram adding up to `players`, `below` and `bestCount`
+  within range) all mean "no comparison". No error is shown and the results dialog never waits.
+- **The response is `{ players, below, best, bestCount, histogram, counted }`.** The histogram uses
+  the personal stats' ten bands. `histogramBand` moved from `src/stats.ts` to `src/score-bands.ts`,
+  which has no DOM types, so the Worker can share it; `src/community-api.ts` holds the paths, the
+  response type, its validator and the player ID format for both sides.
+- **The server stores nothing but `puzzle_number`, `player_id`, `score` and `submitted_at`.** No
+  moves, no IP address, no user agent. The table is `STRICT`, with a `CHECK` on the score, and an
+  index on (puzzle number, score) answers each puzzle's tallies from the index alone (checked with
+  `EXPLAIN QUERY PLAN` under `wrangler dev`). The Worker logs nothing about requests; a database
+  error logs only the error.
+- **Validation happens once, at the boundary.** `POST` only, `application/json` only, a 1 KB body
+  limit enforced while reading the stream (not by trusting `Content-Length`), valid UTF-8, exactly
+  the three fields, a v4 UUID, an integer puzzle number in the window, and at most 40 integer moves
+  (one per person). Anything else gets a bare 400. A wrong method gets 405 with `Allow` rather than
+  400, since it is the route, not the input, that is wrong; an unknown `/api/` path gets 404.
+- **No captcha and no rate limiting in code.** Scores are anonymous and low-stakes, and server-side
+  scoring rules out made-up scores, so the worst abuse is padding a curve with real games. If that
+  happens, the owner can add a Cloudflare rate-limiting rule for `/api/*` in the dashboard
+  (`DEPLOY.md` step 11).
+- **Only `/api/*` runs the Worker first.** `assets.run_worker_first: ["/api/*"]` keeps every other
+  path on the static assets with the same `html_handling` and `not_found_handling`. A request that
+  matches no asset (an unknown path) still reaches the Worker, which hands it back through the
+  `ASSETS` binding, so it gets the same 404. Verified under `wrangler dev` before and after:
+  status, redirects, content type, the `_headers` security headers and body bytes of every probed
+  path are unchanged, 404s included. `_headers` do not apply to the API's own responses, which set
+  `Cache-Control: no-store` and `X-Content-Type-Options: nosniff` themselves. The CSP's
+  `connect-src 'self'` already allows the page's requests.
+- **Preview deployments have no database.** Wrangler 4.148 gives previews only the bindings
+  declared under `previews` (plus any set in the dashboard's preview settings); bindings are not
+  inherited, which its schema and its preview code both state. `previews` declares none, so a
+  preview's `DB` is absent and the API answers 503 there; the page then shows no comparison.
+  Checked under `wrangler dev` with the binding removed. A separate preview database is a
+  follow-up in `TODO.md`.
+- **The production database ID is a placeholder until the owner creates the database.** Any
+  non-empty `database_id` stops Wrangler from creating a database of its own on deploy (its
+  "auto-provisioning"), so a deploy with the placeholder fails instead of quietly binding a new,
+  empty database. The owner's steps are in `DEPLOY.md` 7–11 and `TODO.md`.
+- **Migrations run in the Workers Builds deploy command, before `wrangler deploy`.** A deploy then
+  never runs code that needs a table that does not exist yet, and a deploy with nothing new to
+  apply is a no-op. Wrangler auto-confirms `migrations apply` when not interactive (checked).
+- **Hand-written types for the D1 calls, the `WebWorker` lib for `Request` and `Response`.** No
+  `@cloudflare/workers-types` and no Workers test pool: `worker/d1.ts` types the four D1 methods
+  used, and `tsconfig.worker.json` (in `npm run typecheck`, as strict as the others) uses
+  TypeScript's built-in `WebWorker` lib, the standard Fetch API types, with no DOM. The logic is
+  unit-tested in Node with an in-memory store; the D1 adapter is checked under `wrangler dev`.
+- **Wrangler stays `npx wrangler`.** Running the API locally downloads it on demand; see the README.
+- **The comparison sits below Share, not between the verdict and Share.** The brief placed it
+  under the score and verdict and allowed either reserving its space or revealing it without
+  moving Share. Reserving space would leave an empty gap whenever there are no numbers, which is
+  most puzzles while fewer than 10 people have played them, and always when the API is down.
+  Below Share, numbers that arrive late push only the countdown and statistics, and an e2e test
+  checks that Share stays put at 360 px. In practice the request starts as the last move is
+  played, before its animation and the 0.7 s pause before the dialog opens, so the numbers are
+  usually there when it opens; reopening shows cached numbers at once.
+- **Wording: "Everyone's scores", "Better than 72% of 318 players", "Top score so far: 88% ·
+  reached by 14 players".** "Top score so far" says the target was reached by players and can
+  still rise, unlike the solver's par that was dropped (see "Par removed; a fixed verdict
+  instead"): par measured players against a clairvoyant machine, while this is a score other
+  people reached on the same puzzle. "reached by 14 players" never wraps inside itself. Numbers
+  above 999 get a thousands separator.
+- **The chart is ten columns of the same bands, with the player's band in the accent colour and
+  marked "You".** The label is the cue that does not depend on colour. Bars are scaled to the
+  fullest band, and a band with any players is at least 6% tall so a lone score stays visible.
+  Each column carries screen-reader text ("70–79%: 70 players, your score"). The bar colour
+  (`--color-chart-bar`) is tested at 3:1 against the dialog in both themes.
+- **The share text is unchanged.** Its format is a public boundary; adding the percentile to it is
+  left to the owner.
+- **Page weight:** the daily page went from 21.4 KB to 23.3 KB gzipped (HTML, CSS and scripts).
