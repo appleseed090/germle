@@ -324,6 +324,13 @@ brief are not repeated here.
   button. The other dialogs mark their main control (Share, Play again) with
   `data-initial-focus`; `openDialog` focuses it with `preventScroll` and resets the scroll.
 
+- **The legend ("Healthy, refuses vaccines, infected") comes first, right under the heading.** It
+  used to sit near the bottom in small grey text, after the steps, the verdict rule and the daily
+  constants, and players reported missing who is what. It now sits on a light panel in normal
+  text, so the colours are known before the steps use them; on a narrow phone it wraps between
+  entries, never between a dot and its word. An e2e test checks it is fully in view, above the
+  steps, when the dialog opens on a short phone screen.
+
 ## Navigation
 
 - **Practice and About are icon links in the header, not links inside dialogs.** The owner's call.

@@ -140,7 +140,9 @@ test.describe('with a fixed clock', () => {
 test.describe('on a short phone screen', () => {
   test.use({ viewport: { width: 375, height: 560 } });
 
-  test('opens how to play at its top, with its heading focused', async ({ page }) => {
+  test('opens how to play at its top, with its heading focused and the legend in view', async ({
+    page,
+  }) => {
     await page.goto('/');
     const dialog = page.locator('#how-to-play-dialog');
     await expect(dialog).toBeVisible();
@@ -149,18 +151,43 @@ test.describe('on a short phone screen', () => {
     );
     await expect(page.getByRole('heading', { name: 'How to play' })).toBeInViewport();
     await expect(page.getByRole('heading', { name: 'How to play' })).toBeFocused();
+    const legend = dialog.locator('.legend');
+    await expect(legend).toHaveText('Healthy, refuses vaccines, infected.');
+    await expect(legend).toBeInViewport({ ratio: 1 });
+    const legendBottom = await legend.evaluate((element) => element.getBoundingClientRect().bottom);
+    const stepsTop = await dialog
+      .locator('.how-to-steps')
+      .evaluate((element) => element.getBoundingClientRect().top);
+    expect(legendBottom).toBeLessThanOrEqual(stepsTop);
   });
 });
 
-test('can be played with the keyboard alone', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/');
-  await page.keyboard.press('Escape');
-  await expect(page.getByRole('heading', { name: 'How to play' })).not.toBeVisible();
-  await page.locator('.node[data-tappable="true"]').first().focus();
-  for (let vaccine = 0; vaccine < 4; vaccine++) await page.keyboard.press('Enter');
-  await expect(page.locator('#phase-label')).toHaveText('Quarantine');
-  await expect(page.locator('.node:focus')).toHaveCount(1);
+test.describe('on a puzzle where focus moves on to a refuser', () => {
+  // Puzzle #5: person 2 refuses vaccines, so after person 1 is vaccinated the focus lands on
+  // someone Enter cannot vaccinate, and a keyboard player tabs past them.
+  test.use({ timezoneId: 'UTC' });
+
+  test('can be played with the keyboard alone', async ({ page }) => {
+    await page.clock.install({ time: new Date('2026-10-08T12:00:00Z') });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/');
+    await expect(page.locator('#puzzle-label')).toHaveText('#5');
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('heading', { name: 'How to play' })).not.toBeVisible();
+    await page.locator('.node[data-tappable="true"]').first().focus();
+    let tabsPastUntappable = 0;
+    for (let vaccine = 0; vaccine < 4; vaccine++) {
+      while ((await page.locator('.node:focus').getAttribute('data-tappable')) !== 'true') {
+        await page.keyboard.press('Tab');
+        tabsPastUntappable++;
+      }
+      await page.keyboard.press('Enter');
+      await expect(page.locator('#board')).toHaveAttribute('data-animating', 'false');
+    }
+    expect(tabsPastUntappable).toBeGreaterThan(0);
+    await expect(page.locator('#phase-label')).toHaveText('Quarantine');
+    await expect(page.locator('.node:focus')).toHaveCount(1);
+  });
 });
 
 test.describe('on a 360 px phone', () => {

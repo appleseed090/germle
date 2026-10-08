@@ -958,10 +958,19 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
+/* Right under the heading, on a panel: at the bottom in small grey text, players missed it. */
 .legend {
-  margin: 12px 0 0;
-  color: var(--color-text-muted);
-  font-size: 0.85rem;
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--color-page);
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+/* A narrow screen wraps between entries, never between a dot and its word. */
+.legend-item {
+  white-space: nowrap;
 }
 
 /* Sized in em and lowered by 0.1em, so its centre sits halfway up a capital letter. */
