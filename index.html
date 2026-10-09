@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Germle — a daily outbreak puzzle</title>
+    <title data-i18n="title.daily">Germle — a daily outbreak puzzle</title>
     <meta
       name="description"
       content="A daily outbreak puzzle. Vaccinate a few people to break up a social network, then quarantine to contain the outbreak. Two minutes a day, no login."
@@ -52,7 +52,7 @@
   <body class="page-game">
     <div class="app">
       <header class="app-header">
-        <a class="wordmark" href="/" aria-label="Germle home">
+        <a class="wordmark" href="/" aria-label="Germle home" data-i18n-label="header.home">
           <svg class="wordmark-mark" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M6 7L17 5M6 7L8 18M17 5L18 16M8 18L18 16M6 7L18 16" />
             <circle cx="6" cy="7" r="3" />
@@ -63,8 +63,14 @@
           <span>Germle</span>
         </a>
         <span class="puzzle-label" id="puzzle-label"></span>
-        <nav class="header-actions" aria-label="Game menu">
-          <button class="icon-button" type="button" id="open-how-to-play" aria-label="How to play">
+        <nav class="header-actions" aria-label="Game menu" data-i18n-label="header.gameMenu">
+          <button
+            class="icon-button"
+            type="button"
+            id="open-how-to-play"
+            aria-label="How to play"
+            data-i18n-label="header.howToPlay"
+          >
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="12" cy="12" r="9" />
               <path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14" />
@@ -76,49 +82,91 @@
             type="button"
             id="open-results"
             aria-label="Results and statistics"
+            data-i18n-label="header.results"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M5 20V12M12 20V5M19 20V9" />
             </svg>
           </button>
-          <a class="icon-button" href="/practice" aria-label="Practice">
+          <a
+            class="icon-button"
+            href="/practice"
+            aria-label="Practice"
+            data-i18n-label="header.practice"
+          >
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M7 7v10M17 7v10M4 9.5v5M20 9.5v5M7 12h10" />
             </svg>
           </a>
-          <a class="icon-button" href="/about" aria-label="About Germle">
+          <a
+            class="icon-button"
+            href="/about"
+            aria-label="About Germle"
+            data-i18n-label="header.about"
+          >
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="12" cy="12" r="9" />
               <path d="M12 11v6" />
               <circle class="icon-dot" cx="12" cy="7.6" r="1.1" />
             </svg>
           </a>
-          <button class="icon-button" type="button" id="open-settings" aria-label="Settings">
+          <button
+            class="icon-button"
+            type="button"
+            id="open-settings"
+            aria-label="Settings"
+            data-i18n-label="header.settings"
+          >
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M4 7h16M4 17h16" />
               <circle class="icon-knob" cx="9" cy="7" r="2.5" />
               <circle class="icon-knob" cx="15" cy="17" r="2.5" />
             </svg>
           </button>
+          <button
+            class="icon-button"
+            type="button"
+            id="open-language"
+            aria-label="Language"
+            data-i18n-label="header.language"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path
+                d="M3 12h18M12 3c2.4 2.5 3.6 5.5 3.6 9s-1.2 6.5-3.6 9c-2.4-2.5-3.6-5.5-3.6-9S9.6 5.5 12 3z"
+              />
+            </svg>
+          </button>
         </nav>
       </header>
 
       <p class="archive-banner" id="archive-banner" hidden>
-        <a href="/archive">Archive</a> · <time id="archive-date"></time> ·
-        <a href="/">Today's puzzle</a>
+        <a href="/archive" data-i18n="common.archive">Archive</a> ·
+        <time id="archive-date"></time> ·
+        <a href="/" data-i18n="common.todaysPuzzle">Today's puzzle</a>
       </p>
 
       <main class="board" id="board">
-        <p class="outbreak-banner" id="outbreak-banner" hidden>Outbreak!</p>
+        <p class="outbreak-banner" id="outbreak-banner" data-i18n="game.outbreakBanner" hidden>
+          Outbreak!
+        </p>
         <noscript><p class="noscript">Germle needs JavaScript to run.</p></noscript>
       </main>
 
-      <section class="toolbar" aria-label="Game status">
+      <section class="toolbar" aria-label="Game status" data-i18n-label="toolbar.label">
         <div class="toolbar-row">
           <span class="phase-pill" id="phase-label" data-phase="vaccinate">Vaccinate</span>
           <span class="counter" id="counter">4 vaccines left</span>
           <span class="counter-secondary" id="counter-secondary"></span>
-          <button class="text-button" type="button" id="toolbar-results" hidden>See results</button>
+          <button
+            class="text-button"
+            type="button"
+            id="toolbar-results"
+            data-i18n="toolbar.seeResults"
+            hidden
+          >
+            See results
+          </button>
         </div>
         <p class="instruction" id="instruction">Vaccinate 4 people to break up the network</p>
       </section>
@@ -129,19 +177,27 @@
 
     <dialog class="dialog" id="how-to-play-dialog" aria-labelledby="how-to-play-title">
       <div class="dialog-header">
-        <h2 id="how-to-play-title" tabindex="-1" data-initial-focus>How to play</h2>
-        <button class="icon-button" type="button" data-close-dialog aria-label="Close">
+        <h2 id="how-to-play-title" tabindex="-1" data-initial-focus data-i18n="howToPlay.title">
+          How to play
+        </h2>
+        <button
+          class="icon-button"
+          type="button"
+          data-close-dialog
+          aria-label="Close"
+          data-i18n-label="dialog.close"
+        >
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
         </button>
       </div>
       <p class="legend">
-        <span class="legend-item"
+        <span class="legend-item" data-i18n="howToPlay.legendHealthy"
           ><span class="legend-dot legend-dot--healthy"></span> Healthy,</span
         >
-        <span class="legend-item"
+        <span class="legend-item" data-i18n="howToPlay.legendRefuser"
           ><span class="legend-dot legend-dot--refuser"></span> refuses vaccines,</span
         >
-        <span class="legend-item"
+        <span class="legend-item" data-i18n="howToPlay.legendInfected"
           ><span class="legend-dot legend-dot--infected"></span> infected.</span
         >
       </p>
@@ -161,7 +217,7 @@
             <circle class="figure-node" cx="76" cy="42" r="8" />
             <circle class="figure-node" cx="104" cy="28" r="8" />
           </svg>
-          <p>
+          <p data-i18n="howToPlay.step1">
             Tap people to vaccinate them. The outbreak starts when you have exhausted all vaccines.
           </p>
         </li>
@@ -175,7 +231,9 @@
             <circle class="figure-node" cx="76" cy="28" r="8" />
             <circle class="figure-node figure-node--quarantined" cx="104" cy="28" r="8" />
           </svg>
-          <p>Once the outbreak starts, you can quarantine one person per day.</p>
+          <p data-i18n="howToPlay.step2">
+            Once the outbreak starts, you can quarantine one person per day.
+          </p>
         </li>
         <li>
           <svg class="how-to-figure" viewBox="0 0 120 56" aria-hidden="true">
@@ -190,15 +248,17 @@
             <circle class="figure-node" cx="80" cy="42" r="8" />
             <circle class="figure-node" cx="104" cy="28" r="8" />
           </svg>
-          <p>
+          <p data-i18n="howToPlay.step3">
             The game ends when the outbreak has nowhere left to go. Save as many people as you can!
           </p>
         </li>
       </ol>
       <p class="verdict-rule" id="verdict-rule"></p>
       <p class="puzzle-constants" id="daily-constants"></p>
-      <button class="primary-button" type="button" data-close-dialog>Start playing</button>
-      <p class="dialog-footnote">
+      <button class="primary-button" type="button" data-close-dialog data-i18n="howToPlay.start">
+        Start playing
+      </button>
+      <p class="dialog-footnote" data-i18n="howToPlay.footnote">
         A new puzzle every day at midnight. Missed one? Play it in the
         <a href="/archive">archive</a>.
       </p>
@@ -206,13 +266,19 @@
 
     <dialog class="dialog" id="results-dialog" aria-labelledby="results-title">
       <div class="dialog-header">
-        <h2 id="results-title">Results</h2>
-        <button class="icon-button" type="button" data-close-dialog aria-label="Close">
+        <h2 id="results-title" data-i18n="results.title">Results</h2>
+        <button
+          class="icon-button"
+          type="button"
+          data-close-dialog
+          aria-label="Close"
+          data-i18n-label="dialog.close"
+        >
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
         </button>
       </div>
       <section class="result-summary" id="result-summary" hidden>
-        <p class="result-score"><span id="result-score"></span> saved</p>
+        <p class="result-score" data-i18n="results.saved"><span id="result-score"></span> saved</p>
         <p class="result-verdict" id="result-verdict"></p>
         <div class="breakdown-bar" id="breakdown-bar" aria-hidden="true">
           <span class="breakdown-segment breakdown-segment--vaccinated"></span>
@@ -221,65 +287,95 @@
           <span class="breakdown-segment breakdown-segment--infected"></span>
         </div>
         <ul class="breakdown-legend" id="breakdown-legend">
-          <li><span class="swatch swatch--vaccinated"></span>Vaccinated <strong></strong></li>
-          <li><span class="swatch swatch--quarantined"></span>Quarantined <strong></strong></li>
-          <li><span class="swatch swatch--untouched"></span>Untouched <strong></strong></li>
-          <li><span class="swatch swatch--infected"></span>Infected <strong></strong></li>
+          <li data-i18n="results.vaccinated">
+            <span class="swatch swatch--vaccinated"></span>Vaccinated <strong></strong>
+          </li>
+          <li data-i18n="results.quarantined">
+            <span class="swatch swatch--quarantined"></span>Quarantined <strong></strong>
+          </li>
+          <li data-i18n="results.untouched">
+            <span class="swatch swatch--untouched"></span>Untouched <strong></strong>
+          </li>
+          <li data-i18n="results.infected">
+            <span class="swatch swatch--infected"></span>Infected <strong></strong>
+          </li>
         </ul>
-        <button class="primary-button" type="button" id="share-button" data-initial-focus>
+        <button
+          class="primary-button"
+          type="button"
+          id="share-button"
+          data-initial-focus
+          data-i18n="results.share"
+        >
           Share
         </button>
         <p class="share-status" id="share-status" role="status"></p>
         <div class="share-fallback" id="share-fallback" hidden>
-          <label for="share-fallback-text">Copy your result:</label>
+          <label for="share-fallback-text" data-i18n="results.copyFallback"
+            >Copy your result:</label
+          >
           <textarea id="share-fallback-text" rows="3" readonly></textarea>
         </div>
         <section class="community" id="community" aria-labelledby="community-title" hidden>
-          <h3 id="community-title">Everyone's scores</h3>
+          <h3 id="community-title" data-i18n="community.title">Everyone's scores</h3>
           <p class="community-rank" id="community-rank"></p>
           <p class="community-top-score" id="community-top-score"></p>
-          <ol class="community-chart" id="community-chart" aria-label="Everyone's scores"></ol>
+          <ol
+            class="community-chart"
+            id="community-chart"
+            aria-label="Everyone's scores"
+            data-i18n-label="community.chartLabel"
+          ></ol>
           <p class="community-axis" aria-hidden="true"><span>0%</span><span>100%</span></p>
         </section>
       </section>
-      <p class="result-pending" id="result-pending">Finish today's puzzle to see your score.</p>
-      <p class="countdown" id="countdown-line">
+      <p class="result-pending" id="result-pending" data-i18n="results.finishToday">
+        Finish today's puzzle to see your score.
+      </p>
+      <p class="countdown" id="countdown-line" data-i18n="results.countdown">
         Next Germle in <time id="countdown">--:--:--</time>
       </p>
-      <p class="countdown" id="new-puzzle-ready" hidden>
+      <p class="countdown" id="new-puzzle-ready" data-i18n="results.newPuzzleReady" hidden>
         A new Germle is ready. <a href="/">Play it</a>
       </p>
       <p class="countdown" id="archive-links" hidden>
-        <a href="/archive">More past puzzles</a> · <a href="/">Today's puzzle</a>
+        <a href="/archive" data-i18n="results.morePast">More past puzzles</a> ·
+        <a href="/" data-i18n="common.todaysPuzzle">Today's puzzle</a>
       </p>
       <section class="stats" id="stats" aria-labelledby="stats-title">
-        <h3 id="stats-title">Statistics</h3>
+        <h3 id="stats-title" data-i18n="stats.title">Statistics</h3>
         <dl class="stats-grid">
           <div>
-            <dt>Played</dt>
+            <dt data-i18n="stats.played">Played</dt>
             <dd id="stat-played">0</dd>
           </div>
           <div>
-            <dt>Current streak</dt>
+            <dt data-i18n="stats.streak">Current streak</dt>
             <dd id="stat-streak">0</dd>
           </div>
           <div>
-            <dt>Best score</dt>
+            <dt data-i18n="stats.best">Best score</dt>
             <dd id="stat-best">–</dd>
           </div>
         </dl>
-        <h3>Scores</h3>
+        <h3 data-i18n="stats.scores">Scores</h3>
         <ol class="histogram" id="histogram"></ol>
       </section>
-      <p class="dialog-footnote" id="results-archive-footnote">
+      <p class="dialog-footnote" id="results-archive-footnote" data-i18n="results.archiveFootnote">
         Missed a day? Play past puzzles in the <a href="/archive">archive</a>.
       </p>
     </dialog>
 
     <dialog class="dialog" id="settings-dialog" aria-labelledby="settings-title">
       <div class="dialog-header">
-        <h2 id="settings-title">Settings</h2>
-        <button class="icon-button" type="button" data-close-dialog aria-label="Close">
+        <h2 id="settings-title" data-i18n="settings.title">Settings</h2>
+        <button
+          class="icon-button"
+          type="button"
+          data-close-dialog
+          aria-label="Close"
+          data-i18n-label="dialog.close"
+        >
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
         </button>
       </div>
@@ -290,35 +386,60 @@
         aria-describedby="setting-theme-hint"
       >
         <span>
-          <span class="setting-name" id="setting-theme-name">Theme</span>
-          <span class="setting-hint" id="setting-theme-hint">System follows your device.</span>
+          <span class="setting-name" id="setting-theme-name" data-i18n="settings.theme">Theme</span>
+          <span class="setting-hint" id="setting-theme-hint" data-i18n="settings.themeHint"
+            >System follows your device.</span
+          >
         </span>
         <span class="segmented" id="setting-theme">
           <label class="segmented-option"
-            ><input type="radio" name="theme" value="system" /><span>System</span></label
+            ><input type="radio" name="theme" value="system" /><span
+              data-i18n="settings.themeSystem"
+              >System</span
+            ></label
           >
           <label class="segmented-option"
-            ><input type="radio" name="theme" value="light" /><span>Light</span></label
+            ><input type="radio" name="theme" value="light" /><span data-i18n="settings.themeLight"
+              >Light</span
+            ></label
           >
           <label class="segmented-option"
-            ><input type="radio" name="theme" value="dark" /><span>Dark</span></label
+            ><input type="radio" name="theme" value="dark" /><span data-i18n="settings.themeDark"
+              >Dark</span
+            ></label
           >
         </span>
       </div>
       <label class="setting">
         <span>
-          <span class="setting-name">Show contact numbers</span>
-          <span class="setting-hint"
+          <span class="setting-name" data-i18n="settings.contactCounts">Show contact numbers</span>
+          <span class="setting-hint" data-i18n="settings.contactCountsHint"
             >The number on each person counts their contacts still in the network.</span
           >
         </span>
         <input type="checkbox" class="switch" id="setting-contact-counts" />
       </label>
       <label class="setting">
-        <span class="setting-name">Skip animations</span>
+        <span class="setting-name" data-i18n="settings.skipAnimations">Skip animations</span>
         <input type="checkbox" class="switch" id="setting-reduce-motion" />
       </label>
       <p class="dialog-footnote">© 2026 Jonathan Liu</p>
+    </dialog>
+
+    <dialog class="dialog dialog--narrow" id="language-dialog" aria-labelledby="language-title">
+      <div class="dialog-header">
+        <h2 id="language-title" data-i18n="language.title">Language</h2>
+        <button
+          class="icon-button"
+          type="button"
+          data-close-dialog
+          aria-label="Close"
+          data-i18n-label="dialog.close"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </div>
+      <ul class="language-options" id="language-options"></ul>
     </dialog>
   </body>
 </html>

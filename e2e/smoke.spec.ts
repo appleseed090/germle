@@ -200,11 +200,22 @@ test.describe('on a 360 px phone', () => {
       await page.goto(path);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(360);
       await expect(page.getByRole('button', { name: 'Settings' })).toBeInViewport({ ratio: 1 });
+      await expect(page.getByRole('button', { name: 'Language' })).toBeInViewport({ ratio: 1 });
     }
+    // A year in, the puzzle number has three digits.
+    await page.goto('/');
+    await page.locator('#puzzle-label').evaluate((label) => (label.textContent = '#365'));
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(360);
     await page.goto('/?puzzle=1');
     await expectOnOneLine(page.locator('#archive-banner'));
-    await page.goto('/archive');
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(360);
+    for (const path of ['/archive', '/about']) {
+      await page.goto(path);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(360);
+      await expect(page.getByRole('button', { name: 'Language' })).toBeInViewport({ ratio: 1 });
+      expect(
+        await page.locator('.play-link').evaluate((link) => link.getBoundingClientRect().height),
+      ).toBeLessThan(44);
+    }
     await page.goto('/');
     const header = page.locator('.app-header');
     await expect(header.getByRole('link', { name: 'Practice' })).toHaveAttribute(

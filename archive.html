@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Germle archive — a daily outbreak puzzle</title>
+    <title data-i18n="title.archive">Germle archive — a daily outbreak puzzle</title>
     <meta
       name="description"
       content="Every Germle daily outbreak puzzle so far. Play any day you missed."
@@ -39,7 +39,7 @@
   </head>
   <body class="page-content">
     <header class="app-header">
-      <a class="wordmark" href="/" aria-label="Germle home">
+      <a class="wordmark" href="/" aria-label="Germle home" data-i18n-label="header.home">
         <svg class="wordmark-mark" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M6 7L17 5M6 7L8 18M17 5L18 16M8 18L18 16M6 7L18 16" />
           <circle cx="6" cy="7" r="3" />
@@ -49,16 +49,46 @@
         </svg>
         <span>Germle</span>
       </a>
-      <a class="play-link" href="/">Play today's puzzle</a>
+      <a class="play-link" href="/" data-i18n="common.playToday">Play today's puzzle</a>
+      <button
+        class="icon-button"
+        type="button"
+        id="open-language"
+        aria-label="Language"
+        data-i18n-label="header.language"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path
+            d="M3 12h18M12 3c2.4 2.5 3.6 5.5 3.6 9s-1.2 6.5-3.6 9c-2.4-2.5-3.6-5.5-3.6-9S9.6 5.5 12 3z"
+          />
+        </svg>
+      </button>
     </header>
     <main class="content">
-      <h1>Archive</h1>
-      <p>
+      <h1 data-i18n="archive.title">Archive</h1>
+      <p data-i18n="archive.intro">
         Every Germle so far, newest first. Past puzzles keep their own scores and never count toward
         your streak.
       </p>
       <noscript><p>The archive needs JavaScript to list the puzzles.</p></noscript>
       <ol class="archive-list" id="archive-list"></ol>
     </main>
+
+    <dialog class="dialog dialog--narrow" id="language-dialog" aria-labelledby="language-title">
+      <div class="dialog-header">
+        <h2 id="language-title" data-i18n="language.title">Language</h2>
+        <button
+          class="icon-button"
+          type="button"
+          data-close-dialog
+          aria-label="Close"
+          data-i18n-label="dialog.close"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </div>
+      <ul class="language-options" id="language-options"></ul>
+    </dialog>
   </body>
 </html>

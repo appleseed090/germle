@@ -15,7 +15,9 @@ licensing notice.
 Milestone M3: the daily game at `/` (with stats and sharing), the archive of past puzzles at
 `/archive` (each played at `/?puzzle=<n>`), practice mode at `/practice` (with Easy, Medium and
 Hard presets) and the About page at `/about`. From M4, finished daily games are compared
-anonymously with everyone who played the same puzzle. See `TODO.md` for the backlog.
+anonymously with everyone who played the same puzzle. Every page is in English, Simplified
+Chinese and Traditional Chinese, picked from the browser's languages or with the globe button in
+the header. See `TODO.md` for the backlog.
 
 ## Prerequisites
 
@@ -78,9 +80,23 @@ Chromium build: run `npx playwright install chromium` once (the version is pinne
 - **Themes:** every colour is a CSS token in `src/styles/main.css`. The dark theme overrides them
   when the device prefers dark, or when the player picks Dark in Settings (`src/theme.ts` sets
   `data-theme` on `<html>`). A saved choice is applied before the first paint by
-  `src/theme-before-paint.ts`, which a small plugin in `vite.config.ts` builds into a
-  content-hashed classic script, since the CSP forbids inline scripts. `src/styles/theme.test.ts`
+  `src/before-paint.ts`, which a small plugin in `vite.config.ts` builds into a content-hashed
+  classic script, since the CSP forbids inline scripts. `src/styles/theme.test.ts`
   checks contrast in both themes.
+- **Languages:** one site at the same URLs in every language, chosen in the browser. The page
+  shells are written in English; each translatable element carries `data-i18n="key"` (its text)
+  or `data-i18n-label="key"` (its `aria-label`). `src/i18n/` holds the language detection
+  (`language.ts`), the `Messages` interface every language implements (`messages.ts`), one
+  catalog per language (`en.ts`, `zh-hans.ts`, `zh-hant.ts`) and the code that translates a
+  shell (`shell.ts`). Each page entry calls `setUpPageLanguage` first and passes the messages to
+  the modules that write text. The before-paint script sets `<html lang>` and hides a page that
+  is about to be translated, so its English never flashes. Picking a language from the globe
+  stores it in `germle.v1.settings` and reloads the page. The share card stays English in every
+  language.
+  To add a language: add its tag to `LANGUAGES` and `LANGUAGE_NAMES` in `language.ts` and to
+  `languageForTag`, write a catalog typed `Messages` (the compiler lists anything missing, and
+  `src/i18n/shell.test.ts` checks its shell keys against the four HTML files), register it in
+  `page-language.ts`, then add it to `e2e/language.spec.ts`.
 - **Docs:** `AGENTS.md` (engineering rules), `DECISIONS.md` (why things are the way they are),
   `TODO.md` (backlog), `DEPLOY.md` (Cloudflare and DNS setup).
 

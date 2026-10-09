@@ -50,15 +50,15 @@ test('applies a chosen theme at once, before the first paint on later visits, on
   expect(await pageBackground(page)).toBe(DARK_PAGE);
   expect(await themeColorMedia(page)).toEqual({ light: 'not all', dark: 'all' });
 
-  // With the game's own scripts blocked, only the render-blocking theme script can apply it.
-  await page.route(/\/assets\/(?!theme-).*\.js$/, (route) => route.abort());
+  // With the game's own scripts blocked, only the render-blocking before-paint script can apply it.
+  await page.route(/\/assets\/(?!before-paint-).*\.js$/, (route) => route.abort());
   for (const path of ['/', '/practice?seed=theme', '/about', '/archive']) {
     await page.goto(path);
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     expect(await pageBackground(page)).toBe(DARK_PAGE);
     expect(await themeColorMedia(page)).toEqual({ light: 'not all', dark: 'all' });
   }
-  await page.unroute(/\/assets\/(?!theme-).*\.js$/);
+  await page.unroute(/\/assets\/(?!before-paint-).*\.js$/);
 
   await page.goto('/practice?seed=theme');
   await chooseTheme(page, 'System');

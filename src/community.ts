@@ -5,6 +5,7 @@ import {
   type CommunityStanding,
   type ResultSubmission,
 } from './community-api';
+import type { Messages } from './i18n/messages';
 import { histogramBand, histogramBandLabel } from './score-bands';
 import type { GameStorage } from './storage';
 
@@ -162,25 +163,20 @@ export function percentBeaten(standing: CommunityStanding): number {
   return otherPlayers === 0 ? 0 : Math.floor((100 * standing.below) / otherPlayers);
 }
 
-/** "Better than 72% of 318 players". */
-export function describeRank(standing: CommunityStanding): string {
-  return `Better than ${percentBeaten(standing)}% of ${formatCount(standing.players)} players`;
+/** "Better than 72% of 318 players" in English. */
+export function describeRank(standing: CommunityStanding, text: Messages['community']): string {
+  return text.rank(percentBeaten(standing), standing.players);
 }
 
 /**
  * The top score and how many reached it, as two parts the page joins with " · " ("Top score so
- * far: 88%" and "reached by 14 players") so that a narrow screen wraps between them.
+ * far: 88%" and "reached by 14 players" in English) so that a narrow screen wraps between them.
  */
-export function describeTopScore(standing: CommunityStanding): readonly [string, string] {
-  const players = standing.bestCount === 1 ? 'player' : 'players';
-  return [
-    `Top score so far: ${standing.best}%`,
-    `reached by ${formatCount(standing.bestCount)} ${players}`,
-  ];
-}
-
-function formatCount(count: number): string {
-  return count.toLocaleString('en-US');
+export function describeTopScore(
+  standing: CommunityStanding,
+  text: Messages['community'],
+): readonly [string, string] {
+  return [text.topScore(standing.best), text.reachedBy(standing.bestCount)];
 }
 
 /** One column of the community chart. */

@@ -7,6 +7,7 @@ import {
   startGame,
   type PuzzleConfig,
 } from '../engine';
+import { setUpPageLanguage } from '../i18n/page-language';
 import {
   PRACTICE_PRESETS,
   PRACTICE_RANGES,
@@ -25,6 +26,7 @@ import { openDialog, wireDialog } from '../ui/dialogs';
 import { wireDisclosureButtons } from '../ui/disclosure';
 import { requireElement } from '../ui/dom';
 import { mountGameSession } from '../ui/game-session';
+import { connectLanguageMenu } from '../ui/language-menu';
 import { renderOutcomeBreakdown, renderVerdict } from '../ui/outcome-breakdown';
 import { connectSettingsDialog, displayOptionsFor } from '../ui/settings-dialog';
 import { createToast } from '../ui/toast';
@@ -32,6 +34,11 @@ import { createToast } from '../ui/toast';
 const RESULTS_DELAY_AFTER_END = 700;
 
 const storage = createGameStorage(browserLocalStorage());
+const { language, messages } = setUpPageLanguage(
+  document,
+  storage.loadSettings().language,
+  navigator.languages,
+);
 const pageParameters = new URLSearchParams(window.location.search);
 const setup = parsePracticeParameters(pageParameters, () => randomSeed());
 const practiceUrl = (practice: PracticeSetup): string =>
@@ -49,6 +56,7 @@ const session = mountGameSession({
   initialState: startGame(puzzle).state,
   display: displayOptionsFor(storage.loadSettings()),
   toast,
+  messages,
   elements: {
     boardContainer: requireElement('board', HTMLElement),
     outbreakBanner: requireElement('outbreak-banner', HTMLElement),
@@ -64,7 +72,7 @@ const session = mountGameSession({
     const counts = countOutcomes(state);
     const score = scorePercent(counts);
     requireElement('result-score', HTMLElement).textContent = `${score}%`;
-    renderVerdict(requireElement('result-verdict', HTMLElement), score);
+    renderVerdict(requireElement('result-verdict', HTMLElement), score, messages.verdicts);
     renderOutcomeBreakdown(
       requireElement('breakdown-bar', HTMLElement),
       requireElement('breakdown-legend', HTMLElement),
@@ -87,6 +95,7 @@ requireElement('new-network', HTMLAnchorElement).href = practiceUrl({
 });
 
 const settingsDialog = connectSettingsDialog(storage, session);
+connectLanguageMenu(storage, language);
 requireElement('open-settings', HTMLButtonElement).addEventListener('click', () => {
   openDialog(settingsDialog);
 });
@@ -103,7 +112,7 @@ requireElement('change-setup', HTMLButtonElement).addEventListener('click', () =
 if (!pageParameters.has('seed')) openDialog(setupDialog);
 
 function describeSetup(practice: PracticeSetup): string {
-  return `${describePuzzleConfig(practice.config)} · seed ${practice.seed}`;
+  return `${describePuzzleConfig(practice.config, messages.summary)} · ${messages.summary.seed(practice.seed)}`;
 }
 
 interface SliderBinding {

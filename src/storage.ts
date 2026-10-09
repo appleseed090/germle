@@ -1,5 +1,6 @@
 import { isPlayerId, parseCommunityStanding, type CommunityStanding } from './community-api';
 import type { OutcomeCounts } from './engine';
+import { isLanguage, type Language } from './i18n/language';
 import { isThemeChoice, type ThemeChoice } from './theme';
 
 /** The slice of the Web Storage API persistence needs, so tests can pass an in-memory fake. */
@@ -16,6 +17,8 @@ export interface Settings {
    * the infected people's centre dot. Off by default.
    */
   readonly showContactCounts: boolean;
+  /** The language picked in the language menu; `null` follows the browser's languages. */
+  readonly language: Language | null;
 }
 
 /** The moves of today's unfinished or finished daily game, replayed on reload. */
@@ -43,6 +46,7 @@ export const DEFAULT_SETTINGS: Settings = Object.freeze({
   reduceMotion: null,
   theme: null,
   showContactCounts: false,
+  language: null,
 });
 
 /**
@@ -205,6 +209,7 @@ function parseSettings(value: unknown): Settings {
   const reduceMotion = value['reduceMotion'];
   const theme = value['theme'];
   const showContactCounts = value['showContactCounts'];
+  const language = value['language'];
   return {
     reduceMotion: typeof reduceMotion === 'boolean' ? reduceMotion : null,
     theme: isThemeChoice(theme) ? theme : null,
@@ -212,6 +217,7 @@ function parseSettings(value: unknown): Settings {
       typeof showContactCounts === 'boolean'
         ? showContactCounts
         : DEFAULT_SETTINGS.showContactCounts,
+    language: isLanguage(language) ? language : null,
   };
 }
 

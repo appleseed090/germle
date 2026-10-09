@@ -2,21 +2,22 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { build, defineConfig, type Plugin } from 'vite';
 
-const THEME_BEFORE_PAINT_ENTRY = 'src/theme-before-paint.ts';
+const BEFORE_PAINT_ENTRY = 'src/before-paint.ts';
 
 /**
- * Adds `src/theme-before-paint.ts` to the end of every page's `<head>` as a classic script, which
- * blocks the first paint until a saved theme is applied. The CSP forbids inline scripts, and Vite
- * only bundles module scripts (which are deferred), so the build bundles the entry on its own into a
- * self-contained IIFE with a content hash under `assets/`, where `_headers` caches it as immutable.
- * The dev server loads it as a module instead, so a saved theme may flash there.
+ * Adds `src/before-paint.ts` to the end of every page's `<head>` as a classic script, which blocks
+ * the first paint until a saved theme and the page's language are applied. The CSP forbids inline
+ * scripts, and Vite only bundles module scripts (which are deferred), so the build bundles the
+ * entry on its own into a self-contained IIFE with a content hash under `assets/`, where
+ * `_headers` caches it as immutable. The dev server loads it as a module instead, so a saved theme
+ * or English text may flash there.
  */
-function themeBeforePaintScript(): Plugin {
+function beforePaintScript(): Plugin {
   let root = process.cwd();
   let isBuild = false;
-  let scriptUrl = `/${THEME_BEFORE_PAINT_ENTRY}`;
+  let scriptUrl = `/${BEFORE_PAINT_ENTRY}`;
   return {
-    name: 'germle:theme-before-paint',
+    name: 'germle:before-paint',
     configResolved(config) {
       root = config.root;
       isBuild = config.command === 'build';
@@ -31,16 +32,16 @@ function themeBeforePaintScript(): Plugin {
         build: {
           write: false,
           modulePreload: false,
-          rollupOptions: { input: THEME_BEFORE_PAINT_ENTRY, output: { format: 'iife' } },
+          rollupOptions: { input: BEFORE_PAINT_ENTRY, output: { format: 'iife' } },
         },
       });
       const outputs = Array.isArray(result) ? result : [result];
       const chunk = outputs
         .flatMap((output) => ('output' in output ? output.output : []))
         .find((item) => item.type === 'chunk');
-      if (chunk === undefined) throw new Error(`No chunk built from ${THEME_BEFORE_PAINT_ENTRY}`);
+      if (chunk === undefined) throw new Error(`No chunk built from ${BEFORE_PAINT_ENTRY}`);
       const hash = createHash('sha256').update(chunk.code).digest('hex').slice(0, 8);
-      const fileName = `assets/theme-${hash}.js`;
+      const fileName = `assets/before-paint-${hash}.js`;
       this.emitFile({ type: 'asset', fileName, source: chunk.code });
       scriptUrl = `/${fileName}`;
     },
@@ -76,7 +77,7 @@ function productionHeadersForAllPaths(): Record<string, string> {
 }
 
 export default defineConfig({
-  plugins: [themeBeforePaintScript()],
+  plugins: [beforePaintScript()],
   preview: { headers: productionHeadersForAllPaths() },
   build: {
     rollupOptions: {

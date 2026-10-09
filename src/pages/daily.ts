@@ -1,5 +1,5 @@
 import '../styles/main.css';
-import { formatPuzzleDate, requestedPuzzle } from '../archive';
+import { puzzleDateFormatter, requestedPuzzle } from '../archive';
 import { createCommunityApi, createCommunityComparison } from '../community';
 import type { CommunityStanding } from '../community-api';
 import { nextPuzzleStart } from '../countdown';
@@ -16,6 +16,7 @@ import {
   startGame,
   type GameState,
 } from '../engine';
+import { setUpPageLanguage } from '../i18n/page-language';
 import { describePuzzleConfig } from '../puzzle-summary';
 import type { ShareableResult } from '../share';
 import { computePlayerStats } from '../stats';
@@ -24,6 +25,7 @@ import { openDialog, wireDialog } from '../ui/dialogs';
 import { requireElement } from '../ui/dom';
 import { mountGameSession } from '../ui/game-session';
 import { renderVerdictRule } from '../ui/outcome-breakdown';
+import { connectLanguageMenu } from '../ui/language-menu';
 import { createArchiveResultsDialog, createResultsDialog } from '../ui/results-dialog';
 import { connectSettingsDialog, displayOptionsFor } from '../ui/settings-dialog';
 import { createToast } from '../ui/toast';
@@ -43,6 +45,11 @@ interface PlayedPuzzle {
 }
 
 const storage = createGameStorage(browserLocalStorage());
+const { language, messages, formattingLocale } = setUpPageLanguage(
+  document,
+  storage.loadSettings().language,
+  navigator.languages,
+);
 const today = localCalendarDate(new Date());
 // A device clock set before launch still gets a playable puzzle: #1.
 const todayPuzzleNumber = Math.max(1, puzzleNumberForDate(today));
@@ -53,8 +60,7 @@ if (requested.kind !== 'past' && window.location.search !== '') {
   // Keep the address bar in step with the game: a bad or future number plays today's puzzle.
   window.history.replaceState(null, '', '/');
 }
-if (requested.kind === 'not-out-yet')
-  toast.show(`Puzzle #${requested.puzzleNumber} isn't out yet. Here's today's.`);
+if (requested.kind === 'not-out-yet') toast.show(messages.daily.notOutYet(requested.puzzleNumber));
 const played = requested.kind === 'past' ? pastPuzzle(requested.puzzleNumber) : todaysPuzzle();
 const { puzzleNumber } = played;
 
@@ -76,9 +82,10 @@ const initialState = restoredState ?? startGame(puzzle).state;
 
 const howToPlayDialog = requireElement('how-to-play-dialog', HTMLDialogElement);
 wireDialog(howToPlayDialog);
-renderVerdictRule(requireElement('verdict-rule', HTMLElement));
-requireElement('daily-constants', HTMLElement).textContent =
-  `Every daily puzzle: ${describePuzzleConfig(DAILY_PUZZLE_CONFIG)}`;
+renderVerdictRule(requireElement('verdict-rule', HTMLElement), messages);
+requireElement('daily-constants', HTMLElement).textContent = messages.summary.everyDailyPuzzle(
+  describePuzzleConfig(DAILY_PUZZLE_CONFIG, messages.summary),
+);
 requireElement('puzzle-label', HTMLElement).textContent = `#${puzzleNumber}`;
 
 const session = mountGameSession({
@@ -86,6 +93,7 @@ const session = mountGameSession({
   initialState,
   display: displayOptionsFor(storage.loadSettings()),
   toast,
+  messages,
   elements: {
     boardContainer: requireElement('board', HTMLElement),
     outbreakBanner: requireElement('outbreak-banner', HTMLElement),
@@ -128,7 +136,7 @@ function shareableResult(state: GameState): ShareableResult | undefined {
 }
 
 function todaysPuzzle(): PlayedPuzzle {
-  const resultsDialog = createResultsDialog(nextPuzzleStart(today));
+  const resultsDialog = createResultsDialog(nextPuzzleStart(today), messages);
   const progress = storage.loadDailyProgress();
   return {
     puzzleNumber: todayPuzzleNumber,
@@ -153,16 +161,16 @@ function todaysPuzzle(): PlayedPuzzle {
 }
 
 function pastPuzzle(pastPuzzleNumber: number): PlayedPuzzle {
-  const resultsDialog = createArchiveResultsDialog();
+  const resultsDialog = createArchiveResultsDialog(messages);
   const date = calendarDateForPuzzleNumber(pastPuzzleNumber);
   const dateElement = requireElement('archive-date', HTMLTimeElement);
   dateElement.dateTime = [date.year, date.month, date.day]
     .map((part, index) => String(part).padStart(index === 0 ? 4 : 2, '0'))
     .join('-');
-  dateElement.textContent = formatPuzzleDate(date);
+  dateElement.textContent = puzzleDateFormatter(formattingLocale)(date);
   requireElement('archive-banner', HTMLElement).hidden = false;
   document.documentElement.classList.add('playing-archive');
-  document.title = `Germle #${pastPuzzleNumber} — from the archive`;
+  document.title = messages.daily.archiveTitle(pastPuzzleNumber);
   return {
     puzzleNumber: pastPuzzleNumber,
     playedFrom: 'archive',
@@ -186,6 +194,7 @@ function pastPuzzle(pastPuzzleNumber: number): PlayedPuzzle {
 }
 
 const settingsDialog = connectSettingsDialog(storage, session);
+connectLanguageMenu(storage, language);
 
 requireElement('open-how-to-play', HTMLButtonElement).addEventListener('click', () => {
   openDialog(howToPlayDialog);

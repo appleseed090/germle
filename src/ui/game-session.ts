@@ -10,7 +10,7 @@ import {
   type GameStep,
   type Puzzle,
 } from '../engine';
-import { pluralize } from '../pluralize';
+import type { Messages } from '../i18n/messages';
 import { verdictForScore } from '../verdict';
 import { createBoard, type Board } from './board';
 import { renderVerdict } from './outcome-breakdown';
@@ -39,6 +39,8 @@ export interface GameSessionOptions {
   readonly elements: GameSessionElements;
   readonly display: GameDisplayOptions;
   readonly toast: Toast;
+  /** The page's language. */
+  readonly messages: Pick<Messages, 'game' | 'verdicts'>;
   /** Called after every legal move, before its animation; persist here. */
   readonly onMove: (step: GameStep) => void;
   /** Called once the final move's animation has finished. */
@@ -59,6 +61,7 @@ const BANNER_DURATION = 1800;
 /** Mounts a game on the page and starts accepting taps. */
 export function mountGameSession(options: GameSessionOptions): GameSession {
   const { puzzle, elements, toast } = options;
+  const text = options.messages.game;
   let state = options.initialState;
   let bannerTimer: number | undefined;
   const layoutBounds = layoutBoundsFor(puzzle.config.nodeCount);
@@ -73,6 +76,7 @@ export function mountGameSession(options: GameSessionOptions): GameSession {
       ),
       layoutBounds,
       reduceMotion: options.display.reduceMotion,
+      text,
       onNodeActivate: (node) => {
         void handleActivate(node);
       },
@@ -104,9 +108,9 @@ export function mountGameSession(options: GameSessionOptions): GameSession {
   function explainUntappable(node: number): void {
     const status = state.nodeStatuses[node];
     if (state.phase === 'ended') return;
-    if (status === 'infected') toast.show('Already infected. Quarantine a healthy person.');
+    if (status === 'infected') toast.show(text.alreadyInfected);
     else if (state.phase === 'vaccinate' && puzzle.isRefuser[node] === true)
-      toast.show('This person refuses vaccines.');
+      toast.show(text.refusesVaccines);
   }
 
   function updateToolbar(): void {
@@ -115,21 +119,20 @@ export function mountGameSession(options: GameSessionOptions): GameSession {
     toolbarResultsButton.hidden = state.phase !== 'ended';
     counterSecondary.textContent = '';
     if (state.phase === 'vaccinate') {
-      phaseLabel.textContent = 'Vaccinate';
-      counter.textContent = pluralize(state.vaccinesRemaining, 'vaccine', 'vaccines') + ' left';
-      instruction.textContent = `Vaccinate ${pluralize(puzzle.config.vaccineCount, 'person', 'people')} to break up the network`;
+      phaseLabel.textContent = text.phaseVaccinate;
+      counter.textContent = text.vaccinesLeft(state.vaccinesRemaining);
+      instruction.textContent = text.vaccinateInstruction(puzzle.config.vaccineCount);
     } else if (state.phase === 'quarantine') {
       const { infected } = countOutcomes(state);
-      phaseLabel.textContent = 'Quarantine';
-      counter.textContent = `${state.quarantineCount} quarantined`;
-      counterSecondary.textContent = `${infected} infected`;
-      instruction.textContent =
-        'Tap a healthy person to quarantine them. Each quarantine passes one day.';
+      phaseLabel.textContent = text.phaseQuarantine;
+      counter.textContent = text.quarantinedCount(state.quarantineCount);
+      counterSecondary.textContent = text.infectedCount(infected);
+      instruction.textContent = text.quarantineInstruction;
     } else {
       const score = scorePercent(countOutcomes(state));
-      renderVerdict(phaseLabel, score);
-      counter.textContent = `${score}% saved`;
-      instruction.textContent = 'The outbreak has nowhere left to go.';
+      renderVerdict(phaseLabel, score, options.messages.verdicts);
+      counter.textContent = text.percentSaved(score);
+      instruction.textContent = text.endedInstruction;
     }
   }
 
@@ -137,22 +140,16 @@ export function mountGameSession(options: GameSessionOptions): GameSession {
     const messages: string[] = [];
     for (const event of step.events) {
       if (event.kind === 'vaccinated') {
-        messages.push(
-          `Vaccinated person ${event.node + 1}. ${pluralize(state.vaccinesRemaining, 'vaccine', 'vaccines')} left.`,
-        );
+        messages.push(text.announceVaccinated(event.node + 1, state.vaccinesRemaining));
       } else if (event.kind === 'outbreak-started') {
-        messages.push(
-          `Outbreak! ${event.indexPatients.map((node) => `Person ${node + 1}`).join(' and ')} infected.`,
-        );
+        messages.push(text.announceOutbreak(event.indexPatients.map((node) => node + 1)));
       } else if (event.kind === 'quarantined') {
-        messages.push(`Quarantined person ${event.node + 1}.`);
+        messages.push(text.announceQuarantined(event.node + 1));
       } else if (event.kind === 'spread') {
-        messages.push(
-          `Day ${event.turn + 1}: ${pluralize(event.transmissions.length, 'new infection', 'new infections')}.`,
-        );
+        messages.push(text.announceSpread(event.turn + 1, event.transmissions.length));
       } else {
         const score = scorePercent(countOutcomes(state));
-        messages.push(`Outbreak ${verdictForScore(score).toLowerCase()}. ${score}% saved.`);
+        messages.push(text.announceEnded(verdictForScore(score), score));
       }
     }
     elements.announcer.textContent = messages.join(' ');

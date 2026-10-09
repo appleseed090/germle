@@ -1,11 +1,20 @@
 import '../styles/main.css';
-import { buildArchiveEntries, formatPuzzleDate, type ArchiveEntry } from '../archive';
+import { buildArchiveEntries, puzzleDateFormatter, type ArchiveEntry } from '../archive';
 import { localCalendarDate, puzzleNumberForDate } from '../engine';
+import { setUpPageLanguage } from '../i18n/page-language';
 import { browserLocalStorage, createGameStorage } from '../storage';
 import { requireElement } from '../ui/dom';
+import { connectLanguageMenu } from '../ui/language-menu';
 import { verdictForScore } from '../verdict';
 
 const storage = createGameStorage(browserLocalStorage());
+const { language, messages, formattingLocale } = setUpPageLanguage(
+  document,
+  storage.loadSettings().language,
+  navigator.languages,
+);
+connectLanguageMenu(storage, language);
+const formatPuzzleDate = puzzleDateFormatter(formattingLocale);
 // A device clock set before launch still lists puzzle #1, as the game page plays it.
 const todayPuzzleNumber = Math.max(1, puzzleNumberForDate(localCalendarDate(new Date())));
 const dailyProgress = storage.loadDailyProgress();
@@ -31,16 +40,16 @@ function renderEntry(entry: ArchiveEntry): HTMLLIElement {
 
   const date = document.createElement('span');
   date.className = 'archive-date';
-  date.textContent = entry.isToday ? 'Today' : formatPuzzleDate(entry.date);
+  date.textContent = entry.isToday ? messages.archive.today : formatPuzzleDate(entry.date);
 
   const status = document.createElement('span');
   status.className = 'archive-status';
   if (entry.result !== undefined) {
     const verdict = verdictForScore(entry.result.score);
-    status.textContent = `${entry.result.score}% ${verdict}`;
+    status.textContent = messages.archive.result(entry.result.score, messages.verdicts[verdict]);
     status.dataset['verdict'] = verdict.toLowerCase();
   } else {
-    status.textContent = entry.inProgress ? 'In progress' : 'Play';
+    status.textContent = entry.inProgress ? messages.archive.inProgress : messages.archive.play;
     status.dataset['state'] = entry.inProgress ? 'in-progress' : 'unplayed';
   }
 

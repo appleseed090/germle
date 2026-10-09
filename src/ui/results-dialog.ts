@@ -1,5 +1,6 @@
 import type { CommunityStanding } from '../community-api';
 import { formatCountdown } from '../countdown';
+import type { Messages } from '../i18n/messages';
 import { buildShareText, copyShareText, type ShareableResult } from '../share';
 import { histogramBand, histogramBandLabel } from '../score-bands';
 import type { PlayerStats } from '../stats';
@@ -37,9 +38,11 @@ export interface ArchiveResultsDialog extends ResultsDialog {
  *
  * @param nextPuzzleAt - When the next daily puzzle unlocks; after that the countdown is replaced
  *   by a link to it, for pages left open past midnight.
+ * @param messages - The page's language. The share text stays English in every language: people
+ *   and tests parse its first line.
  */
-export function createResultsDialog(nextPuzzleAt: Date): DailyResultsDialog {
-  const { dialog, showResult, showCommunity } = bindResultSummary();
+export function createResultsDialog(nextPuzzleAt: Date, messages: Messages): DailyResultsDialog {
+  const { dialog, showResult, showCommunity } = bindResultSummary(messages);
   const countdown = requireElement('countdown', HTMLElement);
   const countdownLine = requireElement('countdown-line', HTMLElement);
   const newPuzzleReady = requireElement('new-puzzle-ready', HTMLElement);
@@ -85,13 +88,12 @@ export function createResultsDialog(nextPuzzleAt: Date): DailyResultsDialog {
  * Binds the same dialog markup for a past puzzle: the countdown, statistics and archive footnote
  * are hidden, and links to more past puzzles and today's take the countdown's place.
  */
-export function createArchiveResultsDialog(): ArchiveResultsDialog {
-  const { dialog, showResult, showCommunity } = bindResultSummary();
+export function createArchiveResultsDialog(messages: Messages): ArchiveResultsDialog {
+  const { dialog, showResult, showCommunity } = bindResultSummary(messages);
   for (const id of ['countdown-line', 'new-puzzle-ready', 'stats', 'results-archive-footnote'])
     requireElement(id, HTMLElement).hidden = true;
   requireElement('archive-links', HTMLElement).hidden = false;
-  requireElement('result-pending', HTMLElement).textContent =
-    'Finish this puzzle to see your score.';
+  requireElement('result-pending', HTMLElement).textContent = messages.results.finishThisPuzzle;
   return {
     open() {
       openDialog(dialog);
@@ -104,7 +106,7 @@ export function createArchiveResultsDialog(): ArchiveResultsDialog {
 }
 
 /** The parts both kinds of results share: score, verdict, breakdown, Share and the community. */
-function bindResultSummary(): {
+function bindResultSummary(messages: Messages): {
   readonly dialog: HTMLDialogElement;
   readonly showResult: (result: ShareableResult | undefined) => void;
   readonly showCommunity: ResultsDialog['showCommunity'];
@@ -131,7 +133,7 @@ function bindResultSummary(): {
     shareStatus.textContent = '';
     const clipboard = 'clipboard' in navigator ? navigator.clipboard : undefined;
     void copyShareText(text, clipboard).then((outcome) => {
-      shareStatus.textContent = outcome === 'copied' ? 'Copied to clipboard' : '';
+      shareStatus.textContent = outcome === 'copied' ? messages.results.copied : '';
       if (outcome === 'manual') {
         shareFallback.hidden = false;
         shareFallbackText.value = text;
@@ -143,7 +145,7 @@ function bindResultSummary(): {
 
   return {
     dialog,
-    showCommunity: bindCommunityComparison(),
+    showCommunity: bindCommunityComparison(messages.community),
     showResult(result) {
       summary.hidden = result === undefined;
       pending.hidden = result !== undefined;
@@ -152,7 +154,7 @@ function bindResultSummary(): {
       if (result !== undefined) {
         title.textContent = `Germle #${result.puzzleNumber}`;
         score.textContent = `${result.score}%`;
-        renderVerdict(verdict, result.score);
+        renderVerdict(verdict, result.score, messages.verdicts);
         renderOutcomeBreakdown(breakdownBar, breakdownLegend, result.counts);
         shareText = buildShareText(result);
       }

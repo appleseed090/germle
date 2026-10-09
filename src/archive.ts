@@ -39,16 +39,18 @@ export function requestedPuzzle(
     : { kind: 'not-out-yet', puzzleNumber };
 }
 
-const PUZZLE_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
-  weekday: 'short',
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-});
-
-/** A puzzle's day, short and in the player's locale: "Tue, Oct 6, 2026" in US English. */
-export function formatPuzzleDate(date: CalendarDate): string {
-  return PUZZLE_DATE_FORMAT.format(new Date(date.year, date.month - 1, date.day));
+/**
+ * Formats puzzle days, short and in `locale`: "Tue, Oct 6, 2026" in US English, "2026年10月6日周二"
+ * in Simplified Chinese.
+ */
+export function puzzleDateFormatter(locale: string): (date: CalendarDate) => string {
+  const format = new Intl.DateTimeFormat(locale, {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+  return (date) => format.format(new Date(date.year, date.month - 1, date.day));
 }
 
 /** One row of the archive list. */

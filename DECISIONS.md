@@ -219,7 +219,7 @@ brief are not repeated here.
   the "Contained" verdict stay readable on dark surfaces; the Contained pill uses the same pair.
 - **A saved theme is applied by a render-blocking classic script, not inline and not a module.**
   The CSP forbids inline scripts, and module scripts are deferred, so they can run after the first
-  paint. A plugin in `vite.config.ts` builds `src/theme-before-paint.ts` on its own into an IIFE
+  paint. A plugin in `vite.config.ts` builds `src/before-paint.ts` on its own into an IIFE
   named by content hash under `/assets/`, which `_headers` caches as immutable; it shares the
   settings parser and theme code with the game instead of copying them. The dev server loads it
   as a module, so a saved theme may flash there only.
@@ -337,11 +337,12 @@ brief are not repeated here.
   The daily header reads How to play, Results, Practice (a dumbbell), About (an "i") and Settings;
   the practice header reads Setup, About and Settings. The practice dialogs keep their "Today's
   puzzle" links, and the wordmark still links home.
-- **On phones up to 420 px the header tightens to stay one row:** icon buttons 34 px wide (still
-  44 px tall), a 1.15rem wordmark, 6 px gaps. Below 340 px only the logo mark shows; its link is
-  still labelled "Germle home". Five buttons need about 406 px otherwise, which pushed the page
-  wider than the screen and cut off Settings. An e2e test fails if the page is wider than a
-  360 px phone.
+- **On phones up to 420 px the header tightens to stay one row:** icon buttons 32 px wide (still
+  44 px tall), a 1.15rem wordmark, 6 px gaps; up to 380 px the gaps and right padding drop to
+  4 px. Below 340 px only the logo mark shows; its link is still labelled "Germle home". The daily
+  header has six buttons since the language globe arrived (see "Languages"); at 34 px they made
+  a 360 px page 16 px too wide once the puzzle number has three digits. An e2e test fails if the
+  page is wider than a 360 px phone, with the puzzle number set to `#365`.
 
 ## Locked puzzles
 
@@ -388,7 +389,7 @@ brief are not repeated here.
   each player's local midnight, so a number one player sees as tomorrow's is already out elsewhere.
 - **Players find it from today's game.** How to play ends with "Missed one? Play it in the
   archive", and today's results end with "Missed a day? Play past puzzles in the archive". The
-  header was left alone: its five icons already need the tightened phone layout to fit 360 px.
+  header was left alone: its icons already need the tightened phone layout to fit 360 px.
 
 ## Community scores (M4)
 
@@ -514,3 +515,52 @@ moves }`, rebuilds the puzzle with `createPuzzle(DAILY_PUZZLE_CONFIG, dailySeedK
   server's receipt time in UTC, not the player's local time; the page says so to make clear it
   reveals no location. It replaces "No accounts, no tracking in the game", which stopped being the
   whole truth once scores leave the browser. The meta description now reads "No account needed".
+
+## Languages
+
+- **English, Simplified Chinese and Traditional Chinese, on one site.** The owner asked for both
+  Chinese scripts, a globe in the top right to switch, and as little change as possible. Every
+  page keeps its URL; the language is picked in the browser. Considered and dropped: a copy of
+  each page per language under `/zh-hans/…` (crawlers would see translated link previews, but it
+  adds routes and changes the public link formats) and XLIFF files (useful for outside
+  translators and their tools, which Germle does not have; Node cannot parse XML without a new
+  dependency).
+- **Which language:** the one picked from the globe, stored as `language` in
+  `germle.v1.settings` (`null`, the default, follows the browser), else the first of
+  `navigator.languages` that Germle has, else English. Chinese goes by script, through
+  `Intl.Locale(tag).maximize()`: `zh-TW`, `zh-HK`, `zh-MO` and `zh-Hant` get Traditional; `zh`,
+  `zh-CN`, `zh-SG` and `zh-Hans` get Simplified. Settings saved before this load as `null`.
+- **Picking a language reloads the page,** so no module has to redraw its text live. Daily and
+  archive games are saved after every move and come back; a practice game restarts on the same
+  network, since practice moves are not saved.
+- **The page shells stay English and are translated in place.** An element's `data-i18n` key
+  names its text, `data-i18n-label` its `aria-label`. A translation can name the element's own
+  child elements by tag (`可以在<a>往期谜题</a>里补玩。`), so word order can change while links
+  keep their `href` and elements keep the ids scripts look up; `<span></span>` with nothing
+  inside keeps the child's content (a colour swatch, a count). Translations are never parsed as
+  HTML: anything else in angle brackets throws. A missing key, or a translation that drops or
+  invents a child element, throws as the page starts; `src/i18n/shell.test.ts` checks that every
+  language translates exactly the keys the four HTML files use.
+- **Script text lives in typed catalogs.** `Messages` lists every string the scripts write; each
+  language is an object of that type, so a missing string fails `npm run typecheck`. Counts are
+  passed as numbers and each language words them itself (English plurals, none in Chinese).
+- **No flash of English.** The render-blocking before-paint script (formerly the theme script,
+  now `src/before-paint.ts`) sets `<html lang>`, which also picks Chinese fonts over Japanese
+  glyph shapes, and for a language other than English marks `<html data-translating>`, which
+  hides the page until its script has translated it. If the scripts fail to load, a 1.5 s CSS
+  animation shows the English page anyway; an e2e test blocks the scripts to check.
+- **Dates follow the browser's regional form of the chosen language** (`en-GB` dates for a British
+  browser in English, `zh-HK` for Hong Kong in Traditional Chinese), else the language itself.
+  Before, archive dates used the browser's locale whatever the page's language.
+- **The share card stays English in every language.** Its first line is matched by tests and by
+  people parsing pasted results (see "Remember" in `TODO.md`).
+- **Traditional Chinese uses Taiwan's words** (網路, 設定, 機率, 剪貼簿); Simplified uses the
+  mainland's (网络, 设置, 概率, 剪贴板). Game terms: vaccinate 接种/接種, quarantine 隔离/隔離,
+  refuser 拒绝接种者/拒絕接種者, outbreaks (index patients) 初始感染者, saved 免于感染/免於感染,
+  Contained 已控制, Spread 已扩散/已擴散, untouched 未波及, archive 往期谜题/過往謎題, practice
+  Setup 自定义/自訂 (Settings is 设置/設定). Translated by Claude; to be reviewed by the owner.
+- **Not translated:** meta descriptions and link previews (crawlers do not run scripts),
+  `<noscript>` text, the web manifest and `og.png`.
+- **Page weight:** the daily page went from 23.3 KB to 31.4 KB gzipped; every page carries all
+  three catalogs. Loading only the page's language would save English players about 6 KB and
+  Chinese players about 3 KB, but a translated page would then wait for one more request.

@@ -23,7 +23,12 @@ describe('createGameStorage', () => {
   it('round-trips settings, progress, results and the how-to-play flag', () => {
     const storage = createGameStorage(createMemoryStore());
     expect(storage.loadSettings()).toEqual(DEFAULT_SETTINGS);
-    const settings = { reduceMotion: true, theme: 'dark', showContactCounts: true } as const;
+    const settings = {
+      reduceMotion: true,
+      theme: 'dark',
+      showContactCounts: true,
+      language: 'zh-Hant',
+    } as const;
     storage.saveSettings(settings);
     expect(storage.loadSettings()).toEqual(settings);
 
@@ -52,7 +57,7 @@ describe('createGameStorage', () => {
     });
   });
 
-  it('loads older settings as following the device theme, with contact numbers hidden', () => {
+  it('loads older settings as following the device theme and language, with contact numbers hidden', () => {
     const store = createMemoryStore({
       'germle.v1.settings': JSON.stringify({ reduceMotion: false }),
     });
@@ -60,7 +65,15 @@ describe('createGameStorage', () => {
       reduceMotion: false,
       theme: null,
       showContactCounts: false,
+      language: null,
     });
+  });
+
+  it('follows the browser for a stored language Germle does not offer', () => {
+    for (const language of ['fr', 'zh', 'zh-hans', 42]) {
+      const store = createMemoryStore({ 'germle.v1.settings': JSON.stringify({ language }) });
+      expect(createGameStorage(store).loadSettings().language).toBeNull();
+    }
   });
 
   it('loads settings saved with the retired size-by-contacts switch and drops it on the next save', () => {
@@ -73,12 +86,18 @@ describe('createGameStorage', () => {
     });
     const storage = createGameStorage(store);
     const settings = storage.loadSettings();
-    expect(settings).toEqual({ reduceMotion: true, theme: 'dark', showContactCounts: false });
+    expect(settings).toEqual({
+      reduceMotion: true,
+      theme: 'dark',
+      showContactCounts: false,
+      language: null,
+    });
     storage.saveSettings(settings);
     expect(JSON.parse(store.data.get('germle.v1.settings') ?? '')).toEqual({
       reduceMotion: true,
       theme: 'dark',
       showContactCounts: false,
+      language: null,
     });
   });
 
@@ -90,6 +109,7 @@ describe('createGameStorage', () => {
       reduceMotion: null,
       theme: 'light',
       showContactCounts: false,
+      language: null,
     });
     expect(loadSettings(store)).toEqual(createGameStorage(store).loadSettings());
     expect(loadSettings(undefined)).toEqual(DEFAULT_SETTINGS);

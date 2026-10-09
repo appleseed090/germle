@@ -10,6 +10,7 @@ import {
   type Point,
   type Puzzle,
 } from '../engine';
+import type { Messages } from '../i18n/messages';
 import { playPhases, type AnimationPhase, type RunningAnimation } from './animation';
 import {
   fitLayoutToViewport,
@@ -26,6 +27,8 @@ export interface BoardOptions {
   readonly layout: readonly Point[];
   readonly layoutBounds: LayoutBounds;
   readonly reduceMotion: boolean;
+  /** The board's labels for screen readers, in the page's language. */
+  readonly text: Pick<Messages['game'], 'boardLabel' | 'describePerson'>;
   /** Called when the player taps, clicks or presses Enter/Space on a person (legal or not). */
   readonly onNodeActivate: (node: number) => void;
 }
@@ -91,7 +94,7 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
   const svg = createSvgElement('svg', {
     class: 'board-svg',
     role: 'group',
-    'aria-label': 'Social network',
+    'aria-label': options.text.boardLabel,
   });
   const edgeLayer = createSvgElement('g', { class: 'edges' });
   const pathogenLayer = createSvgElement('g', { class: 'pathogens' });
@@ -254,10 +257,8 @@ export function createBoard(options: BoardOptions, initialState: GameState): Boa
     contactCount: number,
     refusalMatters: boolean,
   ): string {
-    const contacts = contactCount === 1 ? '1 contact' : `${contactCount} contacts`;
-    const refusal = refusalMatters && puzzle.isRefuser[node] === true ? ', refuses vaccines' : '';
-    const statusText = status === 'susceptible' ? 'healthy' : status;
-    return `Person ${node + 1}: ${statusText}${refusal}, ${contacts}`;
+    const refusesVaccines = refusalMatters && puzzle.isRefuser[node] === true;
+    return options.text.describePerson(node + 1, status, refusesVaccines, contactCount);
   }
 
   function render(nextState: GameState): void {

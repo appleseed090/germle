@@ -11,6 +11,9 @@ import {
   type CommunityApi,
   type FetchFunction,
 } from './community';
+import { en } from './i18n/en';
+import { zhHans } from './i18n/zh-hans';
+import { zhHant } from './i18n/zh-hant';
 import { createGameStorage, type KeyValueStore } from './storage';
 
 const PLAYER_ID = '3f1c2a9e-5b7d-4c8e-9a1f-2b3c4d5e6f70';
@@ -228,14 +231,27 @@ describe('the comparison text', () => {
   });
 
   it('describes the rank and the top score', () => {
-    expect(describeRank(STANDING)).toBe('Better than 72% of 318 players');
-    expect(describeRank({ ...STANDING, players: 1318, below: 949 })).toBe(
+    expect(describeRank(STANDING, en.community)).toBe('Better than 72% of 318 players');
+    expect(describeRank({ ...STANDING, players: 1318, below: 949 }, en.community)).toBe(
       'Better than 72% of 1,318 players',
     );
-    expect(describeTopScore(STANDING)).toEqual(['Top score so far: 88%', 'reached by 14 players']);
-    expect(describeTopScore({ ...STANDING, bestCount: 1 })).toEqual([
+    expect(describeTopScore(STANDING, en.community)).toEqual([
+      'Top score so far: 88%',
+      'reached by 14 players',
+    ]);
+    expect(describeTopScore({ ...STANDING, bestCount: 1 }, en.community)).toEqual([
       'Top score so far: 88%',
       'reached by 1 player',
+    ]);
+  });
+
+  it('describes the rank and the top score in Chinese, grouping thousands as English does', () => {
+    expect(describeRank({ ...STANDING, players: 1318, below: 949 }, zhHans.community)).toBe(
+      '超过了 1,318 名玩家中 72% 的人',
+    );
+    expect(describeTopScore(STANDING, zhHant.community)).toEqual([
+      '目前最高分：88%',
+      '共 14 位玩家達到',
     ]);
   });
 

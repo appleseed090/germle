@@ -15,8 +15,15 @@ External memory for the project: what is pending, constraints to remember, defer
 - [x] Community comparison (from the M4 backlog): finished daily and archive games are compared
       with everyone who played the puzzle, through a Worker API and a D1 database. Code done on
       `claude/optimistic-ptolemy-q8qpjc`; live only after the owner's steps below.
+- [x] Languages: English, Simplified Chinese and Traditional Chinese, with a globe button in every
+      header (see "Languages" in `DECISIONS.md`).
 
 ## Needs the owner
+
+- [ ] **Review the Chinese translations** on the branch preview before merging: every page in
+      简体中文 and 繁體中文 (globe button, top right), a full daily game and its results, practice
+      setup and results, the archive and About. Wording lives in `src/i18n/zh-hans.ts` and
+      `src/i18n/zh-hant.ts`.
 
 - [x] GitHub default branch switched to `main`.
 - [x] Cloudflare Worker connected to the repo; builds and deploys from `main`.
@@ -81,6 +88,11 @@ External memory for the project: what is pending, constraints to remember, defer
 
 ## Remember
 
+- Every English text change must change the Chinese catalogs in the same commit:
+  `src/i18n/zh-hans.ts` and `src/i18n/zh-hant.ts` (their `shell` holds the page-shell text, keyed
+  by `data-i18n`). A new script string is a new `Messages` field, which the compiler then demands
+  in every language; a new or renamed `data-i18n` key fails `src/i18n/shell.test.ts` until both
+  catalogs have it. Nothing flags an English edit to an existing key, so check by hand.
 - The share card's first line (`Germle #<n> · <score>% saved`) is matched by the e2e tests and by
   anyone parsing pasted results. Its last line is `https://germle.com` (the scheme makes Discord
   link it); archive results keep the first line and end with `https://germle.com/?puzzle=<n>`.

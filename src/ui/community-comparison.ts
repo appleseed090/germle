@@ -6,6 +6,7 @@ import {
   isStandingShown,
   type ChartBand,
 } from '../community';
+import type { Messages } from '../i18n/messages';
 import { requireElement } from './dom';
 
 /**
@@ -16,10 +17,9 @@ import { requireElement } from './dom';
  *
  * @returns Shows numbers for a score, or hides the section for `undefined` or too few players.
  */
-export function bindCommunityComparison(): (
-  standing: CommunityStanding | undefined,
-  score: number,
-) => void {
+export function bindCommunityComparison(
+  text: Messages['community'],
+): (standing: CommunityStanding | undefined, score: number) => void {
   const section = requireElement('community', HTMLElement);
   const rank = requireElement('community-rank', HTMLElement);
   const topScore = requireElement('community-top-score', HTMLElement);
@@ -29,18 +29,20 @@ export function bindCommunityComparison(): (
       section.hidden = true;
       return;
     }
-    rank.textContent = describeRank(standing);
-    const [best, reachedBy] = describeTopScore(standing);
+    rank.textContent = describeRank(standing, text);
+    const [best, reachedBy] = describeTopScore(standing, text);
     const reachedByPhrase = document.createElement('span');
     reachedByPhrase.className = 'community-reached-by';
     reachedByPhrase.textContent = reachedBy;
     topScore.replaceChildren(best, ' · ', reachedByPhrase);
-    chart.replaceChildren(...communityChartBands(standing, score).map(renderChartBand));
+    chart.replaceChildren(
+      ...communityChartBands(standing, score).map((band) => renderChartBand(band, text)),
+    );
     section.hidden = false;
   };
 }
 
-function renderChartBand(band: ChartBand): HTMLLIElement {
+function renderChartBand(band: ChartBand, text: Messages['community']): HTMLLIElement {
   const column = document.createElement('li');
   column.className = band.isPlayersBand ? 'community-band community-band--yours' : 'community-band';
   const track = document.createElement('span');
@@ -51,11 +53,11 @@ function renderChartBand(band: ChartBand): HTMLLIElement {
   track.append(bar);
   const description = document.createElement('span');
   description.className = 'visually-hidden';
-  description.textContent = `${band.label}%: ${band.players} ${band.players === 1 ? 'player' : 'players'}${band.isPlayersBand ? ', your score' : ''}`;
+  description.textContent = text.band(band.label, band.players, band.isPlayersBand);
   const marker = document.createElement('span');
   marker.className = 'community-band-marker';
   marker.setAttribute('aria-hidden', 'true');
-  marker.textContent = band.isPlayersBand ? 'You' : '';
+  marker.textContent = band.isPlayersBand ? text.you : '';
   column.append(track, description, marker);
   return column;
 }
