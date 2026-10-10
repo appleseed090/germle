@@ -63,7 +63,7 @@
           <span>Germle</span>
         </a>
         <span class="puzzle-label" id="puzzle-label"></span>
-        <nav class="header-actions" aria-label="Game menu">
+        <nav class="header-actions" aria-label="Site menu">
           <button
             class="icon-button"
             type="button"
@@ -78,22 +78,12 @@
           <dialog class="menu-panel" id="game-menu" aria-label="Menu">
             <ul class="menu-list">
               <li>
-                <button class="menu-item" type="button" id="open-how-to-play">
+                <a class="menu-item" href="/" id="menu-today" aria-current="page">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="12" cy="12" r="9" />
-                    <path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14" />
-                    <circle class="icon-dot" cx="12" cy="17.2" r="1.1" />
+                    <path d="M8 5.5v13l10.5-6.5z" />
                   </svg>
-                  How to play
-                </button>
-              </li>
-              <li>
-                <button class="menu-item" type="button" id="open-results">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M5 20V12M12 20V5M19 20V9" />
-                  </svg>
-                  Results
-                </button>
+                  Today's puzzle
+                </a>
               </li>
               <li>
                 <a class="menu-item" href="/archive">
@@ -111,6 +101,25 @@
                   </svg>
                   Practice
                 </a>
+              </li>
+              <li class="menu-separator" role="presentation"></li>
+              <li>
+                <button class="menu-item" type="button" id="open-how-to-play">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14" />
+                    <circle class="icon-dot" cx="12" cy="17.2" r="1.1" />
+                  </svg>
+                  How to play
+                </button>
+              </li>
+              <li>
+                <button class="menu-item" type="button" id="open-results">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 20V12M12 20V5M19 20V9" />
+                  </svg>
+                  Results
+                </button>
               </li>
               <li class="menu-separator" role="presentation"></li>
               <li>

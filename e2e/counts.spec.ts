@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures';
+import { chooseFromMenu } from './menu';
 
 interface PersonOnBoard {
   readonly shownCount: number;
@@ -107,7 +108,7 @@ test('refusers carry a cross while vaccinating and infected people a dot, until 
   for (const count of await counts.all()) await expect(count).toBeHidden();
 
   const showNumbers = page.getByRole('checkbox', { name: 'Show contact numbers' });
-  await page.getByRole('button', { name: 'Settings' }).click();
+  await chooseFromMenu(page, 'Settings');
   await expect(showNumbers).not.toBeChecked();
   await showNumbers.check();
   await expect(page.locator('.node-cross:visible, .node-core:visible')).toHaveCount(0);
@@ -117,7 +118,7 @@ test('refusers carry a cross while vaccinating and infected people a dot, until 
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-contact-counts', 'shown');
   await expect(page.locator('.node-count:visible')).toHaveCount(30);
-  await page.getByRole('button', { name: 'Settings' }).click();
+  await chooseFromMenu(page, 'Settings');
   await expect(showNumbers).toBeChecked();
   await showNumbers.uncheck();
   await expect(page.locator('.node-count:visible')).toHaveCount(0);
@@ -133,7 +134,7 @@ test('refusers fade to healthy over 0.6 s, and at once with Skip animations', as
       .first()
       .evaluate((disc) => getComputedStyle(disc).transitionDuration);
   expect(await discFade()).toBe('0.6s');
-  await page.getByRole('button', { name: 'Settings' }).click();
+  await chooseFromMenu(page, 'Settings');
   await page.getByRole('checkbox', { name: 'Skip animations' }).check();
   expect(await discFade()).toBe('0s');
 });

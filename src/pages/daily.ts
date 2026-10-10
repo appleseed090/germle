@@ -162,6 +162,7 @@ function pastPuzzle(pastPuzzleNumber: number): PlayedPuzzle {
     .join('-');
   dateElement.textContent = formatPuzzleDate(date);
   requireElement('archive-banner', HTMLElement).hidden = false;
+  requireElement('menu-today', HTMLAnchorElement).removeAttribute('aria-current');
   document.documentElement.classList.add('playing-archive');
   document.title = `Germle #${pastPuzzleNumber} — from the archive`;
   return {

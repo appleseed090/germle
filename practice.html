@@ -51,22 +51,78 @@
           <span>Germle</span>
         </a>
         <span class="puzzle-label">Practice</span>
-        <nav class="header-actions" aria-label="Practice menu">
-          <button class="header-text-button" type="button" id="open-setup">Setup</button>
-          <a class="icon-button" href="/about" aria-label="About Germle">
+        <nav class="header-actions" aria-label="Site menu">
+          <button
+            class="icon-button"
+            type="button"
+            id="open-menu"
+            aria-label="Menu"
+            aria-haspopup="dialog"
+          >
             <svg viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="12" cy="12" r="9" />
-              <path d="M12 11v6" />
-              <circle class="icon-dot" cx="12" cy="7.6" r="1.1" />
-            </svg>
-          </a>
-          <button class="icon-button" type="button" id="open-settings" aria-label="Settings">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M4 7h16M4 17h16" />
-              <circle class="icon-knob" cx="9" cy="7" r="2.5" />
-              <circle class="icon-knob" cx="15" cy="17" r="2.5" />
+              <path d="M4 7h16M4 12h16M4 17h16" />
             </svg>
           </button>
+          <dialog class="menu-panel" id="game-menu" aria-label="Menu">
+            <ul class="menu-list">
+              <li>
+                <a class="menu-item" href="/" id="menu-today">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8 5.5v13l10.5-6.5z" />
+                  </svg>
+                  Today's puzzle
+                </a>
+              </li>
+              <li>
+                <a class="menu-item" href="/archive">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="4" y="5.5" width="16" height="14.5" rx="2" />
+                    <path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" />
+                  </svg>
+                  Archive
+                </a>
+              </li>
+              <li>
+                <a class="menu-item" href="/practice" aria-current="page">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M7 7v10M17 7v10M4 9.5v5M20 9.5v5M7 12h10" />
+                  </svg>
+                  Practice
+                </a>
+              </li>
+              <li class="menu-separator" role="presentation"></li>
+              <li>
+                <button class="menu-item" type="button" id="open-setup">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 20h4L19 9l-4-4L4 16z" />
+                    <path d="M13.5 6.5l4 4" />
+                  </svg>
+                  Setup
+                </button>
+              </li>
+              <li class="menu-separator" role="presentation"></li>
+              <li>
+                <button class="menu-item" type="button" id="open-settings">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 7h16M4 17h16" />
+                    <circle class="icon-knob" cx="9" cy="7" r="2.5" />
+                    <circle class="icon-knob" cx="15" cy="17" r="2.5" />
+                  </svg>
+                  Settings
+                </button>
+              </li>
+              <li>
+                <a class="menu-item" href="/about">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 11v6" />
+                    <circle class="icon-dot" cx="12" cy="7.6" r="1.1" />
+                  </svg>
+                  About
+                </a>
+              </li>
+            </ul>
+          </dialog>
         </nav>
       </header>
 

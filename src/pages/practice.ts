@@ -25,6 +25,7 @@ import { openDialog, wireDialog } from '../ui/dialogs';
 import { wireDisclosureButtons } from '../ui/disclosure';
 import { requireElement } from '../ui/dom';
 import { mountGameSession } from '../ui/game-session';
+import { connectHeaderMenu } from '../ui/header-menu';
 import { renderOutcomeBreakdown, renderVerdict } from '../ui/outcome-breakdown';
 import { connectSettingsDialog, displayOptionsFor } from '../ui/settings-dialog';
 import { createToast } from '../ui/toast';
@@ -85,6 +86,11 @@ requireElement('new-network', HTMLAnchorElement).href = practiceUrl({
   ...setup,
   seed: randomSeed(),
 });
+
+connectHeaderMenu(
+  requireElement('open-menu', HTMLButtonElement),
+  requireElement('game-menu', HTMLDialogElement),
+);
 
 const settingsDialog = connectSettingsDialog(storage, session);
 requireElement('open-settings', HTMLButtonElement).addEventListener('click', () => {

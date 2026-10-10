@@ -3,7 +3,13 @@ import { buildArchiveEntries, formatPuzzleDate, type ArchiveEntry } from '../arc
 import { localCalendarDate, puzzleNumberForDate } from '../engine';
 import { browserLocalStorage, createGameStorage } from '../storage';
 import { requireElement } from '../ui/dom';
+import { connectHeaderMenu } from '../ui/header-menu';
 import { verdictForScore } from '../verdict';
+
+connectHeaderMenu(
+  requireElement('open-menu', HTMLButtonElement),
+  requireElement('game-menu', HTMLDialogElement),
+);
 
 const storage = createGameStorage(browserLocalStorage());
 // A device clock set before launch still lists puzzle #1, as the game page plays it.

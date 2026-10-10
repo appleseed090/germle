@@ -35,7 +35,7 @@
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://germle.com/og.png" />
-    <link rel="stylesheet" href="/src/styles/main.css" />
+    <script type="module" src="/src/pages/about.ts"></script>
   </head>
   <body class="page-content">
     <header class="app-header">
@@ -49,7 +49,60 @@
         </svg>
         <span>Germle</span>
       </a>
-      <a class="play-link" href="/">Play today's puzzle</a>
+      <nav class="header-actions" aria-label="Site menu">
+        <a class="play-link" href="/">Play today's puzzle</a>
+        <button
+          class="icon-button"
+          type="button"
+          id="open-menu"
+          aria-label="Menu"
+          aria-haspopup="dialog"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+        </button>
+        <dialog class="menu-panel" id="game-menu" aria-label="Menu">
+          <ul class="menu-list">
+            <li>
+              <a class="menu-item" href="/" id="menu-today">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 5.5v13l10.5-6.5z" />
+                </svg>
+                Today's puzzle
+              </a>
+            </li>
+            <li>
+              <a class="menu-item" href="/archive">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="4" y="5.5" width="16" height="14.5" rx="2" />
+                  <path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" />
+                </svg>
+                Archive
+              </a>
+            </li>
+            <li>
+              <a class="menu-item" href="/practice">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M7 7v10M17 7v10M4 9.5v5M20 9.5v5M7 12h10" />
+                </svg>
+                Practice
+              </a>
+            </li>
+            <li class="menu-separator" role="presentation"></li>
+            <li>
+              <a class="menu-item" href="/about" aria-current="page">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 11v6" />
+                  <circle class="icon-dot" cx="12" cy="7.6" r="1.1" />
+                </svg>
+                About
+              </a>
+            </li>
+          </ul>
+        </dialog>
+      </nav>
     </header>
     <main class="content">
       <h1>About Germle</h1>

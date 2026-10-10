@@ -1,4 +1,5 @@
 import { expect, test } from './fixtures';
+import { chooseFromMenu } from './menu';
 import { expectVerdictToMatchScore } from './verdict';
 
 test('plays a practice game from a link and offers a replay of the same seed', async ({ page }) => {
@@ -71,7 +72,7 @@ test('fills the setup from the Easy, Medium and Hard presets', async ({ page }) 
     /people=30&neighbours=4&vaccines=4&outbreaks=1&refusers=0&contagion=35&seed=/,
   );
   await expect(page.locator('.node')).toHaveCount(30);
-  await page.getByRole('button', { name: 'Setup' }).click();
+  await chooseFromMenu(page, 'Setup');
   await expect(preset('Easy')).toBeChecked();
 });
 

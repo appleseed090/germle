@@ -20,15 +20,8 @@ async function themeColorMedia(page: Page): Promise<Record<string, string>> {
   );
 }
 
-/** The daily page keeps Settings in its menu; the practice page shows it in the header. */
-async function openSettings(page: Page): Promise<void> {
-  if (new URL(page.url()).pathname === '/practice')
-    await page.getByRole('button', { name: 'Settings' }).click();
-  else await chooseFromMenu(page, 'Settings');
-}
-
 async function chooseTheme(page: Page, theme: 'System' | 'Light' | 'Dark'): Promise<void> {
-  await openSettings(page);
+  await chooseFromMenu(page, 'Settings');
   await page.getByRole('radio', { name: theme }).check();
   await page.locator('#settings-dialog').getByRole('button', { name: 'Close' }).click();
 }
