@@ -15,6 +15,11 @@ External memory for the project: what is pending, constraints to remember, defer
 - [x] Community comparison (from the M4 backlog): finished daily and archive games are compared
       with everyone who played the puzzle, through a Worker API and a D1 database. Code done on
       `claude/optimistic-ptolemy-q8qpjc`; live only after the owner's steps below.
+- [ ] Header menu (spike on `claude/menu-prototype`, awaiting the owner's pick against
+      `claude/archive-button-prototype`): the daily header's icons move into one ☰ menu with
+      How to play, Results, Archive, Practice, Settings and About. Before merging: decide whether
+      the practice header gets the same menu, update `DECISIONS.md` Navigation and Archive and the
+      README, and drop the now-unused tight phone rules for `.header-actions .icon-button`.
 
 ## Needs the owner
 

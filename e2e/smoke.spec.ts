@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures';
 import { expectOnOneLine } from './layout';
+import { chooseFromMenu } from './menu';
 import { expectVerdictToMatchScore } from './verdict';
 
 const SHARE_FIRST_LINE = /^Germle #\d+ · \d+% saved$/;
@@ -119,6 +120,37 @@ test('the about page credits the inspiration and states the privacy policy', asy
   ]);
 });
 
+test('the menu closes on a tap outside it without tapping the person underneath', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Start playing' }).click();
+  const counter = page.locator('#counter');
+  await expect(counter).toHaveText('4 vaccines left');
+  const menuButton = page.getByRole('button', { name: 'Menu' });
+  await menuButton.click();
+  const menu = page.getByRole('dialog', { name: 'Menu' });
+  await expect(menu).toBeVisible();
+  const personBesideTheMenu = await page.evaluate(() => {
+    const menuLeft = document.querySelector('#game-menu')?.getBoundingClientRect().left ?? 0;
+    for (const person of document.querySelectorAll('.node[data-tappable="true"]')) {
+      const { left, right, top, bottom } = person.getBoundingClientRect();
+      if (right < menuLeft - 8) return { x: (left + right) / 2, y: (top + bottom) / 2 };
+    }
+    return undefined;
+  });
+  if (personBesideTheMenu === undefined) throw new Error('Every person is behind the menu.');
+  await page.mouse.click(personBesideTheMenu.x, personBesideTheMenu.y);
+  await expect(menu).toBeHidden();
+  await expect(counter).toHaveText('4 vaccines left');
+
+  await chooseFromMenu(page, 'Settings');
+  await expect(menu).toBeHidden();
+  await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(menuButton).toBeFocused();
+});
+
 test.describe('with a fixed clock', () => {
   test.use({ timezoneId: 'UTC' });
 
@@ -129,7 +161,7 @@ test.describe('with a fixed clock', () => {
     await page.goto('/');
     await expect(page.locator('#puzzle-label')).toHaveText('#7');
     await page.getByRole('button', { name: 'Start playing' }).click();
-    await page.getByRole('button', { name: 'Results and statistics' }).click();
+    await chooseFromMenu(page, 'Results');
     await expect(page.locator('#result-pending')).toBeVisible();
     await expect(page.locator('#countdown')).toHaveText('00:00:10');
     await page.clock.fastForward('00:15');
@@ -193,30 +225,39 @@ test.describe('on a puzzle where focus moves on to a refuser', () => {
 test.describe('on a 360 px phone', () => {
   test.use({ viewport: { width: 360, height: 740 } });
 
-  test('the header links to practice and about, fits one row, and the dialogs do not', async ({
+  test('the header menu links to the archive, practice and about, fits one row, and the dialogs do not', async ({
     page,
   }) => {
-    for (const path of ['/', '/?puzzle=1', '/practice?seed=header']) {
+    for (const [path, lastHeaderButton] of [
+      ['/', 'Menu'],
+      ['/?puzzle=1', 'Menu'],
+      ['/practice?seed=header', 'Settings'],
+    ] as const) {
       await page.goto(path);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(360);
-      await expect(page.getByRole('button', { name: 'Settings' })).toBeInViewport({ ratio: 1 });
+      await expect(page.getByRole('button', { name: lastHeaderButton })).toBeInViewport({
+        ratio: 1,
+      });
     }
     await page.goto('/?puzzle=1');
     await expectOnOneLine(page.locator('#archive-banner'));
     await page.goto('/archive');
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(360);
     await page.goto('/');
-    const header = page.locator('.app-header');
-    await expect(header.getByRole('link', { name: 'Practice' })).toHaveAttribute(
-      'href',
-      '/practice',
-    );
-    await expect(header.getByRole('link', { name: 'About Germle' })).toHaveAttribute(
-      'href',
-      '/about',
-    );
-    await expect(page.locator('dialog a[href="/practice"], dialog a[href="/about"]')).toHaveCount(
-      0,
-    );
+    await page.getByRole('button', { name: 'Start playing' }).click();
+    await page.getByRole('button', { name: 'Menu' }).click();
+    const menu = page.getByRole('dialog', { name: 'Menu' });
+    await expect(menu).toBeInViewport({ ratio: 1 });
+    for (const [name, href] of [
+      ['Archive', '/archive'],
+      ['Practice', '/practice'],
+      ['About', '/about'],
+    ] as const)
+      await expect(menu.getByRole('link', { name })).toHaveAttribute('href', href);
+    await expect(
+      page.locator(
+        'dialog:not(#game-menu) a[href="/practice"], dialog:not(#game-menu) a[href="/about"]',
+      ),
+    ).toHaveCount(0);
   });
 });

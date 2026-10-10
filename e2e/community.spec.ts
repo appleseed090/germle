@@ -1,5 +1,6 @@
 import type { Page, Route } from '@playwright/test';
 import { expect, test } from './fixtures';
+import { chooseFromMenu } from './menu';
 import { playToTheEnd } from './play';
 
 // `vite preview` has no Worker, so every test answers /api/* itself.
@@ -156,7 +157,7 @@ test('keeps the results working when the API fails, and resends once it is back'
     answer = failure;
     if (index > 0) {
       await page.locator('#results-dialog').getByRole('button', { name: 'Close' }).click();
-      await page.getByRole('button', { name: 'Results and statistics' }).click();
+      await chooseFromMenu(page, 'Results');
     }
     await expect.poll(() => submissions.length).toBe(index + 1);
     await expect(page.locator('#community')).toBeHidden();
@@ -165,7 +166,7 @@ test('keeps the results working when the API fails, and resends once it is back'
 
   answer = undefined;
   await page.locator('#results-dialog').getByRole('button', { name: 'Close' }).click();
-  await page.getByRole('button', { name: 'Results and statistics' }).click();
+  await chooseFromMenu(page, 'Results');
   await expect(page.locator('#community-rank')).toHaveText('Better than 72% of 318 players');
   expect(submissions).toHaveLength(failures.length + 1);
   expect(new Set(submissions.map((submission) => JSON.stringify(submission))).size).toBe(1);

@@ -1,5 +1,6 @@
 import { expect, test } from './fixtures';
 import { expectOnOneLine } from './layout';
+import { chooseFromMenu } from './menu';
 import { playToTheEnd } from './play';
 import { expectVerdictToMatchScore } from './verdict';
 
@@ -59,7 +60,7 @@ test('plays a past puzzle from the archive without touching daily stats', async 
   await page.goto('/');
   await expect(page.locator('#puzzle-label')).toHaveText('#7');
   await expect(page.locator('#archive-banner')).toBeHidden();
-  await page.getByRole('button', { name: 'Results and statistics' }).click();
+  await chooseFromMenu(page, 'Results');
   await expect(page.locator('#result-pending')).toHaveText(
     "Finish today's puzzle to see your score.",
   );

@@ -23,6 +23,7 @@ import { browserLocalStorage, createGameStorage, type DailyResult } from '../sto
 import { openDialog, wireDialog } from '../ui/dialogs';
 import { requireElement } from '../ui/dom';
 import { mountGameSession } from '../ui/game-session';
+import { connectHeaderMenu } from '../ui/header-menu';
 import { renderVerdictRule } from '../ui/outcome-breakdown';
 import { createArchiveResultsDialog, createResultsDialog } from '../ui/results-dialog';
 import { connectSettingsDialog, displayOptionsFor } from '../ui/settings-dialog';
@@ -186,6 +187,11 @@ function pastPuzzle(pastPuzzleNumber: number): PlayedPuzzle {
 }
 
 const settingsDialog = connectSettingsDialog(storage, session);
+
+connectHeaderMenu(
+  requireElement('open-menu', HTMLButtonElement),
+  requireElement('game-menu', HTMLDialogElement),
+);
 
 requireElement('open-how-to-play', HTMLButtonElement).addEventListener('click', () => {
   openDialog(howToPlayDialog);

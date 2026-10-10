@@ -185,11 +185,12 @@ button {
 }
 
 .app-header {
+  --header-end-padding: calc(var(--gutter) - 4px);
   display: flex;
   align-items: center;
   gap: 8px;
   height: var(--header-height);
-  padding: 0 calc(var(--gutter) - 4px) 0 var(--gutter);
+  padding: 0 var(--header-end-padding) 0 var(--gutter);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -274,11 +275,89 @@ button {
   fill: var(--color-page);
 }
 
+/* A modal dialog in the top layer, placed against the viewport: just under the header, aligned
+   with the menu button at the right edge of the centred 1200 px app. Being modal, its invisible
+   backdrop takes the tap that closes it, so that tap never also lands on a person. */
+.menu-panel {
+  position: fixed;
+  inset: auto;
+  top: calc(env(safe-area-inset-top) + var(--header-height) - 4px);
+  right: calc(
+    max(0px, (100vw - 1200px) / 2) + env(safe-area-inset-right) + var(--header-end-padding)
+  );
+  min-width: 220px;
+  margin: 0;
+  padding: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.18);
+}
+
+.menu-panel::backdrop {
+  background: transparent;
+}
+
+.menu-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.menu-item:hover {
+  background: var(--color-hover);
+}
+
+.menu-item svg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.menu-item .icon-dot {
+  fill: currentColor;
+  stroke: none;
+}
+
+.menu-item .icon-knob {
+  fill: var(--color-surface);
+}
+
+.menu-separator {
+  height: 1px;
+  margin: 6px 8px;
+  background: var(--color-border);
+}
+
 /* Phones: narrower header buttons and a smaller wordmark keep the header to one row. */
 @media (max-width: 420px) {
   .app-header {
+    --header-end-padding: 8px;
     gap: 6px;
-    padding-right: 8px;
   }
 
   .puzzle-label {
@@ -1516,8 +1595,8 @@ button {
 
 @media (min-width: 720px) {
   .app-header {
+    --header-end-padding: 20px;
     padding-left: 24px;
-    padding-right: 20px;
   }
 
   .toolbar {
