@@ -277,7 +277,7 @@ button {
 /* Phones: narrower header buttons and a smaller wordmark keep the header to one row. */
 @media (max-width: 420px) {
   .app-header {
-    gap: 6px;
+    gap: 4px;
     padding-right: 8px;
   }
 
@@ -291,7 +291,7 @@ button {
   }
 
   .header-actions .icon-button {
-    width: 34px;
+    width: 32px;
   }
 
   .header-text-button {
@@ -719,6 +719,14 @@ button {
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
+}
+
+.results-archive-button {
+  margin-top: 12px;
+}
+
+.results-archive-button[hidden] {
+  display: none;
 }
 
 .button-row {

@@ -15,6 +15,10 @@ External memory for the project: what is pending, constraints to remember, defer
 - [x] Community comparison (from the M4 backlog): finished daily and archive games are compared
       with everyone who played the puzzle, through a Worker API and a D1 database. Code done on
       `claude/optimistic-ptolemy-q8qpjc`; live only after the owner's steps below.
+- [ ] Archive entry points (spike on `claude/archive-button-prototype`, awaiting the owner's pick):
+      a calendar icon in the daily header and a "Play past puzzles" button in today's results.
+      Before merging: e2e checks for both, `DECISIONS.md` Navigation and Archive updated. The
+      tighter phone header (32 px buttons, 4 px gaps) fits 360 px only up to puzzle #999.
 
 ## Needs the owner
 
