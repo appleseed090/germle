@@ -43,6 +43,7 @@ test('plays a past puzzle from the archive without touching daily stats', async 
   await expect(page.locator('#stats')).toBeHidden();
   await expect(page.locator('#countdown-line')).toBeHidden();
   await expect(page.locator('#archive-links')).toBeVisible();
+  await expect(resultsDialog.getByRole('link', { name: 'Play past puzzles' })).toBeHidden();
   await page.getByRole('button', { name: 'Share' }).click();
   await expect(page.locator('#share-status')).toHaveText('Copied to clipboard');
   const [firstLine, , link] = (await page.evaluate(() => navigator.clipboard.readText())).split(

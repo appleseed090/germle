@@ -67,7 +67,7 @@ Chromium build: run `npx playwright install chromium` once (the version is pinne
   Watts–Strogatz network, layout, game rules and scoring. Its rules are specified in
   `docs/ENGINE.md`; unit tests sit next to each module (`*.test.ts`).
 - **UI:** `src/pages/` holds one entry per page; `src/ui/` the SVG board (rendering, hit
-  testing, drag, animations), dialogs, disclosure buttons and toolbar; `src/share.ts`,
+  testing, drag, animations), dialogs, the header menu, disclosure buttons and toolbar; `src/share.ts`,
   `src/stats.ts`, `src/storage.ts`, `src/archive.ts`, `src/practice-setup.ts`,
   `src/puzzle-summary.ts`, `src/verdict.ts` and `src/community.ts` are tested modules for the
   share card, statistics, validated `localStorage` access, archive links and listing, practice

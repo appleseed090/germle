@@ -135,7 +135,7 @@ brief are not repeated here.
   not counted; settings are shared with the daily page.
 - **A bare `/practice` visit opens the setup dialog over a playable random game.** A link with a
   seed goes straight to the game.
-- **Page shells repeat the header, toolbar and settings markup.** No templating step for three
+- **Page shells repeat the header, menu, toolbar and settings markup.** No templating step for four
   static pages; listed in `TODO.md` as a possible cleanup.
 - **Each setup field has an "i" button that shows one sentence inline, below the field.** A
   disclosure (`aria-expanded`, `aria-controls`, `hidden`) rather than a tooltip or popover: it
@@ -333,15 +333,23 @@ brief are not repeated here.
 
 ## Navigation
 
-- **Practice and About are icon links in the header, not links inside dialogs.** The owner's call.
-  The daily header reads How to play, Results, Practice (a dumbbell), About (an "i") and Settings;
-  the practice header reads Setup, About and Settings. The practice dialogs keep their "Today's
-  puzzle" links, and the wordmark still links home.
-- **On phones up to 420 px the header tightens to stay one row:** icon buttons 34 px wide (still
-  44 px tall), a 1.15rem wordmark, 6 px gaps. Below 340 px only the logo mark shows; its link is
-  still labelled "Germle home". Five buttons need about 406 px otherwise, which pushed the page
-  wider than the screen and cut off Settings. An e2e test fails if the page is wider than a
-  360 px phone.
+- **Every page has one ☰ menu, the owner's call, replacing the row of header icons.** Each item is
+  an icon and a word. Every menu starts with Today's puzzle, Archive and Practice, then the page's
+  own actions (the daily page: How to play and Results; practice: Setup), then Settings on the game
+  pages and About. The page you are on is marked (`aria-current="page"`, accent colour); a past
+  puzzle marks none, since Today's puzzle leads elsewhere from there. About and the archive keep
+  their "Play today's puzzle" button beside the menu. The practice dialogs keep their "Today's
+  puzzle" links, and the wordmark still links home. Practice and About are never linked from
+  inside other dialogs.
+- **The menu is a modal `<dialog>` with an invisible backdrop, not a popover.** A popover lets the
+  tap that closes it through, so tapping the board to dismiss it also vaccinated whoever was under
+  the finger; the modal backdrop takes that tap. Its buttons close it before opening their own
+  dialog, so focus returns to the menu button afterwards. It is placed under the header, aligned
+  with the menu button through `--header-max-width` and `--header-end-padding`. An e2e test checks
+  the dismissing tap and the focus.
+- **On phones up to 420 px the header tightens:** a 1.15rem wordmark and 6 px gaps; below 340 px
+  only the logo mark shows, its link still labelled "Germle home". Every page fits one row down to
+  320 px, and an e2e test fails if any page is wider than a 360 px phone.
 
 ## Locked puzzles
 
@@ -386,9 +394,10 @@ brief are not repeated here.
   opens the archive; a later number shows "Puzzle #n isn't out yet. Here's today's.", and the
   address bar is reset to `/` whenever today's puzzle is played. The game page still switches at
   each player's local midnight, so a number one player sees as tomorrow's is already out elsewhere.
-- **Players find it from today's game.** How to play ends with "Missed one? Play it in the
-  archive", and today's results end with "Missed a day? Play past puzzles in the archive". The
-  header was left alone: its five icons already need the tightened phone layout to fit 360 px.
+- **Players find it from the menu and from today's results.** Archive is in every page's menu.
+  Today's results show a "Play past puzzles" button under the countdown, above the statistics, so
+  it is in view on a phone once a game ends; past puzzles hide it and offer "More past puzzles ·
+  Today's puzzle" instead. How to play still ends with "Missed one? Play it in the archive".
 
 ## Community scores (M4)
 

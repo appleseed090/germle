@@ -61,6 +61,10 @@ test('plays a full daily game, copies the result and restores it on reload', asy
   await expect(resultsDialog).toBeVisible();
   await expect(page.locator('#phase-label')).toHaveAttribute('data-phase', 'ended');
   await expectVerdictToMatchScore(page);
+  await expect(resultsDialog.getByRole('link', { name: 'Play past puzzles' })).toHaveAttribute(
+    'href',
+    '/archive',
+  );
 
   const copied = await copyResult(page);
   const [firstLine, squares, link, ...extraLines] = copied.split('\n');

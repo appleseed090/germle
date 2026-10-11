@@ -377,10 +377,6 @@ button {
     gap: 6px;
     font-size: 1.15rem;
   }
-
-  .header-actions .icon-button {
-    width: 34px;
-  }
 }
 
 /* The smallest phones keep only the logo mark; the link's label still says "Germle home". */
@@ -803,6 +799,15 @@ button {
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
+}
+
+.results-archive-button {
+  margin-top: 12px;
+}
+
+/* .secondary-button sets display: grid, which would otherwise override [hidden]. */
+.results-archive-button[hidden] {
+  display: none;
 }
 
 .button-row {

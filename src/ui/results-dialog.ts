@@ -82,12 +82,12 @@ export function createResultsDialog(nextPuzzleAt: Date): DailyResultsDialog {
 }
 
 /**
- * Binds the same dialog markup for a past puzzle: the countdown, statistics and archive footnote
- * are hidden, and links to more past puzzles and today's take the countdown's place.
+ * Binds the same dialog markup for a past puzzle: the countdown, statistics and Play past puzzles
+ * button are hidden, and links to more past puzzles and today's take the countdown's place.
  */
 export function createArchiveResultsDialog(): ArchiveResultsDialog {
   const { dialog, showResult, showCommunity } = bindResultSummary();
-  for (const id of ['countdown-line', 'new-puzzle-ready', 'stats', 'results-archive-footnote'])
+  for (const id of ['countdown-line', 'new-puzzle-ready', 'stats', 'results-archive-button'])
     requireElement(id, HTMLElement).hidden = true;
   requireElement('archive-links', HTMLElement).hidden = false;
   requireElement('result-pending', HTMLElement).textContent =

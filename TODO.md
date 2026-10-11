@@ -15,13 +15,9 @@ External memory for the project: what is pending, constraints to remember, defer
 - [x] Community comparison (from the M4 backlog): finished daily and archive games are compared
       with everyone who played the puzzle, through a Worker API and a D1 database. Code done on
       `claude/optimistic-ptolemy-q8qpjc`; live only after the owner's steps below.
-- [ ] Site menu (spike on `claude/menu-prototype`, awaiting the owner's sign-off): every page's
-      header has one ☰ menu. All list Today's puzzle, Archive and Practice, then the page's own
-      actions (daily: How to play, Results; practice: Setup), then Settings (game pages) and About;
-      the current page is marked. About and Archive keep their "Play today's puzzle" button. Before
-      merging: update `DECISIONS.md` Navigation and Archive and the README, drop the now-unused
-      tight phone rule for `.header-actions .icon-button`, and decide about the
-      `claude/archive-button-prototype` results button.
+- [x] Site menu: every page's header has one ☰ menu (Today's puzzle, Archive, Practice, the
+      page's own actions, Settings, About), and today's results show "Play past puzzles"
+      (see `DECISIONS.md` Navigation and Archive).
 
 ## Needs the owner
 
@@ -82,9 +78,9 @@ External memory for the project: what is pending, constraints to remember, defer
 ## Deferred cleanups
 
 - The page shells repeat markup: the two game pages (daily, practice) share the header, toolbar
-  and settings dialog; all four pages share the `<head>` (icons, theme-color metas). The archive
-  page, the fourth, only copies About's head and header, so the cleanup was left for now; a small
-  Vite HTML transform could share it if another game page appears.
+  and settings dialog; all four pages share the `<head>` (icons, theme-color metas) and the menu's
+  Today's puzzle, Archive, Practice and About items. A small Vite HTML transform could share it if
+  another page appears; a new menu item must otherwise be added to all four pages.
 
 ## Remember
 
