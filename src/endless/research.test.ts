@@ -6,6 +6,7 @@ import {
   isUnlockId,
   researchForRun,
   runStartOptions,
+  unlockCost,
   unlockedUpgrades,
 } from './research';
 import { UPGRADE_IDS, UPGRADES } from './upgrades';
@@ -44,8 +45,9 @@ describe('unlocks', () => {
   });
 
   it('can be bought only when affordable and not owned', () => {
-    expect(canBuyUnlock('contact-tracing', 39, [])).toBe(false);
-    expect(canBuyUnlock('contact-tracing', 40, [])).toBe(true);
+    const cost = unlockCost('contact-tracing');
+    expect(canBuyUnlock('contact-tracing', cost - 1, [])).toBe(false);
+    expect(canBuyUnlock('contact-tracing', cost, [])).toBe(true);
     expect(canBuyUnlock('contact-tracing', 400, ['contact-tracing'])).toBe(false);
   });
 

@@ -1,7 +1,7 @@
 /**
  * Every number that shapes Germle Endless: level curves, the pass mark, upgrade odds and effects,
- * Research income and costs, and ad pacing. Tune here (with `npm run simulate:endless`), nowhere else; `DECISIONS.md` records the
- * simulator numbers behind each change.
+ * Research income and costs, and ad pacing. Tune here (with `npm run simulate:endless`), nowhere
+ * else; `DECISIONS.md` records the simulator numbers behind each change.
  */
 
 import type { UnlockId } from './research';
@@ -22,22 +22,26 @@ export function curveAt(curve: LevelCurve, level: number): number {
 
 export const LEVEL_BALANCE = Object.freeze({
   /** People in the network; capped where an 80-person board is still tappable on a phone. */
-  nodeCount: { atLevelOne: 12, perLevel: 4, limit: 80 } satisfies LevelCurve,
-  /** Ring degree before rewiring (even): denser networks from this level on. */
-  denseFromLevel: 14,
-  sparseRingNeighbourCount: 4,
-  denseRingNeighbourCount: 6,
-  rewireProbability: { atLevelOne: 0.05, perLevel: 0.01, limit: 0.2 } satisfies LevelCurve,
+  nodeCount: { atLevelOne: 12, perLevel: 3, limit: 80 } satisfies LevelCurve,
+  /**
+   * Ring degree before rewiring. Kept at 4: a degree of 6 made every level unwinnable for the
+   * simulator's bot (17% saved at 75 people), so connections get denser through rewiring instead.
+   */
+  ringNeighbourCount: 4,
+  /** Long-range shortcuts, which make a network harder to cut into pieces. */
+  rewireProbability: { atLevelOne: 0.05, perLevel: 0.01, limit: 0.25 } satisfies LevelCurve,
   /** Vaccines as a share of the network, rounded, at least one. */
-  vaccineShare: { atLevelOne: 0.17, perLevel: -0.004, limit: 0.08 } satisfies LevelCurve,
-  /** People infected when the outbreak starts: one more every `levelsPerExtraIndexPatient`. */
-  levelsPerExtraIndexPatient: 5,
-  maximumIndexPatients: 6,
+  vaccineShare: { atLevelOne: 0.17, perLevel: -0.005, limit: 0.06 } satisfies LevelCurve,
+  /**
+   * People infected when the outbreak starts (rounded down). Past the network's size cap this
+   * and the curves below keep the pressure rising, so stacked upgrades cannot outgrow it.
+   */
+  indexPatientCount: { atLevelOne: 1, perLevel: 0.4, limit: 14 } satisfies LevelCurve,
   /** Refusers as a share of the network, rounded down. */
   refuserShare: { atLevelOne: 0, perLevel: 0.004, limit: 0.08 } satisfies LevelCurve,
-  transmissionProbability: { atLevelOne: 0.3, perLevel: 0.004, limit: 0.42 } satisfies LevelCurve,
+  transmissionProbability: { atLevelOne: 0.3, perLevel: 0.006, limit: 0.6 } satisfies LevelCurve,
   /** Share of people (percent) a level must save to pass. */
-  passThresholdPercent: { atLevelOne: 50, perLevel: 1, limit: 72 } satisfies LevelCurve,
+  passThresholdPercent: { atLevelOne: 50, perLevel: 1.5, limit: 85 } satisfies LevelCurve,
   /** A finish within this many points of the pass mark counts as a near miss (either side). */
   nearMissPoints: 3,
 });
@@ -48,9 +52,9 @@ export const UPGRADE_BALANCE = Object.freeze({
   /** Relative odds of each rarity when an offer slot is filled. */
   rarityWeights: { common: 6, uncommon: 3, rare: 1 },
   extraVaccinesPerStack: 1,
-  transmissionMultiplierPerMask: 0.85,
-  passThresholdPointsPerSafetyMargin: 4,
-  immunePeoplePerStack: 2,
+  transmissionMultiplierPerMask: 0.9,
+  passThresholdPointsPerSafetyMargin: 3,
+  immunePeoplePerStack: 1,
   freeQuarantinesPerStack: 1,
   ringVaccinationFactor: 0.5,
   undoChargesPerStack: 1,
@@ -63,15 +67,15 @@ export const RESEARCH_BALANCE = Object.freeze({
   bonusPerFiveLevels: 10,
   /** What each unlock costs: every upgrade outside the starters and every starting bonus. */
   costs: {
-    'contact-tracing': 40,
-    'spare-reroll': 60,
-    'ring-vaccination': 90,
-    'early-warning': 130,
-    'head-start': 170,
-    'second-opinion': 210,
-    'double-shift': 260,
-    'wider-choice': 320,
-    burnout: 380,
+    'contact-tracing': 60,
+    'spare-reroll': 100,
+    'ring-vaccination': 150,
+    burnout: 220,
+    'head-start': 300,
+    'early-warning': 380,
+    'second-opinion': 460,
+    'double-shift': 560,
+    'wider-choice': 680,
   } satisfies Record<UnlockId, number>,
 });
 

@@ -56,7 +56,7 @@ describe('applyUpgrades', () => {
       quarantinesBeforeFirstSpread: 1,
       vaccinatedNeighbourTransmissionFactor: UPGRADE_BALANCE.ringVaccinationFactor,
       spreadCanFizzle: true,
-      naturallyImmuneCount: UPGRADE_BALANCE.immunePeoplePerStack,
+      naturallyImmuneCount: UPGRADE_BALANCE.immunePeoplePerStack + DAILY_PUZZLE_CONFIG.refuserCount,
       indexPatientsKnownInAdvance: true,
     });
     expect(upgraded.passThresholdPercent).toBe(

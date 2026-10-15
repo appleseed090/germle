@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { beginRun, buyUnlock, finishRun, recordRun } from './profile';
+import { unlockCost } from './research';
 import { finishLevel, type LevelResult } from './run';
 import { FRESH_SAVE, SAVE_VERSION, parseSave, serialiseSave, type EndlessSave } from './save';
 
@@ -109,7 +110,10 @@ describe('profile transitions', () => {
     expect(buyUnlock(FRESH_SAVE, 'contact-tracing')).toBeUndefined();
     const rich = { ...FRESH_SAVE, research: 100 };
     const bought = buyUnlock(rich, 'contact-tracing');
-    expect(bought).toMatchObject({ research: 60, unlocks: ['contact-tracing'] });
+    expect(bought).toMatchObject({
+      research: 100 - unlockCost('contact-tracing'),
+      unlocks: ['contact-tracing'],
+    });
     expect(bought && buyUnlock(bought, 'contact-tracing')).toBeUndefined();
   });
 

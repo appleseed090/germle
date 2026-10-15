@@ -172,7 +172,10 @@ export const STRINGS = Object.freeze({
       name: 'Rapid Response',
       description: 'Your first quarantine each level passes no day.',
     },
-    outreach: { name: 'Outreach', description: 'Nobody refuses vaccines.' },
+    outreach: {
+      name: 'Outreach',
+      description: 'Nobody refuses vaccines, and as many people start immune.',
+    },
     'smaller-outbreak': {
       name: 'Smaller Outbreak',
       description: 'One fewer patient zero each level (at least one).',

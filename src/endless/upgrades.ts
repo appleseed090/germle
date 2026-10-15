@@ -33,19 +33,19 @@ export interface UpgradeDefinition {
 }
 
 export const UPGRADES: Readonly<Record<UpgradeId, UpgradeDefinition>> = Object.freeze({
-  'extra-vaccine': { id: 'extra-vaccine', rarity: 'common', maximumStacks: 4 },
-  masks: { id: 'masks', rarity: 'common', maximumStacks: 3 },
-  'safety-margin': { id: 'safety-margin', rarity: 'common', maximumStacks: 3 },
+  'extra-vaccine': { id: 'extra-vaccine', rarity: 'common', maximumStacks: 3 },
+  masks: { id: 'masks', rarity: 'common', maximumStacks: 2 },
+  'safety-margin': { id: 'safety-margin', rarity: 'common', maximumStacks: 2 },
   'natural-immunity': { id: 'natural-immunity', rarity: 'common', maximumStacks: 3 },
-  'rapid-response': { id: 'rapid-response', rarity: 'common', maximumStacks: 3 },
-  outreach: { id: 'outreach', rarity: 'uncommon', maximumStacks: 1 },
-  'smaller-outbreak': { id: 'smaller-outbreak', rarity: 'uncommon', maximumStacks: 2 },
+  'rapid-response': { id: 'rapid-response', rarity: 'common', maximumStacks: 1 },
+  outreach: { id: 'outreach', rarity: 'common', maximumStacks: 1 },
+  'smaller-outbreak': { id: 'smaller-outbreak', rarity: 'rare', maximumStacks: 1 },
   'contact-tracing': { id: 'contact-tracing', rarity: 'uncommon', maximumStacks: 1 },
   'ring-vaccination': { id: 'ring-vaccination', rarity: 'uncommon', maximumStacks: 1 },
-  'early-warning': { id: 'early-warning', rarity: 'uncommon', maximumStacks: 1 },
+  'early-warning': { id: 'early-warning', rarity: 'rare', maximumStacks: 1 },
   'double-shift': { id: 'double-shift', rarity: 'rare', maximumStacks: 1 },
   'second-opinion': { id: 'second-opinion', rarity: 'rare', maximumStacks: 2 },
-  burnout: { id: 'burnout', rarity: 'rare', maximumStacks: 1 },
+  burnout: { id: 'burnout', rarity: 'uncommon', maximumStacks: 1 },
 });
 
 /** Type guard for IDs read from untrusted data (saves). */
@@ -106,7 +106,10 @@ export function applyUpgrades(
     vaccinatedNeighbourTransmissionFactor:
       stacks('ring-vaccination') > 0 ? balance.ringVaccinationFactor : 1,
     spreadCanFizzle: stacks('burnout') > 0,
-    naturallyImmuneCount: stacks('natural-immunity') * balance.immunePeoplePerStack,
+    // Outreach: the would-be refusers change their minds, so that many people start immune.
+    naturallyImmuneCount:
+      stacks('natural-immunity') * balance.immunePeoplePerStack +
+      (stacks('outreach') > 0 ? baseConfig.refuserCount : 0),
     indexPatientsKnownInAdvance: stacks('early-warning') > 0,
   };
   return {

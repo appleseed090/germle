@@ -51,6 +51,7 @@ anonymously with everyone who played the same puzzle. See `TODO.md` for the back
 | `npm run preview:portal`     | Serve `dist-portal/` with the real CrazyGames SDK                         |
 | `npm run check:builds`       | Check `dist/` and `dist-portal/` against the product rules                |
 | `npm run compare:germle-com` | Prove `dist/` is byte-for-byte what `origin/main` builds                  |
+| `npm run simulate:endless`   | Play many Germle Endless runs with a bot and print balance numbers        |
 
 To run the site with its API and a local database: `npm run build`, then
 `npx wrangler d1 migrations apply germle --local` once, then `npx wrangler dev`. `npm run dev`
