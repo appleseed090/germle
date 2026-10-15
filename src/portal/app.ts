@@ -189,7 +189,7 @@ export function startApp(root: HTMLElement, platform: Platform): void {
 
   function showHome(): void {
     leaveLevel();
-    removeBackdrop ??= mountScene(stage, outbreakScene(9, 2), 'portal-backdrop');
+    removeBackdrop ??= mountScene(stage, outbreakScene(12, 0.3), 'portal-backdrop');
     root.dataset['screen'] = 'home';
     showOverlay(
       homeScreen(save, {

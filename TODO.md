@@ -42,7 +42,7 @@ green and `dist/` byte-for-byte identical to `main` (`npm run compare:germle-com
       runs out, veterans' 20-minute runs, Double Shift's size.
 - [x] 6. Platform layer (ads, saves, leaderboard) with local and CrazyGames implementations;
       portal Playwright tests (`npm run e2e:portal`, also a CI job).
-- [ ] 7. Covers, `npm run package:portal`, PR from `portal` to `main`.
+- [x] 7. Covers, `npm run package:portal`, PR from `portal` to `main`.
 - [ ] 8. Owner playtest; fix what they report; then the PR is ready to merge.
 
 Constraints to remember:

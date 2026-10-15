@@ -4,46 +4,18 @@
  * and nothing CrazyGames forbids. Also checks that the portal's player-facing English lives in
  * `src/portal/strings.ts`. Run after both builds; `npm run check` does.
  */
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative, sep } from 'node:path';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import {
   germleComBuildViolations,
-  isTextPath,
   portalBuildViolations,
   portalSourceViolations,
-  type CheckedFile,
 } from './build-rules.ts';
+import { readFileTree } from './file-tree.ts';
 
 const ROOT = new URL('..', import.meta.url).pathname;
-
-function readTree(
-  directory: string,
-  keepFile: (path: string) => boolean = () => true,
-): CheckedFile[] {
-  const absoluteDirectory = join(ROOT, directory);
-  if (!existsSync(absoluteDirectory))
-    throw new Error(`${directory}/ does not exist; build it first`);
-  const files: CheckedFile[] = [];
-  const visit = (absolutePath: string): void => {
-    for (const entry of readdirSync(absolutePath)) {
-      const entryPath = join(absolutePath, entry);
-      if (statSync(entryPath).isDirectory()) {
-        visit(entryPath);
-        continue;
-      }
-      const path = relative(absoluteDirectory, entryPath).split(sep).join('/');
-      if (!keepFile(path)) continue;
-      const bytes = readFileSync(entryPath);
-      files.push({
-        path,
-        text: isTextPath(path) ? bytes.toString('utf8') : undefined,
-        byteLength: bytes.length,
-      });
-    }
-  };
-  visit(absoluteDirectory);
-  return files;
-}
+const readTree = (directory: string, keepFile?: (path: string) => boolean) =>
+  readFileTree(ROOT, directory, keepFile);
 
 const isPortalSource = (path: string): boolean =>
   path.endsWith('.ts') && !path.endsWith('.test.ts');

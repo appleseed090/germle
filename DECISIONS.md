@@ -715,3 +715,12 @@ moves }`, rebuilds the puzzle with `createPuzzle(DAILY_PUZZLE_CONFIG, dailySeedK
   they fail on any page error or any request to a site other than localhost and the SDK. Three
   viewports: 1280 × 720, a phone in landscape and a phone in portrait; the legibility test also
   shrinks to 800 × 450.
+- **`npm run package:portal` writes `release/germle-endless.zip` and `release/covers/`, both
+  gitignored.** It builds `dist-portal/`, refuses to package if any portal rule fails, zips it with
+  `index.html` at the archive root (a small ZIP writer in `scripts/zip.ts`, deflate with fixed
+  timestamps, so no `zip` binary or dependency is needed and the same build gives the same
+  archive), and screenshots `portal/cover.html` at 1920 × 1080, 800 × 1200 and 800 × 800 into PNGs.
+  The cover page is development-only (the build's only input is `index.html`) and draws a real
+  level, played by the bot until 30% of its 69 people are infected, with the board renderer, under
+  the title, the only text CrazyGames allows on a cover. The docs' required file format for covers
+  was not found; PNG is the safe guess.

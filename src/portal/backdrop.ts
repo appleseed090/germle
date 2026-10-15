@@ -1,8 +1,9 @@
-import type { GameState } from '../engine/game';
+import { countOutcomes, type GameState } from '../engine/game';
 import { computeForceLayout, layoutBoundsFor } from '../engine/layout';
 import { createStreamRandom } from '../engine/random';
+import { applyTapWithRules, startGameWithRules } from '../engine/rules';
 import { prepareLevel, type PreparedLevel } from '../endless/levels';
-import { playLevelWithBot } from '../endless/simulation';
+import { chooseBotMove } from '../endless/simulation';
 import { createBoard } from '../ui/board';
 import { element } from './dom';
 
@@ -13,12 +14,17 @@ export interface OutbreakScene {
 }
 
 /**
- * A fixed level played by the bot through its vaccines and a few quarantines, so the outbreak is
- * visibly under way. Deterministic, so the backdrop and the covers always look the same.
+ * A fixed level played by the bot until at least `infectedShare` of its people are infected (or
+ * the game ends), so the outbreak is visibly under way but most of the network is still in play.
+ * Deterministic, so the backdrop and the covers always look the same.
  */
-export function outbreakScene(level: number, quarantines: number): OutbreakScene {
+export function outbreakScene(level: number, infectedShare: number): OutbreakScene {
   const prepared = prepareLevel('backdrop', level, []);
-  const state = playLevelWithBot(prepared, prepared.puzzle.config.vaccineCount + quarantines);
+  const { puzzle, rules } = prepared;
+  let state = startGameWithRules(puzzle, rules).state;
+  const infectedTarget = Math.ceil(infectedShare * puzzle.config.nodeCount);
+  while (state.phase !== 'ended' && countOutcomes(state).infected < infectedTarget)
+    state = applyTapWithRules(puzzle, rules, state, chooseBotMove(prepared, state)).state;
   return { prepared, state };
 }
 

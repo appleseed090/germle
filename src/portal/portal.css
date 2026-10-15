@@ -731,3 +731,34 @@ body.portal {
 .portal-reduced-motion .upgrade-card {
   transition: none;
 }
+
+/* ---------- Covers (portal/cover.html, screenshotted by npm run package:portal) ---------- */
+
+.cover {
+  position: fixed;
+  inset: 0;
+  background: var(--color-page);
+}
+
+.cover-stage {
+  position: absolute;
+  inset: 0 0 20%;
+}
+
+.cover-title {
+  position: absolute;
+  left: 50%;
+  bottom: 5%;
+  margin: 0;
+  padding: 0.18em 0.6em 0.24em;
+  border-radius: 0.35em;
+  background: var(--color-surface);
+  box-shadow: 0 0.12em 0.6em rgb(0 0 0 / 0.18);
+  color: var(--color-text);
+  font-size: clamp(56px, 9vmin, 140px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
