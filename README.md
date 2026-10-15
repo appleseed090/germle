@@ -36,23 +36,24 @@ anonymously with everyone who played the same puzzle. See `TODO.md` for the back
 
 ## Commands
 
-| Command                      | What it does                                                              |
-| ---------------------------- | ------------------------------------------------------------------------- |
-| `npm ci`                     | Install exact dev dependencies                                            |
-| `npm run dev`                | Vite dev server with hot reload                                           |
-| `npm run check`              | Typecheck + lint + format + unit tests + both builds + build rules (gate) |
-| `npm run build`              | Production build into `dist/`                                             |
-| `npm run preview`            | Serve the built `dist/` locally                                           |
-| `npm run format`             | Rewrite files with Prettier                                               |
-| `npm run e2e`                | Playwright tests against `dist/` (build first)                            |
-| `npm run generate:images`    | Re-render favicons, app icons and `og.png` into `public/`                 |
-| `npm run dev:portal`         | Germle Endless dev server (local ads overlay and saves)                   |
-| `npm run build:portal`       | Germle Endless build into `dist-portal/`                                  |
-| `npm run preview:portal`     | Serve `dist-portal/` with the real CrazyGames SDK                         |
-| `npm run e2e:portal`         | Playwright tests against `dist-portal/` with a fake SDK (build first)     |
-| `npm run check:builds`       | Check `dist/` and `dist-portal/` against the product rules                |
-| `npm run compare:germle-com` | Prove `dist/` is byte-for-byte what `origin/main` builds                  |
-| `npm run simulate:endless`   | Play many Germle Endless runs with a bot and print balance numbers        |
+| Command                      | What it does                                                               |
+| ---------------------------- | -------------------------------------------------------------------------- |
+| `npm ci`                     | Install exact dev dependencies                                             |
+| `npm run dev`                | Vite dev server with hot reload                                            |
+| `npm run check`              | Typecheck + lint + format + unit tests + both builds + build rules (gate)  |
+| `npm run build`              | Production build into `dist/`                                              |
+| `npm run preview`            | Serve the built `dist/` locally                                            |
+| `npm run format`             | Rewrite files with Prettier                                                |
+| `npm run e2e`                | Playwright tests against `dist/` (build first)                             |
+| `npm run generate:images`    | Re-render favicons, app icons and `og.png` into `public/`                  |
+| `npm run dev:portal`         | Germle Endless dev server (local ads overlay and saves)                    |
+| `npm run build:portal`       | Germle Endless build into `dist-portal/`                                   |
+| `npm run preview:portal`     | Serve `dist-portal/` with the real CrazyGames SDK                          |
+| `npm run package:portal`     | Build, check and zip Germle Endless, and render its covers into `release/` |
+| `npm run e2e:portal`         | Playwright tests against `dist-portal/` with a fake SDK (build first)      |
+| `npm run check:builds`       | Check `dist/` and `dist-portal/` against the product rules                 |
+| `npm run compare:germle-com` | Prove `dist/` is byte-for-byte what `origin/main` builds                   |
+| `npm run simulate:endless`   | Play many Germle Endless runs with a bot and print balance numbers         |
 
 To run the site with its API and a local database: `npm run build`, then
 `npx wrangler d1 migrations apply germle --local` once, then `npx wrangler dev`. `npm run dev`

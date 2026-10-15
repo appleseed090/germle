@@ -11,6 +11,7 @@
     "dev:portal": "vite --config vite.portal.config.ts",
     "build:portal": "vite build --config vite.portal.config.ts",
     "preview:portal": "vite preview --config vite.portal.config.ts",
+    "package:portal": "node scripts/package-portal.ts",
     "check:builds": "node scripts/check-builds.ts",
     "compare:germle-com": "node scripts/compare-germle-com-build.ts",
     "simulate:endless": "node scripts/simulate-endless.ts",
