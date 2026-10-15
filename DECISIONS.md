@@ -561,3 +561,19 @@ moves }`, rebuilds the puzzle with `createPuzzle(DAILY_PUZZLE_CONFIG, dailySeedK
   itself was blocked too) and the wider web found no game called Germle or Germle Endless; the
   nearest CrazyGames titles are "Germ War" (a shooter) and "Epidemica". No trademark search was
   done.
+- **Endless rules are a new engine module beside the classic one, not options inside
+  `game.ts`.** Changing `game.ts`, even with defaults that keep every result, would change the
+  JavaScript germle.com ships; a separate `src/engine/rules.ts` keeps `dist/` byte-for-byte
+  identical and the locked-puzzle code untouched. The price is a second copy of the turn logic
+  (about 100 lines), kept honest by a test that plays all 365 locked daily puzzles and 100 random
+  practice games through both engines with every option off and compares every state, event and
+  legal move. Folding `game.ts` into the rules module is a deferred cleanup for when a germle.com
+  byte change is acceptable (see `TODO.md`).
+- **`rules.ts` is not re-exported from `src/engine/index.ts`.** Doing so changed how Rolldown
+  split germle.com's shared chunks (different files and hashes, same behaviour); importing it
+  directly keeps `dist/` identical.
+- **Natural immunity uses a new `immunity` stream.** Adding the name to `SeedStreamName` is a
+  type-only change; no existing stream's seed or draws move.
+- **Some upgrades need no engine option:** extra vaccines, lower contagiousness, fewer refusers and
+  fewer index patients are values of the existing `PuzzleConfig`; a lower pass mark is run logic;
+  undo replays the move list without its last move (`replayMovesWithRules`).
