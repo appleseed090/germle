@@ -30,8 +30,10 @@ green and `dist/` byte-for-byte identical to `main` (`npm run compare:germle-com
       `npm run compare:germle-com`.
 - [x] 2. Engine options in `src/engine/rules.ts`, off by default, proven equal to the classic
       engine on every locked puzzle.
-- [ ] 3. Run loop in `src/endless/`: levels, pass/fail, scoring, upgrade choice, summary;
-      headless simulator `npm run simulate:endless`.
+- [x] 3. Run loop in `src/endless/`: levels, pass/fail, scoring, upgrade choice, summary;
+      headless simulator `npm run simulate:endless` (`--calibrate` for per-level numbers). The
+      first curves are a placeholder: the bot cannot pass base levels from 14 on, and with
+      upgrades it never fails; stage 5 tunes them.
 - [ ] 4. Portal UI: 16:9 and portrait layouts, level 1 hints, transitions, run resume.
 - [ ] 5. Research and unlocks, starting bonuses, balance tuned with the simulator.
 - [ ] 6. Platform layer (ads, saves, leaderboard) with local and CrazyGames implementations;
