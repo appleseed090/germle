@@ -207,6 +207,17 @@ export function predictNextDayInfections(
   );
 }
 
+/**
+ * How many more quarantines it takes, counting the next one, until a day passes: 1 under the
+ * classic rules, more while free quarantines last or with several quarantines per day.
+ */
+export function quarantinesUntilNextDay(rules: GameRules, state: GameState): number {
+  const counted = state.quarantineCount - rules.quarantinesBeforeFirstSpread;
+  return counted < 0
+    ? -counted + rules.quarantinesPerDay
+    : rules.quarantinesPerDay - (counted % rules.quarantinesPerDay);
+}
+
 type MutableGameState = Omit<
   { -readonly [Key in keyof GameState]: GameState[Key] },
   'nodeStatuses'

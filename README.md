@@ -96,7 +96,12 @@ Chromium build: run `npx playwright install chromium` once (the version is pinne
   `src/theme-before-paint.ts`, which a small plugin in `vite.config.ts` builds into a
   content-hashed classic script, since the CSP forbids inline scripts. `src/styles/theme.test.ts`
   checks contrast in both themes.
-- **Docs:** `AGENTS.md` (engineering rules), `DECISIONS.md` (why things are the way they are),
+- **Germle Endless (portal build):** `src/endless/` is the pure run logic (levels from a run seed,
+  upgrades, Research, the save schema, all balance numbers in `balance.ts`, and the simulator's
+  bot); `src/portal/` is its UI on the shared SVG board plus the platform layer
+  (`platform/platform.ts` interfaces, `local.ts` for development, `crazygames.ts` for the SDK);
+  `src/engine/rules.ts` holds the off-by-default engine options its upgrades use. See `CLAUDE.md`.
+- **Docs:** `CLAUDE.md` (the two products), `AGENTS.md` (engineering rules), `DECISIONS.md` (why things are the way they are),
   `TODO.md` (backlog), `DEPLOY.md` (Cloudflare and DNS setup).
 
 ## Deployment

@@ -31,6 +31,7 @@ export const PORTAL_LIMITS = Object.freeze({
 });
 
 const TEXT_EXTENSIONS = new Set([
+  '.ts',
   '.html',
   '.js',
   '.mjs',
@@ -149,8 +150,9 @@ const PORTAL_STRINGS_FILE = 'src/portal/strings.ts';
  * `src/portal/strings.ts`, and that file stays within the content rules.
  *
  * Elsewhere a string literal fails if it holds two words separated by a space or is a single
- * capitalised word, which is how visible text looks; identifiers, CSS classes, event names and
- * keys do not. A line ending in `// not-player-text` is exempt, for the rare exception.
+ * capitalised word, which is how visible text looks; identifiers, CSS class lists (kebab-case with
+ * a hyphen), event names and keys do not. Lines that construct an `Error` are exempt (developer
+ * messages), as is a line ending in `// not-player-text`, for the rare exception.
  *
  * @param files - Sources under `src/portal/` and `src/endless/`, tests excluded.
  */
@@ -170,6 +172,8 @@ export function portalSourceViolations(files: readonly CheckedFile[]): string[] 
       .split('\n')
       .forEach((line, index) => {
         if (line.trimEnd().endsWith('// not-player-text')) return;
+        // Error messages are for developers; the game never shows them.
+        if (/\bnew \w*Error\(/.test(line)) return;
         for (const literal of stringLiteralContents(line)) {
           if (looksLikePlayerText(literal))
             violations.push(
@@ -198,7 +202,16 @@ function stringLiteralContents(line: string): string[] {
 /** `KeyboardEvent.key` values look like capitalised words but are not text. */
 const KEY_NAMES: ReadonlySet<string> = new Set(['Enter', 'Tab', 'Home', 'End', 'Backspace']);
 
+/** Lowercase kebab-case tokens with at least one hyphen, as in `portal-button hud-undo`. */
+function isClassList(literal: string): boolean {
+  const tokens = literal.trim().split(/\s+/);
+  return (
+    tokens.every((token) => /^[a-z][a-z0-9]*(-[a-z0-9]*)*$/.test(token)) &&
+    tokens.some((token) => token.includes('-'))
+  );
+}
+
 function looksLikePlayerText(literal: string): boolean {
-  if (KEY_NAMES.has(literal)) return false;
+  if (KEY_NAMES.has(literal) || isClassList(literal)) return false;
   return /[A-Za-z]{2,}[,.!?]?\s+[A-Za-z]{2,}/.test(literal) || /^[A-Z][a-z]+[.!?]?$/.test(literal);
 }

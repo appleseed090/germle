@@ -1,8 +1,10 @@
 /**
- * Every number that shapes Germle Endless: level curves, the pass mark, and upgrade odds and
- * effects. Tune here (with `npm run simulate:endless`), nowhere else; `DECISIONS.md` records the
+ * Every number that shapes Germle Endless: level curves, the pass mark, upgrade odds and effects,
+ * Research income and costs, and ad pacing. Tune here (with `npm run simulate:endless`), nowhere else; `DECISIONS.md` records the
  * simulator numbers behind each change.
  */
+
+import type { UnlockId } from './research';
 
 /** A value that starts somewhere and moves by a fixed step per level, within a bound. */
 export interface LevelCurve {
@@ -52,4 +54,30 @@ export const UPGRADE_BALANCE = Object.freeze({
   freeQuarantinesPerStack: 1,
   ringVaccinationFactor: 0.5,
   undoChargesPerStack: 1,
+});
+
+export const RESEARCH_BALANCE = Object.freeze({
+  /** Research for each level a run clears. */
+  perLevelCleared: 10,
+  /** Extra Research for every full five levels a run clears. */
+  bonusPerFiveLevels: 10,
+  /** What each unlock costs: every upgrade outside the starters and every starting bonus. */
+  costs: {
+    'contact-tracing': 40,
+    'spare-reroll': 60,
+    'ring-vaccination': 90,
+    'early-warning': 130,
+    'head-start': 170,
+    'second-opinion': 210,
+    'double-shift': 260,
+    'wider-choice': 320,
+    burnout: 380,
+  } satisfies Record<UnlockId, number>,
+});
+
+export const AD_BALANCE = Object.freeze({
+  /** No midgame ad before this many levels are cleared in a run (CrazyGames' pacing advice). */
+  firstMidgameAfterLevelsCleared: 3,
+  /** The local platform's stand-in for the SDK's own midgame cooldown. */
+  localMidgameCooldownSeconds: 180,
 });
