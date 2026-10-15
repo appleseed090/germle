@@ -28,7 +28,7 @@ green and `dist/` byte-for-byte identical to `main` (`npm run compare:germle-com
 - [x] 1. Guardrails: `portal` branch, `CLAUDE.md`, `vite.portal.config.ts`, `portal/index.html`,
       `scripts/check-builds.ts` in `npm run check`, ESLint import boundary,
       `npm run compare:germle-com`.
-- [ ] 2. Engine options in `src/engine/rules.ts`, off by default, proven equal to the classic
+- [x] 2. Engine options in `src/engine/rules.ts`, off by default, proven equal to the classic
       engine on every locked puzzle.
 - [ ] 3. Run loop in `src/endless/`: levels, pass/fail, scoring, upgrade choice, summary;
       headless simulator `npm run simulate:endless`.
@@ -104,6 +104,10 @@ Constraints to remember:
   Kept as specified; revisit if it reads badly in practice.
 
 ## Deferred cleanups
+
+- **Fold `src/engine/game.ts` into `src/engine/rules.ts`** (classic = `CLASSIC_RULES`) once a
+  change to the bytes germle.com ships is acceptable. Until then the turn logic exists twice,
+  guarded by the equivalence test in `rules.test.ts`.
 
 - The page shells repeat markup: the two game pages (daily, practice) share the header, toolbar
   and settings dialog; all four pages share the `<head>` (icons, theme-color metas) and the menu's

@@ -81,3 +81,28 @@ left a choice open, the choice made is stated here and logged in `DECISIONS.md`.
   an infected and a susceptible person.
 - Score = `round(100 × (untouched + quarantined + vaccinated) / people)`, rounding halves up. The
   four counts (vaccinated, quarantined, untouched, infected) are reported with it.
+
+## Optional rules (Germle Endless only)
+
+`src/engine/rules.ts` plays the same game with options that Germle Endless's upgrades switch on.
+Every option defaults to off (`CLASSIC_RULES`), and with the defaults each function returns
+exactly what its counterpart in `game.ts` returns; `rules.test.ts` checks this on every locked
+daily puzzle and on random games over varied practice configs. Daily, archive and practice games
+never use the module, and `game.ts` is unchanged.
+
+| Option                                  | Classic | Effect when changed                                                                                        |
+| --------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------- |
+| `quarantinesPerDay`                     | 1       | The epidemic advances one turn after every this-many quarantines.                                          |
+| `quarantinesBeforeFirstSpread`          | 0       | The first this-many quarantines pass no day.                                                               |
+| `vaccinatedNeighbourTransmissionFactor` | 1       | β into a person is multiplied by this once per vaccinated neighbour (the never-fizzle rule still applies). |
+| `spreadCanFizzle`                       | false   | A turn with no roll below the threshold infects nobody.                                                    |
+| `naturallyImmuneCount`                  | 0       | That many people, the first of a shuffle of everyone by the `immunity` stream, start vaccinated for free.  |
+| `indexPatientsKnownInAdvance`           | false   | Index patients are chosen at the start (same rule, before any vaccine) and cannot be vaccinated.           |
+
+- A quarantine that passes no day still ends the game if it contains the outbreak.
+- The opening vaccine count is capped at the number of people who can be vaccinated, so immune
+  people or known index patients can never leave a vaccine that cannot be spent.
+- **Contact tracing** (`predictNextDayInfections`) reads the next turn's rolls against the
+  current statuses: exactly who the next day infects if the next quarantine is someone else.
+- The `immunity` stream is derived like the others (`germle:v1:<seedKey>:immunity`); no daily,
+  archive or practice puzzle reads it.

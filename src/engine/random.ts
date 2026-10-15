@@ -3,9 +3,11 @@ export type RandomSource = () => number;
 
 /**
  * The independent random streams a puzzle draws from. Each stream has its own seed, so adding or
- * removing draws in one stream never changes the values another stream produces.
+ * removing draws in one stream never changes the values another stream produces. `immunity` is
+ * read only by the optional rules in `rules.ts`, never by daily, archive or practice games.
  */
-export type SeedStreamName = 'graph' | 'layout' | 'refusers' | 'outbreaks' | 'transmission';
+export type SeedStreamName =
+  'graph' | 'layout' | 'refusers' | 'outbreaks' | 'transmission' | 'immunity';
 
 const SEED_NAMESPACE = 'germle:v1';
 
