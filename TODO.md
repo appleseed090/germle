@@ -47,10 +47,10 @@ green and `dist/` byte-for-byte identical to `main` (`npm run compare:germle-com
 
 Constraints to remember:
 
-- The CrazyGames docs could not be read from the development container (its network policy
-  blocks `docs.crazygames.com` and `sdk.crazygames.com`); the rules used are from search-engine
-  summaries and are marked unverified in `DECISIONS.md`. Re-check them against the live docs
-  before submitting.
+- The CrazyGames requirements were checked against the live docs and the real SDK on 2026-10-15
+  (`DECISIONS.md`). At submission the owner must also: turn on the Progress Save toggle, upload
+  the three covers and the two preview videos (`npm run videos:portal`), and set both
+  orientations as supported.
 - **Leaderboards (needs the owner):** invite-only on CrazyGames and need an encryption key from the
   Developer Portal. If CrazyGames enables one for the game, implement
   `LeaderboardPlatform.submitLevelsCleared` in `src/portal/platform/crazygames.ts` from the docs

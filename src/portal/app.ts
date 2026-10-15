@@ -62,7 +62,8 @@ const COUNT_UP_MILLISECONDS = 650;
 /**
  * Germle Endless: the flow between home, levels, summaries, upgrade choices, the run summary and
  * Research. Owns the save and writes it through the platform at the end of each level and at
- * each decision, never on every tap.
+ * each decision, never on every tap. Ends the platform's loading phase (`loadingStop`) just before
+ * the first screen, so it always comes before the first `gameplayStart`.
  *
  * @param root - The page's `#portal-app` element; the app fills it.
  */
@@ -76,6 +77,7 @@ export function startApp(root: HTMLElement, platform: Platform): void {
   let level: { view: LevelView; prepared: PreparedLevel } | undefined;
   let toastTimer: number | undefined;
   let removeBackdrop: (() => void) | undefined;
+  let secondChanceTakenThisSession = false;
 
   const stage = element('main', { className: 'stage' });
   const overlay = element('div', { className: 'overlay-layer' });
@@ -170,8 +172,13 @@ export function startApp(root: HTMLElement, platform: Platform): void {
     persist();
   }
 
+  /**
+   * Runs an ad. The whole game is inert from the request until the ad finishes or fails, as
+   * CrazyGames requires (not only once it starts); sound mutes only once it starts.
+   */
   async function withAd<Result>(show: (hooks: AdHooks) => Promise<Result>): Promise<Result> {
     root.dataset['ad'] = 'playing';
+    root.inert = true;
     level?.view.setInputBlocked(true);
     try {
       return await show({
@@ -181,6 +188,7 @@ export function startApp(root: HTMLElement, platform: Platform): void {
       });
     } finally {
       sound.setMuted('ad', false);
+      root.inert = false;
       root.dataset['ad'] = 'none';
     }
   }
@@ -283,7 +291,7 @@ export function startApp(root: HTMLElement, platform: Platform): void {
   function showSummary(result: LevelResult): void {
     root.dataset['screen'] = 'summary';
     showOverlay(
-      summaryScreen(result, canUseSecondChance(currentRun()), {
+      summaryScreen(result, canOfferSecondChance(), {
         onContinue: () => {
           void continueAfterPass();
         },
@@ -306,12 +314,28 @@ export function startApp(root: HTMLElement, platform: Platform): void {
     showChoice();
   }
 
+  /**
+   * Second chance is a rewarded "keep playing": once per run, at most once per session (the
+   * CrazyGames monetisation guide's limit for revives), and never offered when ads are off.
+   */
+  function canOfferSecondChance(): boolean {
+    return (
+      canUseSecondChance(currentRun()) &&
+      !secondChanceTakenThisSession &&
+      platform.ads.rewardedAdsAvailable()
+    );
+  }
+
   async function takeSecondChance(): Promise<void> {
     const rewarded = await withAd((hooks) => platform.ads.showRewardedAd(hooks));
+    const result = currentRun().lastResult;
     if (!rewarded) {
       showToast(STRINGS.toasts.adUnavailable);
+      // Redraw: if ads turned out to be off, the offer disappears.
+      if (result !== null) showSummary(result);
       return;
     }
+    secondChanceTakenThisSession = true;
     setRun(useSecondChance(currentRun()));
     playLevel();
   }
@@ -322,7 +346,7 @@ export function startApp(root: HTMLElement, platform: Platform): void {
     const run = currentRun();
     const offer = currentOffer(run, unlockedUpgrades(save.unlocks), offerCountFor(save));
     showOverlay(
-      choiceScreen(run, offer, {
+      choiceScreen(run, offer, run.freeRerollsLeft > 0 || platform.ads.rewardedAdsAvailable(), {
         onPick: (upgrade, card) => {
           void pick(upgrade, offer, card);
         },
@@ -356,6 +380,7 @@ export function startApp(root: HTMLElement, platform: Platform): void {
       const rewarded = await withAd((hooks) => platform.ads.showRewardedAd(hooks));
       if (!rewarded) {
         showToast(STRINGS.toasts.adUnavailable);
+        showChoice();
         return;
       }
     }
@@ -450,6 +475,7 @@ export function startApp(root: HTMLElement, platform: Platform): void {
 
   // A brand-new player lands straight in level 1; anyone else sees the title screen first.
   const isFirstVisit = save.run === null && save.runsFinished === 0 && !save.tutorialDone;
+  platform.ads.loadingStop();
   if (isFirstVisit) startNewRun();
   else showHome();
 }

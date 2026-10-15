@@ -18,5 +18,5 @@ const platform: Platform = import.meta.env.DEV
       (window as unknown as { CrazyGames?: { SDK?: unknown } }).CrazyGames?.SDK,
     );
 platform.ads.loadingStart();
+// startApp calls loadingStop itself, before the first gameplayStart.
 startApp(requireElement('portal-app', HTMLElement), platform);
-platform.ads.loadingStop();

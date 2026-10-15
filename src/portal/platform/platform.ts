@@ -26,6 +26,13 @@ export interface AdsPlatform {
    *   failed, was blocked or is unavailable. Never rejects.
    */
   showRewardedAd(hooks: AdHooks): Promise<boolean>;
+  /**
+   * Whether a rewarded ad could play at all: false once the platform has shown that ads are off
+   * for this player (an ad blocker, or CrazyGames' Basic Launch, where ads are disabled). The game
+   * then hides its rewarded buttons, since CrazyGames rejects buttons that do nothing. A single
+   * unfilled request does not count.
+   */
+  rewardedAdsAvailable(): boolean;
   /** The player is now playing (a level started or resumed). */
   gameplayStart(): void;
   /** The player stopped playing (a level ended, a menu or summary opened). */

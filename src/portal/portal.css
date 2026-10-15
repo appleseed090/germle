@@ -270,6 +270,26 @@ body.portal {
   flex: 1 1 auto;
 }
 
+.rewarded-button {
+  gap: 8px;
+}
+
+.rewarded-icon {
+  flex: none;
+  width: 22px;
+  height: 22px;
+}
+
+.rewarded-icon rect {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.rewarded-icon path {
+  fill: currentColor;
+}
+
 /* ---------- Board extras ---------- */
 
 .portal-hint {

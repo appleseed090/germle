@@ -12,6 +12,7 @@ function createFakeSdk(options: {
   environment?: string;
   initFails?: boolean;
   ad?: (callbacks: AdCallbacks) => void;
+  adblock?: boolean;
   dataThrows?: boolean;
   muteAudio?: boolean;
 }) {
@@ -22,6 +23,7 @@ function createFakeSdk(options: {
     environment: options.environment ?? 'crazygames',
     init: () => (options.initFails === true ? Promise.reject(new Error('no')) : Promise.resolve()),
     ad: {
+      hasAdblock: () => Promise.resolve(options.adblock === true),
       requestAd: (type: string, callbacks: AdCallbacks) => {
         calls.push(`requestAd:${type}`);
         options.ad?.(callbacks);
@@ -52,8 +54,31 @@ function createFakeSdk(options: {
       },
     },
   };
+  // Like the real SDK v3, every module throws until `init` has resolved.
+  let initialised = false;
+  const guarded = {
+    get environment() {
+      return initialised ? sdk.environment : 'uninitialized';
+    },
+    init: async () => {
+      await sdk.init();
+      initialised = true;
+    },
+    get ad() {
+      if (!initialised) throw new Error('CrazySDK is not initialized yet');
+      return sdk.ad;
+    },
+    get game() {
+      if (!initialised) throw new Error('CrazySDK is not initialized yet');
+      return sdk.game;
+    },
+    get data() {
+      if (!initialised) throw new Error('CrazySDK is not initialized yet');
+      return sdk.data;
+    },
+  };
   return {
-    sdk,
+    sdk: guarded,
     calls,
     stored,
     changeSettings: (settings: { muteAudio?: boolean }) => settingsListener?.(settings),
@@ -121,6 +146,27 @@ describe('the CrazyGames platform', () => {
     );
   });
 
+  it('hides rewarded offers once ads are off, but not after an ad that merely went unfilled', async () => {
+    const unfilled = await createCrazyGamesPlatform(
+      createFakeSdk({ ad: (callbacks) => callbacks.adError?.({ code: 'unfilled' }) }).sdk,
+    );
+    await unfilled.ads.showRewardedAd({ onAdStarted: () => undefined });
+    expect(unfilled.ads.rewardedAdsAvailable()).toBe(true);
+
+    for (const code of ['adblock', 'adsDisabledBasicLaunch']) {
+      const off = await createCrazyGamesPlatform(
+        createFakeSdk({ ad: (callbacks) => callbacks.adError?.({ code }) }).sdk,
+      );
+      expect(off.ads.rewardedAdsAvailable()).toBe(true);
+      await off.ads.showRewardedAd({ onAdStarted: () => undefined });
+      expect(off.ads.rewardedAdsAvailable()).toBe(false);
+    }
+
+    const blocked = await createCrazyGamesPlatform(createFakeSdk({ adblock: true }).sdk);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(blocked.ads.rewardedAdsAvailable()).toBe(false);
+  });
+
   it('saves through the Data module, and keeps the session going if it refuses', async () => {
     const fake = createFakeSdk({});
     const platform = await createCrazyGamesPlatform(fake.sdk);
@@ -151,9 +197,17 @@ describe('the CrazyGames platform', () => {
     await expect(platform.ads.showRewardedAd({ onAdStarted: () => undefined })).resolves.toBe(
       false,
     );
+    expect(platform.ads.rewardedAdsAvailable()).toBe(false);
     platform.saves.setItem('k', 'v');
     expect(platform.saves.getItem('k')).toBe('v');
     expect(platform.leaderboard.available).toBe(false);
+  });
+
+  it('never reads the SDK before init resolves, as the real SDK throws until then', async () => {
+    const fake = createFakeSdk({});
+    const platform = await createCrazyGamesPlatform(fake.sdk);
+    platform.ads.gameplayStart();
+    expect(fake.calls).toEqual(['gameplayStart']);
   });
 
   it('runs offline when init fails or the environment is disabled', async () => {

@@ -8,25 +8,29 @@ import { chooseBotMove } from '../src/endless/simulation';
 
 /** Where the fake SDK keeps the Data module's values in the page's own storage. */
 const FAKE_DATA_PREFIX = 'fake-crazygames-data:';
-/** Set to `error` in the page's storage to make every fake ad fail. */
+/**
+ * Set in the page's storage to make every fake ad fail: `unfilled` (no ad this time) or `adblock`
+ * (ads are off for this player, which `hasAdblock` also reports).
+ */
 const FAKE_AD_MODE_KEY = 'fake-crazygames-ads';
 
 /**
- * A stand-in for the CrazyGames SDK v3, served at the real SDK's URL. It records every call in
+ * A stand-in for the CrazyGames SDK v3, served at the real SDK's URL. Like the real one, its
+ * modules throw until `init` has resolved. It records every call in
  * `window.fakeCrazyGamesCalls`, keeps Data module values in the page's storage (so they survive a
  * reload, like the real module), and plays each ad for 400 ms or fails it, as the test asks.
  */
 const FAKE_SDK = `(() => {
   const calls = (window.fakeCrazyGamesCalls = []);
   const record = (name) => () => { calls.push(name); };
-  window.CrazyGames = { SDK: {
-    environment: 'crazygames',
-    init: () => { calls.push('init'); return Promise.resolve(); },
+  let initialised = false;
+  const modules = {
     ad: {
       requestAd: (type, callbacks) => {
         calls.push('requestAd:' + type);
-        if (localStorage.getItem('${FAKE_AD_MODE_KEY}') === 'error') {
-          setTimeout(() => callbacks.adError && callbacks.adError({ code: 'unfilled' }), 50);
+        const mode = localStorage.getItem('${FAKE_AD_MODE_KEY}');
+        if (mode === 'unfilled' || mode === 'adblock') {
+          setTimeout(() => callbacks.adError && callbacks.adError({ code: mode }), 50);
           return;
         }
         setTimeout(() => {
@@ -35,7 +39,7 @@ const FAKE_SDK = `(() => {
           setTimeout(() => { calls.push('adFinished'); callbacks.adFinished && callbacks.adFinished(); }, 400);
         }, 50);
       },
-      hasAdblock: () => Promise.resolve(false),
+      hasAdblock: () => Promise.resolve(localStorage.getItem('${FAKE_AD_MODE_KEY}') === 'adblock'),
     },
     game: {
       gameplayStart: record('gameplayStart'),
@@ -52,6 +56,18 @@ const FAKE_SDK = `(() => {
       removeItem: (key) => localStorage.removeItem('${FAKE_DATA_PREFIX}' + key),
       clear: () => {},
     },
+  };
+  // Like the real SDK v3: every module throws until init has resolved.
+  const guard = (name) => () => {
+    if (!initialised) throw new Error('CrazySDK is not initialized yet');
+    return modules[name];
+  };
+  window.CrazyGames = { SDK: {
+    get environment() { return initialised ? 'crazygames' : 'uninitialized'; },
+    init: () => { calls.push('init'); return Promise.resolve().then(() => { initialised = true; }); },
+    get ad() { return guard('ad')(); },
+    get game() { return guard('game')(); },
+    get data() { return guard('data')(); },
   } };
 })();`;
 
@@ -88,8 +104,11 @@ export function sdkCalls(page: Page): Promise<string[]> {
   );
 }
 
-/** Makes every later ad fail (`error`) or play to the end (`finish`). */
-export async function setAdMode(page: Page, mode: 'error' | 'finish'): Promise<void> {
+/** Makes every later ad go unfilled, fail as blocked, or play to the end (`finish`). */
+export async function setAdMode(
+  page: Page,
+  mode: 'unfilled' | 'adblock' | 'finish',
+): Promise<void> {
   await page.evaluate(
     ([key, value]) => {
       localStorage.setItem(key, value);

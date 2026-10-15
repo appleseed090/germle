@@ -11,14 +11,17 @@ const STORAGE_PREFIX = 'germle-endless-dev:';
  * `import.meta.env.DEV` branch in `main.ts` drops it, and `scripts/check-builds.ts` fails if
  * browser storage appears in `dist-portal/`).
  *
- * Add `?ads=fail` to the dev URL to make every ad fail, to try the no-reward path.
+ * Add `?ads=fail` to the dev URL to make every ad fail (the no-reward path), or `?ads=off` to play
+ * as if ads were off for this player (an ad blocker or Basic Launch: no rewarded buttons).
  */
 export function createLocalPlatform(): Platform {
-  const adsFail = new URLSearchParams(window.location.search).get('ads') === 'fail';
+  const adsMode = new URLSearchParams(window.location.search).get('ads');
+  const adsFail = adsMode === 'fail';
+  const adsOff = adsMode === 'off';
   let lastMidgameAt = -Infinity;
 
   const playSimulatedAd = (label: string, hooks: AdHooks): Promise<boolean> => {
-    if (adsFail) return Promise.resolve(false);
+    if (adsFail || adsOff) return Promise.resolve(false);
     hooks.onAdStarted();
     const overlay = document.createElement('div');
     overlay.className = 'simulated-ad';
@@ -48,6 +51,7 @@ export function createLocalPlatform(): Platform {
         await playSimulatedAd(STRINGS.ads.simulatedMidgame, hooks);
       },
       showRewardedAd: (hooks) => playSimulatedAd(STRINGS.ads.simulatedRewarded, hooks),
+      rewardedAdsAvailable: () => !adsOff,
       gameplayStart: () => {
         log('gameplayStart');
       },
