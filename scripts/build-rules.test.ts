@@ -21,6 +21,7 @@ describe('isTextPath', () => {
   it('treats code, markup and extensionless config files as text, images as binary', () => {
     expect(isTextPath('assets/index-abc.js')).toBe(true);
     expect(isTextPath('_headers')).toBe(true);
+    expect(isTextPath('src/portal/app.ts')).toBe(true);
     expect(isTextPath('og.png')).toBe(false);
   });
 });
@@ -93,7 +94,8 @@ describe('portalSourceViolations', () => {
       portalSourceViolations([
         textFile(
           'src/portal/screen.ts',
-          "element.classList.add('hud-level');\nif (event.key === 'Enter') go(); // Starts the run\n",
+          "element.classList.add('hud-level');\nif (event.key === 'Enter') go(); // Starts the run\n" +
+            "const css = 'portal-button portal-button--primary';\nthrow new Error('No run in progress');\n",
         ),
       ]),
     ).toEqual([]);
@@ -109,6 +111,11 @@ describe('portalSourceViolations', () => {
     ]);
     expect(
       portalSourceViolations([textFile('src/endless/upgrades.ts', "const name = 'Masks';")]),
+    ).toHaveLength(1);
+    expect(
+      portalSourceViolations([
+        textFile('src/portal/x.ts', "hint.textContent = 'tap to vaccinate';"),
+      ]),
     ).toHaveLength(1);
   });
 

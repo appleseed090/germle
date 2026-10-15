@@ -602,3 +602,41 @@ moves }`, rebuilds the puzzle with `createPuzzle(DAILY_PUZZLE_CONFIG, dailySeedK
   most infected neighbours, then most contacts, when quarantining), plus the obvious use of
   Early Warning and Contact Tracing. It never undoes, so it undervalues Second Opinion. Human
   time is modelled as 2.2 s per tap and 10 s per level transition.
+- **The portal reuses germle.com's board unchanged and decorates it from outside.** Early
+  Warning's known index patients and Contact Tracing's at-risk people get classes the board never
+  touches (`node--known-patient`, `node--at-risk`), set after each draw; known patients also get
+  `data-tappable="false"`, since the classic board's own tappability does not know the option.
+  Changing `src/ui/board.ts` would change germle.com's bytes.
+- **Landscape first, portrait kept.** In landscape (16:9 on desktop and phones) the board fills
+  the left and the HUD is a column of `clamp(220px, 27vw, 340px)` on the right; at aspect ratio
+  1:1 or taller the HUD moves above the board and the instruction and upgrade list hide. All
+  portal text is at least 14 px. Checked by screenshot at 1280 × 720, 800 × 450, 740 × 360 and
+  390 × 844.
+- **Panels are plain elements, not `<dialog>`.** Escape closes a modal dialog, and CrazyGames
+  asks games not to use Escape; the build check fails on `showModal` in the portal output. Panels
+  take `role="dialog"` and `aria-modal`, and focus their heading (focusing the first upgrade card
+  looked like a choice already made).
+- **A brand-new player lands in level 1 with no click;** anyone with a save sees the title
+  screen, whose first button continues the saved run or starts one. Level 1 of a first run shows
+  one hint per phase ("Tap people to vaccinate them", "Tap healthy people to quarantine them"),
+  each until the first tap of that phase; nothing else explains the game.
+- **The HUD's meter shows how many can still be saved** (everyone not yet infected) against the
+  pass mark, so a near miss is visible while it happens; the summary repeats it and calls
+  "Close call!" or "So close: n points short" within 3 points.
+- **Sound is synthesised with Web Audio** (no audio files): short blips for each move, the
+  outbreak, a pass, a failure, a pick and a new best. Muted by the player's setting, by the
+  portal's `muteAudio` and during every ad (from `adStarted`, as CrazyGames asks).
+- **The largest network is cheap enough to draw with the classic SVG board.** 80 people and
+  about 240 edges, measured in Chromium with 4× CPU throttling on a Pixel-7-sized viewport: a
+  median and 95th-percentile frame of 16.7 ms while quarantining, one 50 ms frame, and 0.64 s to
+  lay out and mount the board (hidden behind the level's intro card). No simplified rendering
+  was needed.
+- **The title screen shows a real network mid-outbreak** behind its panel: a fixed level played
+  by the simulator's bot through its vaccines and two quarantines, drawn by the real board. The
+  covers use the same scene.
+- **The save is one versioned JSON value** under `germle-endless-save`: Research, unlocks, best
+  run, runs finished, tutorial flag, settings and the run in progress. Every field is validated
+  on load; a bad field falls back to its default, an inconsistent run is dropped, unreadable data
+  gives a fresh save, and a save from a newer version is left untouched (the game then plays
+  without saving rather than overwrite it). It is written after each level, each upgrade pick or
+  reroll, each Research purchase and when Settings close, never on a tap.

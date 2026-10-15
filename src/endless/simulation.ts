@@ -24,47 +24,57 @@ import {
 import { UPGRADE_IDS, type UpgradeId } from './upgrades';
 
 /**
- * A simple greedy player, for balancing. Vaccinates whoever has the most contacts still in the
- * network (with Early Warning, neighbours of the known index patients first); quarantines the
- * healthy person touching the most infected people, then the most contacts (with Contact
- * Tracing, someone about to be infected). It never undoes.
+ * A simple greedy player's next move, for balancing, the title screen's backdrop and the covers.
+ * Vaccinates whoever has the most contacts still in the network (with Early Warning, neighbours
+ * of the known index patients first); quarantines the healthy person touching the most infected
+ * people, then the most contacts (with Contact Tracing, someone about to be infected). It never
+ * undoes.
  *
- * @returns The finished game.
+ * @returns A tappable node; the game must not have ended.
  */
-export function playLevelWithBot(prepared: PreparedLevel): GameState {
+export function chooseBotMove(prepared: PreparedLevel, state: GameState): number {
   const { puzzle, rules, contactTracing } = prepared;
-  let state = startGameWithRules(puzzle, rules).state;
-  while (state.phase !== 'ended') {
-    const contacts = contactsStillInNetwork(puzzle.graph, state.nodeStatuses);
-    const atRisk =
-      contactTracing && state.phase === 'quarantine'
-        ? new Set(predictNextDayInfections(puzzle, rules, state))
-        : new Set<number>();
-    let chosenNode = -1;
-    let chosenPriority = -Infinity;
-    for (let node = 0; node < puzzle.config.nodeCount; node++) {
-      if (!isTappableWithRules(puzzle, state, node)) continue;
-      const neighbours = puzzle.graph.adjacency[node] as readonly Incidence[];
-      const contactCount = contacts[node] ?? 0;
-      let priority: number;
-      if (state.phase === 'vaccinate') {
-        const besideIndexPatient = neighbours.some(({ neighbour }) =>
-          state.indexPatients.includes(neighbour),
-        );
-        priority = (besideIndexPatient ? 1000 : 0) + contactCount;
-      } else {
-        const infectedNeighbours = neighbours.filter(
-          ({ neighbour }) => state.nodeStatuses[neighbour] === 'infected',
-        ).length;
-        priority = (atRisk.has(node) ? 100_000 : 0) + infectedNeighbours * 1000 + contactCount;
-      }
-      if (priority > chosenPriority) {
-        chosenNode = node;
-        chosenPriority = priority;
-      }
+  const contacts = contactsStillInNetwork(puzzle.graph, state.nodeStatuses);
+  const atRisk =
+    contactTracing && state.phase === 'quarantine'
+      ? new Set(predictNextDayInfections(puzzle, rules, state))
+      : new Set<number>();
+  let chosenNode = -1;
+  let chosenPriority = -Infinity;
+  for (let node = 0; node < puzzle.config.nodeCount; node++) {
+    if (!isTappableWithRules(puzzle, state, node)) continue;
+    const neighbours = puzzle.graph.adjacency[node] as readonly Incidence[];
+    const contactCount = contacts[node] ?? 0;
+    let priority: number;
+    if (state.phase === 'vaccinate') {
+      const besideIndexPatient = neighbours.some(({ neighbour }) =>
+        state.indexPatients.includes(neighbour),
+      );
+      priority = (besideIndexPatient ? 1000 : 0) + contactCount;
+    } else {
+      const infectedNeighbours = neighbours.filter(
+        ({ neighbour }) => state.nodeStatuses[neighbour] === 'infected',
+      ).length;
+      priority = (atRisk.has(node) ? 100_000 : 0) + infectedNeighbours * 1000 + contactCount;
     }
-    state = applyTapWithRules(puzzle, rules, state, chosenNode).state;
+    if (priority > chosenPriority) {
+      chosenNode = node;
+      chosenPriority = priority;
+    }
   }
+  return chosenNode;
+}
+
+/**
+ * Plays a level with {@link chooseBotMove} until it ends, or until `maximumMoves` moves.
+ *
+ * @returns The last state reached.
+ */
+export function playLevelWithBot(prepared: PreparedLevel, maximumMoves = Infinity): GameState {
+  const { puzzle, rules } = prepared;
+  let state = startGameWithRules(puzzle, rules).state;
+  for (let moves = 0; state.phase !== 'ended' && moves < maximumMoves; moves++)
+    state = applyTapWithRules(puzzle, rules, state, chooseBotMove(prepared, state)).state;
   return state;
 }
 

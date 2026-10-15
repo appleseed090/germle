@@ -34,7 +34,10 @@ green and `dist/` byte-for-byte identical to `main` (`npm run compare:germle-com
       headless simulator `npm run simulate:endless` (`--calibrate` for per-level numbers). The
       first curves are a placeholder: the bot cannot pass base levels from 14 on, and with
       upgrades it never fails; stage 5 tunes them.
-- [ ] 4. Portal UI: 16:9 and portrait layouts, level 1 hints, transitions, run resume.
+- [x] 4. Portal UI: 16:9 and portrait layouts, level 1 hints, transitions, run resume. Also
+      brought forward from stages 5–6 so the build plays end to end: the save schema
+      (`src/endless/save.ts`), Research catalog and profile transitions, the Research screen,
+      and the platform layer (`src/portal/platform/`: local and CrazyGames implementations).
 - [ ] 5. Research and unlocks, starting bonuses, balance tuned with the simulator.
 - [ ] 6. Platform layer (ads, saves, leaderboard) with local and CrazyGames implementations;
       portal Playwright tests.
@@ -106,6 +109,11 @@ Constraints to remember:
   Kept as specified; revisit if it reads badly in practice.
 
 ## Deferred cleanups
+
+- **`createBoard` has no teardown.** Germle Endless mounts a new board per level and removes the
+  old container; the board's `ResizeObserver` and listeners go with the detached elements. A
+  `destroy()` on the board would make that explicit, but changes germle.com's bytes; add it when
+  that is acceptable.
 
 - **Fold `src/engine/game.ts` into `src/engine/rules.ts`** (classic = `CLASSIC_RULES`) once a
   change to the bytes germle.com ships is acceptable. Until then the turn logic exists twice,

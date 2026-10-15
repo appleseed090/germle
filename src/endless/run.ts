@@ -208,6 +208,11 @@ export function endRun(run: RunState): RunState {
   return { ...run, phase: 'over' };
 }
 
+/** Ends a run the player chose to stop, from any phase; cleared levels still count. */
+export function abandonRun(run: RunState): RunState {
+  return { ...run, phase: 'over' };
+}
+
 /** The score of a run so far. */
 export function runScore(run: RunState): RunScore {
   return { levelsCleared: run.levelsCleared, peopleSaved: run.peopleSaved };

@@ -17,6 +17,7 @@ import {
   applyTapWithRules,
   isTappableWithRules,
   predictNextDayInfections,
+  quarantinesUntilNextDay,
   replayMovesWithRules,
   startGameWithRules,
   validateGameRules,
@@ -187,6 +188,35 @@ describe('quarantinesPerDay and quarantinesBeforeFirstSpread', () => {
     expect(events[2]).toEqual([{ kind: 'quarantined', node: 2 }, { kind: 'ended' }]);
     expect(state.phase).toBe('ended');
     expect(state.turnsElapsed).toBe(0);
+  });
+});
+
+describe('quarantinesUntilNextDay', () => {
+  it('counts the quarantines left before the next day, matching when spread happens', () => {
+    for (const overrides of [
+      {},
+      { quarantinesPerDay: 2 },
+      { quarantinesBeforeFirstSpread: 2 },
+      { quarantinesPerDay: 2, quarantinesBeforeFirstSpread: 1 },
+    ]) {
+      const rules = withRules(overrides);
+      const puzzle = createPuzzle({ ...DAILY_PUZZLE_CONFIG, transmissionProbability: 0.05 }, 'q');
+      let state = startGameWithRules(puzzle, rules).state;
+      let expectedUntilDay: number | undefined;
+      while (state.phase !== 'ended') {
+        const node = scriptedMove(puzzle, state);
+        if (state.phase === 'quarantine') {
+          expectedUntilDay ??= quarantinesUntilNextDay(rules, state);
+          const step = applyTapWithRules(puzzle, rules, state, node);
+          const passedDay = step.events.some((event) => event.kind === 'spread');
+          expect(passedDay).toBe(expectedUntilDay === 1);
+          expectedUntilDay = passedDay ? undefined : expectedUntilDay - 1;
+          state = step.state;
+        } else {
+          state = applyTapWithRules(puzzle, rules, state, node).state;
+        }
+      }
+    }
   });
 });
 

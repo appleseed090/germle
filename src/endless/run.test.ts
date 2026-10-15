@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { replayMovesWithRules } from '../engine/rules';
 import { prepareLevel } from './levels';
 import {
+  abandonRun,
   canUseSecondChance,
   compareRunScores,
   createRunSeed,
@@ -90,6 +91,12 @@ describe('a run', () => {
     expect(canUseSecondChance(failedAgain)).toBe(false);
     expect(() => useSecondChance(failedAgain)).toThrow();
     expect(endRun(failedAgain).phase).toBe('over');
+  });
+
+  it('can be abandoned from any phase, keeping its score', () => {
+    const passed = finishLevel(startRun('abcd1234', NO_BONUSES), result(1, true));
+    expect(abandonRun(passed)).toMatchObject({ phase: 'over', levelsCleared: 1 });
+    expect(abandonRun(startRun('abcd1234', NO_BONUSES)).phase).toBe('over');
   });
 
   it('rejects transitions from the wrong phase', () => {
