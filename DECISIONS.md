@@ -577,3 +577,28 @@ moves }`, rebuilds the puzzle with `createPuzzle(DAILY_PUZZLE_CONFIG, dailySeedK
 - **Some upgrades need no engine option:** extra vaccines, lower contagiousness, fewer refusers and
   fewer index patients are values of the existing `PuzzleConfig`; a lower pass mark is run logic;
   undo replays the move list without its last move (`replayMovesWithRules`).
+- **A run is reproducible from its seed.** Level `n` of run `s` is the puzzle with seed key
+  `endless-<s>-<n>` (never a daily number or a `practice-` key), built with the run's upgrades;
+  each upgrade offer draws from its own stream keyed by seed, level and reroll count, so
+  reloading during a choice shows the same offer and never rerolls for free.
+- **The run is a small state machine** (`playing`, `choosing`, `failed`, `over`) of plain JSON,
+  saved whole after each level. The score is levels cleared, then people saved over cleared
+  levels. A failed level may be replayed once per run (Second chance): the same network and
+  outbreak, which the player has now seen.
+- **Networks stop growing at 80 people,** the practice maximum and the most a 360 px phone can
+  show with tappable people (DECISIONS "Contact counts": 21 px discs). Later levels get harder
+  through density (ring degree 6), more index patients, fewer vaccines per person, higher
+  contagiousness and a higher pass mark. Using the existing config limits also means Endless
+  levels pass the same `validatePuzzleConfig` as practice.
+- **Thirteen upgrades.** Common: Extra Vaccine (+1 vaccine), Masks (×0.85 contagiousness), Safety
+  Margin (−4 points on the pass mark), Natural Immunity (2 people start immune), Rapid Response
+  (1 quarantine before the first day passes). Uncommon: Outreach (no refusers), Smaller Outbreak
+  (one fewer index patient), Contact Tracing (see who the next day infects), Ring Vaccination
+  (vaccinated people halve the contagiousness to their neighbours), Early Warning (see the index
+  patients before vaccinating). Rare: Double Shift (two quarantines per day), Second Opinion
+  (undo one move per level), Burnout (a day with no lucky contact infects nobody). Offers are
+  three distinct upgrades the run can still take, each slot drawing a rarity by weight 6 : 3 : 1.
+- **The simulator's bot is the locked-puzzle test's player** (most contacts when vaccinating;
+  most infected neighbours, then most contacts, when quarantining), plus the obvious use of
+  Early Warning and Contact Tracing. It never undoes, so it undervalues Second Opinion. Human
+  time is modelled as 2.2 s per tap and 10 s per level transition.

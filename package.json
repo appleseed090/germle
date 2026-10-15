@@ -13,6 +13,7 @@
     "preview:portal": "vite preview --config vite.portal.config.ts",
     "check:builds": "node scripts/check-builds.ts",
     "compare:germle-com": "node scripts/compare-germle-com-build.ts",
+    "simulate:endless": "node scripts/simulate-endless.ts",
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.node.json && tsc -p tsconfig.worker.json",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
