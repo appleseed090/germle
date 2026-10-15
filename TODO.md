@@ -19,6 +19,34 @@ External memory for the project: what is pending, constraints to remember, defer
       page's own actions, Settings, About), and today's results show "Play past puzzles"
       (see `DECISIONS.md` Navigation and Archive).
 
+## Germle Endless (CrazyGames portal build, `portal` branch)
+
+A roguelite endless mode built on the engine, packaged for CrazyGames. Map and rules in
+`CLAUDE.md`; decisions in `DECISIONS.md` ("Germle Endless"). Stages, each leaving `npm run check`
+green and `dist/` byte-for-byte identical to `main` (`npm run compare:germle-com`):
+
+- [x] 1. Guardrails: `portal` branch, `CLAUDE.md`, `vite.portal.config.ts`, `portal/index.html`,
+      `scripts/check-builds.ts` in `npm run check`, ESLint import boundary,
+      `npm run compare:germle-com`.
+- [ ] 2. Engine options in `src/engine/rules.ts`, off by default, proven equal to the classic
+      engine on every locked puzzle.
+- [ ] 3. Run loop in `src/endless/`: levels, pass/fail, scoring, upgrade choice, summary;
+      headless simulator `npm run simulate:endless`.
+- [ ] 4. Portal UI: 16:9 and portrait layouts, level 1 hints, transitions, run resume.
+- [ ] 5. Research and unlocks, starting bonuses, balance tuned with the simulator.
+- [ ] 6. Platform layer (ads, saves, leaderboard) with local and CrazyGames implementations;
+      portal Playwright tests.
+- [ ] 7. Covers, `npm run package:portal`, PR from `portal` to `main`.
+- [ ] 8. Owner playtest; fix what they report; then the PR is ready to merge.
+
+Constraints to remember:
+
+- The CrazyGames docs could not be read from the development container (its network policy
+  blocks `docs.crazygames.com` and `sdk.crazygames.com`); the rules used are from search-engine
+  summaries and are marked unverified in `DECISIONS.md`. Re-check them against the live docs
+  before submitting.
+- Leaderboards are invite-only on CrazyGames and need an encryption key from the Developer Portal.
+
 ## Needs the owner
 
 - [x] GitHub default branch switched to `main`.

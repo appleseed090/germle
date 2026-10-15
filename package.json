@@ -8,13 +8,19 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "dev:portal": "vite --config vite.portal.config.ts",
+    "build:portal": "vite build --config vite.portal.config.ts",
+    "preview:portal": "vite preview --config vite.portal.config.ts",
+    "check:builds": "node scripts/check-builds.ts",
+    "compare:germle-com": "node scripts/compare-germle-com-build.ts",
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.node.json && tsc -p tsconfig.worker.json",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
     "generate:images": "node scripts/generate-images.ts",
     "test": "vitest run",
-    "check": "npm run typecheck && npm run lint && npm run test && npm run build",
-    "e2e": "playwright test"
+    "check": "npm run typecheck && npm run lint && npm run test && npm run build && npm run build:portal && npm run check:builds",
+    "e2e": "playwright test",
+    "e2e:portal": "playwright test --config playwright.portal.config.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

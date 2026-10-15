@@ -1,4 +1,6 @@
 dist
+dist-portal
+release
 coverage
 playwright-report
 test-results

@@ -523,3 +523,41 @@ moves }`, rebuilds the puzzle with `createPuzzle(DAILY_PUZZLE_CONFIG, dailySeedK
   server's receipt time in UTC, not the player's local time; the page says so to make clear it
   reveals no location. It replaces "No accounts, no tracking in the game", which stopped being the
   whole truth once scores leave the browser. The meta description now reads "No account needed".
+
+## Germle Endless (CrazyGames portal build)
+
+- **A second product in the same repo, kept apart by build, lint and a byte comparison.**
+  `vite.portal.config.ts` builds `portal/index.html` into `dist-portal/`; germle.com's config is
+  untouched. ESLint forbids germle.com code from importing `src/portal/` or `src/endless/`, so
+  no germle.com page can bundle portal code (failing at lint, the earliest stage);
+  `scripts/check-builds.ts` scans both outputs as a backstop; `npm run compare:germle-com` builds
+  `origin/main` in a temporary git worktree and compares every `dist/` file by SHA-256. The
+  comparison is not in `npm run check`, since germle.com changes are expected to differ; it is
+  run before each portal merge.
+- **The portal build loads the CrazyGames SDK only in production.** A Vite plugin adds the
+  SDK's script tag at build time; `npm run dev:portal` runs the local platform (simulated ads,
+  saves in the dev browser) and never contacts CrazyGames. All asset paths are relative
+  (`base: './'`), since CrazyGames serves the game from its own path.
+- **Build-check scripts run on Node directly** (type stripping) and import with explicit `.ts`
+  extensions (`allowImportingTsExtensions` in `tsconfig.node.json`). The rules are pure
+  functions in `scripts/build-rules.ts`, unit-tested by Vitest.
+- **"Player text lives in `src/portal/strings.ts`" is checked heuristically.** Outside that
+  file, a string literal in `src/portal/` or `src/endless/` fails the check if it holds two words
+  separated by a space or a single capitalised word; a line ending `// not-player-text` is
+  exempt. The strings file itself is scanned for words outside a PEGI 12, general-audience tone.
+- **CrazyGames requirements were taken from search summaries, not the docs themselves**
+  (2026-10-15). The development container's network policy blocks `docs.crazygames.com`, so the
+  pages could not be opened. Used, and to be re-checked against the live docs: SDK v3 at
+  `https://sdk.crazygames.com/crazygames-sdk-v3.js` with `await SDK.init()`; midgame ads capped
+  by the SDK at one every 3 minutes (`adCooldown` error otherwise) and best not before level 3–4;
+  no midgame ad next to a rewarded "continue" offer; mute on `adStarted`, not on request; the
+  Data module (synchronous `getItem`/`setItem`/`removeItem`, 1 MB, batched writes) needs the
+  "Progress Save" toggle in the submission flow; leaderboards are invite-only and need an
+  encryption key; covers 1920×1080, 800×1200 and 800×800 with the title as the only text; at
+  most 1,500 files and an initial download of 20 MB for the mobile homepage (50 MB otherwise);
+  relative paths only; one click at most to gameplay; PEGI 12; no custom fullscreen; avoid
+  Escape.
+- **The name is "Germle Endless".** A search of CrazyGames (through search engines; the site
+  itself was blocked too) and the wider web found no game called Germle or Germle Endless; the
+  nearest CrazyGames titles are "Germ War" (a shooter) and "Epidemica". No trademark search was
+  done.
