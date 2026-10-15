@@ -10,6 +10,16 @@ Germle is an original game inspired by Vax! (2014) by Ellsworth Campbell and Isa
 Salathé Group at Penn State. It shares none of Vax!'s code or artwork; see `CREDITS.md` for the
 licensing notice.
 
+## Two products
+
+This repo builds two separate products from one engine; `CLAUDE.md` is the map.
+
+- **germle.com**, the daily puzzle: everything below unless marked otherwise. Built by
+  `npm run build` into `dist/` and deployed from `main`.
+- **Germle Endless**, a roguelite endless mode for the CrazyGames web portal: `portal/`,
+  `src/portal/` and `src/endless/`, built by `npm run build:portal` into `dist-portal/` and
+  packaged by hand for upload. Developed on the `portal` branch; it never changes `dist/`.
+
 ## Status
 
 Milestone M3: the daily game at `/` (with stats and sharing), the archive of past puzzles at
@@ -26,16 +36,21 @@ anonymously with everyone who played the same puzzle. See `TODO.md` for the back
 
 ## Commands
 
-| Command                   | What it does                                                |
-| ------------------------- | ----------------------------------------------------------- |
-| `npm ci`                  | Install exact dev dependencies                              |
-| `npm run dev`             | Vite dev server with hot reload                             |
-| `npm run check`           | Typecheck + lint + format check + unit tests + build (gate) |
-| `npm run build`           | Production build into `dist/`                               |
-| `npm run preview`         | Serve the built `dist/` locally                             |
-| `npm run format`          | Rewrite files with Prettier                                 |
-| `npm run e2e`             | Playwright tests against `dist/` (build first)              |
-| `npm run generate:images` | Re-render favicons, app icons and `og.png` into `public/`   |
+| Command                      | What it does                                                              |
+| ---------------------------- | ------------------------------------------------------------------------- |
+| `npm ci`                     | Install exact dev dependencies                                            |
+| `npm run dev`                | Vite dev server with hot reload                                           |
+| `npm run check`              | Typecheck + lint + format + unit tests + both builds + build rules (gate) |
+| `npm run build`              | Production build into `dist/`                                             |
+| `npm run preview`            | Serve the built `dist/` locally                                           |
+| `npm run format`             | Rewrite files with Prettier                                               |
+| `npm run e2e`                | Playwright tests against `dist/` (build first)                            |
+| `npm run generate:images`    | Re-render favicons, app icons and `og.png` into `public/`                 |
+| `npm run dev:portal`         | Germle Endless dev server (local ads overlay and saves)                   |
+| `npm run build:portal`       | Germle Endless build into `dist-portal/`                                  |
+| `npm run preview:portal`     | Serve `dist-portal/` with the real CrazyGames SDK                         |
+| `npm run check:builds`       | Check `dist/` and `dist-portal/` against the product rules                |
+| `npm run compare:germle-com` | Prove `dist/` is byte-for-byte what `origin/main` builds                  |
 
 To run the site with its API and a local database: `npm run build`, then
 `npx wrangler d1 migrations apply germle --local` once, then `npx wrangler dev`. `npm run dev`
