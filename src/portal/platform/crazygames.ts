@@ -39,13 +39,15 @@ const INIT_TIMEOUT_MILLISECONDS = 8000;
 const AD_START_TIMEOUT_MILLISECONDS = 15_000;
 
 /**
- * Connects to the CrazyGames SDK loaded by `portal/index.html`. If the SDK is missing, fails to
+ * Connects to the CrazyGames SDK that `portal/index.html` loads. If the SDK is missing, fails to
  * initialise, or reports the `disabled` environment (the game is hosted somewhere else), the game
  * still runs: ads report "unavailable", saves last only for the session and gameplay events are
  * dropped.
+ *
+ * @param sdkCandidate - `window.CrazyGames?.SDK`, untrusted: checked for the methods used.
  */
-export async function createCrazyGamesPlatform(): Promise<Platform> {
-  const sdk = readSdk();
+export async function createCrazyGamesPlatform(sdkCandidate: unknown): Promise<Platform> {
+  const sdk = asSdk(sdkCandidate);
   if (sdk === undefined) return offlinePlatform();
   try {
     await withTimeout(sdk.init(), INIT_TIMEOUT_MILLISECONDS);
@@ -77,9 +79,7 @@ export async function createCrazyGamesPlatform(): Promise<Platform> {
   };
 }
 
-function readSdk(): CrazyGamesSdk | undefined {
-  const candidate: unknown = (window as unknown as { CrazyGames?: { SDK?: unknown } }).CrazyGames
-    ?.SDK;
+function asSdk(candidate: unknown): CrazyGamesSdk | undefined {
   if (typeof candidate !== 'object' || candidate === null) return undefined;
   const sdk = candidate as Partial<CrazyGamesSdk>;
   const looksUsable =
@@ -100,7 +100,7 @@ function sdkAds(sdk: CrazyGamesSdk): AdsPlatform {
         settled = true;
         resolve(rewarded);
       };
-      window.setTimeout(() => {
+      globalThis.setTimeout(() => {
         if (!started) settle(false);
       }, AD_START_TIMEOUT_MILLISECONDS);
       const requested = safely(() => {
@@ -216,7 +216,7 @@ function withTimeout<Value>(promise: Promise<Value>, milliseconds: number): Prom
   return Promise.race([
     promise,
     new Promise<never>((_, reject) => {
-      window.setTimeout(() => {
+      globalThis.setTimeout(() => {
         reject(new Error('timeout'));
       }, milliseconds);
     }),

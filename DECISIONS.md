@@ -682,3 +682,36 @@ moves }`, rebuilds the puzzle with `createPuzzle(DAILY_PUZZLE_CONFIG, dailySeedK
   than the time goal once upgrades stacked; by 2 it felt steep early. Index patients start at 1
   and add one every 2.5 levels (at most 14); vaccines start at 17% of the network and fall 0.5
   points a level to 6%; contagiousness starts at 30% and rises 0.6 points a level to 60%.
+- **Every platform call goes through `AdsPlatform`, `SavePlatform` and `LeaderboardPlatform`**
+  (`src/portal/platform/platform.ts`). `main.ts` picks the implementation: `local.ts` under the dev
+  server (ads are a two-second overlay, `?ads=fail` makes them fail; saves go to the dev
+  browser's storage) and `crazygames.ts` in the build. Vite drops the local one from the build,
+  and the build check fails if browser storage appears in `dist-portal/`, so the SDK Data module
+  is the only save path there.
+- **The SDK is external code, checked at the boundary and never trusted to behave.** The adapter
+  takes `window.CrazyGames?.SDK` as an unknown value and checks the methods it uses; every call
+  is wrapped; `init` has an 8-second limit; an ad that has not started within 15 seconds counts as
+  failed, so the game never waits forever. A missing SDK, a failed `init` or the `disabled`
+  environment gives an offline platform (no ads, saves for the session only), and a Data module
+  that throws (Progress Save off) falls back to memory. Unit-tested against fake SDKs.
+- **Ads.** A midgame ad is requested only when the player continues from a passed level's
+  summary, from the third cleared level on, before the upgrade choice; never after a failure, so
+  it is never next to the rewarded "Replay this level" offer. The SDK's own 3-minute cooldown
+  decides whether one actually plays. Rewarded ads only on the player's tap: Second chance (once
+  per run) and Reroll (when no free reroll is left). Sound mutes on `adStarted`, input is blocked
+  for the whole request, and a failed or blocked ad gives no reward, just "No video available
+  right now."
+- **Gameplay events:** `loadingStart`/`loadingStop` around the first screen; `gameplayStart`
+  when a level becomes playable and on leaving the menu; `gameplayStop` when a level ends and on
+  opening the menu; `happytime` on a new best run. Not on tab or focus changes, which the
+  platform handles.
+- **Leaderboards are off.** CrazyGames' leaderboard is invite-only and needs a per-game encryption
+  key from the Developer Portal, and the search summaries disagreed on the encryption scheme;
+  guessing it would ship code that silently fails. `LeaderboardPlatform.available` is `false` and
+  the game never mentions a leaderboard; see `TODO.md`.
+- **The portal's end-to-end tests run the real build against a fake SDK** served at the SDK's
+  URL, which records every call and plays or fails ads on request. The tests compute the bot's
+  moves with the game's own engine and tap them, so they stay valid when the balance changes, and
+  they fail on any page error or any request to a site other than localhost and the SDK. Three
+  viewports: 1280 × 720, a phone in landscape and a phone in portrait; the legibility test also
+  shrinks to 800 × 450.
