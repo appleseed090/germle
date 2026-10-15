@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { prepareLevel } from './levels';
-import { calibrateLevel, playLevelWithBot, simulateRun, summariseRuns } from './simulation';
+import {
+  calibrateLevel,
+  playLevelWithBot,
+  simulateCareer,
+  simulateRun,
+  summariseRuns,
+} from './simulation';
 import { UPGRADE_IDS } from './upgrades';
 
 const OPTIONS = {
@@ -9,6 +15,8 @@ const OPTIONS = {
   takesSecondChance: true,
   randomPickChance: 0.2,
   maximumLevels: 12,
+  offerCount: 3,
+  mistakeChance: 0.1,
 };
 
 describe('the simulator', () => {
@@ -33,5 +41,18 @@ describe('the simulator', () => {
     expect(calibration.passRate).toBeGreaterThanOrEqual(0);
     expect(calibration.passRate).toBeLessThanOrEqual(1);
     expect(calibration.passThresholdPercent).toBe(prepareLevel('x', 1, []).passThresholdPercent);
+  });
+
+  it('simulates a career that spends Research between runs', () => {
+    const career = simulateCareer('test', 3, {
+      takesSecondChance: false,
+      randomPickChance: 0,
+      maximumLevels: 12,
+      mistakeChance: 0,
+    });
+    expect(career).toHaveLength(3);
+    expect(career[0]?.unlocksBefore).toEqual([]);
+    const earnedBeforeLast = (career[0]?.researchEarned ?? 0) + (career[1]?.researchEarned ?? 0);
+    if (earnedBeforeLast >= 40) expect(career[2]?.unlocksBefore.length).toBeGreaterThan(0);
   });
 });

@@ -21,6 +21,15 @@ import {
   type RunStartOptions,
   type RunState,
 } from './run';
+import {
+  RESEARCH_CATALOG,
+  canBuyUnlock,
+  researchForRun,
+  runStartOptions,
+  unlockCost,
+  unlockedUpgrades,
+  type UnlockId,
+} from './research';
 import { UPGRADE_IDS, type UpgradeId } from './upgrades';
 
 /**
@@ -66,15 +75,29 @@ export function chooseBotMove(prepared: PreparedLevel, state: GameState): number
 }
 
 /**
- * Plays a level with {@link chooseBotMove} until it ends, or until `maximumMoves` moves.
+ * Plays a level with {@link chooseBotMove} until it ends, or until `maximumMoves` moves. With a
+ * `mistakes` source, each move is instead a random legal move with probability `chance`, to model
+ * a less careful player.
  *
  * @returns The last state reached.
  */
-export function playLevelWithBot(prepared: PreparedLevel, maximumMoves = Infinity): GameState {
+export function playLevelWithBot(
+  prepared: PreparedLevel,
+  maximumMoves = Infinity,
+  mistakes?: { readonly chance: number; readonly random: RandomSource },
+): GameState {
   const { puzzle, rules } = prepared;
   let state = startGameWithRules(puzzle, rules).state;
-  for (let moves = 0; state.phase !== 'ended' && moves < maximumMoves; moves++)
-    state = applyTapWithRules(puzzle, rules, state, chooseBotMove(prepared, state)).state;
+  for (let moves = 0; state.phase !== 'ended' && moves < maximumMoves; moves++) {
+    let node = chooseBotMove(prepared, state);
+    if (mistakes !== undefined && mistakes.random() < mistakes.chance) {
+      const legal = state.nodeStatuses.flatMap((_, candidate) =>
+        isTappableWithRules(puzzle, state, candidate) ? [candidate] : [],
+      );
+      node = legal[Math.floor(mistakes.random() * legal.length)] ?? node;
+    }
+    state = applyTapWithRules(puzzle, rules, state, node).state;
+  }
   return state;
 }
 
@@ -121,6 +144,10 @@ export interface SimulationOptions {
   readonly randomPickChance: number;
   /** Stops a run that somehow never fails. */
   readonly maximumLevels: number;
+  /** Upgrades per offer (4 with Wider Choice). */
+  readonly offerCount: number;
+  /** Chance that any move is a random legal one instead of the bot's choice (0 = expert). */
+  readonly mistakeChance: number;
 }
 
 /** Plays one whole run with the bot. Deterministic for a given seed and options. */
@@ -135,13 +162,16 @@ export function simulateRun(seed: string, options: SimulationOptions): Simulated
   while (run.phase !== 'over' && run.level <= options.maximumLevels) {
     if (run.phase === 'playing') {
       const prepared = prepareLevel(run.seed, run.level, run.picks);
-      const finalState = playLevelWithBot(prepared);
+      const finalState = playLevelWithBot(prepared, Infinity, {
+        chance: options.mistakeChance,
+        random,
+      });
       levelsPlayed++;
       moves += finalState.moves.length;
       if (run.level === 1 && firstLevelMoves === 0) firstLevelMoves = finalState.moves.length;
       run = finishLevel(run, judgeLevel(prepared, finalState));
     } else if (run.phase === 'choosing') {
-      const offer = currentOffer(run, options.unlocked);
+      const offer = currentOffer(run, options.unlocked, options.offerCount);
       for (const id of offer) offered.set(id, (offered.get(id) ?? 0) + 1);
       if (offer.length === 0) {
         run = skipOffer(run);
@@ -293,4 +323,47 @@ export function calibrateLevel(
     passRate: results.filter((result) => result.passed).length / seedCount,
     moves: percentiles(results.map((result) => result.moves)),
   };
+}
+
+/** One run of a simulated player's career, with what Research had bought before it. */
+export interface CareerRun {
+  readonly run: SimulatedRun;
+  readonly researchEarned: number;
+  readonly unlocksBefore: readonly UnlockId[];
+}
+
+/**
+ * A player's first `runCount` runs: each run uses the unlocks bought so far, and after each run
+ * the player buys the cheapest affordable unlocks, cheapest first, until nothing is affordable.
+ */
+export function simulateCareer(
+  name: string,
+  runCount: number,
+  options: Pick<
+    SimulationOptions,
+    'takesSecondChance' | 'randomPickChance' | 'maximumLevels' | 'mistakeChance'
+  >,
+): CareerRun[] {
+  let research = 0;
+  const unlocks: UnlockId[] = [];
+  const careerRandom = createMulberry32(hashStringFnv1a32(`career:${name}`));
+  const runs: CareerRun[] = [];
+  for (let index = 0; index < runCount; index++) {
+    const { offerCount, ...start } = runStartOptions(unlocks, careerRandom);
+    const run = simulateRun(`${name}r${index}`, {
+      ...options,
+      unlocked: unlockedUpgrades(unlocks),
+      start,
+      offerCount,
+    });
+    const researchEarned = researchForRun(run.levelsCleared);
+    runs.push({ run, researchEarned, unlocksBefore: [...unlocks] });
+    research += researchEarned;
+    for (const { id } of RESEARCH_CATALOG) {
+      if (!canBuyUnlock(id, research, unlocks)) continue;
+      research -= unlockCost(id);
+      unlocks.push(id);
+    }
+  }
+  return runs;
 }

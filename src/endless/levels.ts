@@ -7,16 +7,10 @@ import { applyUpgrades, type UpgradeId, type UpgradedLevel } from './upgrades';
 export function baseLevelConfig(level: number): PuzzleConfig {
   const balance = LEVEL_BALANCE;
   const nodeCount = Math.round(curveAt(balance.nodeCount, level));
-  const indexPatientCount = Math.min(
-    1 + Math.floor((level - 1) / balance.levelsPerExtraIndexPatient),
-    balance.maximumIndexPatients,
-  );
+  const indexPatientCount = Math.floor(curveAt(balance.indexPatientCount, level));
   return validatePuzzleConfig({
     nodeCount,
-    ringNeighbourCount:
-      level >= balance.denseFromLevel
-        ? balance.denseRingNeighbourCount
-        : balance.sparseRingNeighbourCount,
+    ringNeighbourCount: balance.ringNeighbourCount,
     rewireProbability: curveAt(balance.rewireProbability, level),
     refuserCount: Math.floor(nodeCount * curveAt(balance.refuserShare, level)),
     vaccineCount: Math.max(1, Math.round(nodeCount * curveAt(balance.vaccineShare, level))),

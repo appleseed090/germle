@@ -586,18 +586,24 @@ moves }`, rebuilds the puzzle with `createPuzzle(DAILY_PUZZLE_CONFIG, dailySeedK
   levels. A failed level may be replayed once per run (Second chance): the same network and
   outbreak, which the player has now seen.
 - **Networks stop growing at 80 people,** the practice maximum and the most a 360 px phone can
-  show with tappable people (DECISIONS "Contact counts": 21 px discs). Later levels get harder
-  through density (ring degree 6), more index patients, fewer vaccines per person, higher
-  contagiousness and a higher pass mark. Using the existing config limits also means Endless
-  levels pass the same `validatePuzzleConfig` as practice.
-- **Thirteen upgrades.** Common: Extra Vaccine (+1 vaccine), Masks (×0.85 contagiousness), Safety
-  Margin (−4 points on the pass mark), Natural Immunity (2 people start immune), Rapid Response
-  (1 quarantine before the first day passes). Uncommon: Outreach (no refusers), Smaller Outbreak
-  (one fewer index patient), Contact Tracing (see who the next day infects), Ring Vaccination
-  (vaccinated people halve the contagiousness to their neighbours), Early Warning (see the index
-  patients before vaccinating). Rare: Double Shift (two quarantines per day), Second Opinion
-  (undo one move per level), Burnout (a day with no lucky contact infects nobody). Offers are
-  three distinct upgrades the run can still take, each slot drawing a rarity by weight 6 : 3 : 1.
+  show with tappable people (DECISIONS "Contact counts": 21 px discs). Past that, more index
+  patients, fewer vaccines per person, higher contagiousness and a higher pass mark keep the
+  pressure rising, so stacked upgrades cannot outgrow it. Using the existing config limits also
+  means Endless levels pass the same `validatePuzzleConfig` as practice.
+- **"Denser connections" come from rewiring, not a ring of 6.** Each person keeps 4 ring
+  neighbours; the rewiring chance grows from 5% to 25%, adding long-range shortcuts that make a
+  network harder to cut. A ring of 6 was tried first and was a wall: the bot saved 17% on every
+  level that had it, and even 20 vaccines at 80 people passed only 5% of the time.
+- **Thirteen upgrades** (rarity, stacks). Common: Extra Vaccine (+1 vaccine, ×3), Masks
+  (×0.9 contagiousness, ×2), Safety Margin (−3 points on the pass mark, ×2), Natural Immunity (1
+  random person starts immune, ×3), Rapid Response (the first quarantine passes no day, ×1),
+  Outreach (no refusers, and as many people start immune, ×1). Uncommon: Contact Tracing (see who
+  the next day infects), Ring Vaccination (vaccinated people halve the contagiousness to their
+  neighbours), Burnout (a day with no lucky contact infects nobody). Rare: Smaller Outbreak (one
+  fewer index patient), Early Warning (see the index patients before vaccinating), Double Shift
+  (two quarantines per day), Second Opinion (undo one move per level, ×2). Offers are three
+  distinct upgrades the run can still take, each slot drawing a rarity by weight 6 : 3 : 1.
+  Rarities and stacks were set by each upgrade's effect alone on the bot (below).
 - **The simulator's bot is the locked-puzzle test's player** (most contacts when vaccinating;
   most infected neighbours, then most contacts, when quarantining), plus the obvious use of
   Early Warning and Contact Tracing. It never undoes, so it undervalues Second Opinion. Human
@@ -640,3 +646,39 @@ moves }`, rebuilds the puzzle with `createPuzzle(DAILY_PUZZLE_CONFIG, dailySeedK
   gives a fresh save, and a save from a newer version is left untouched (the game then plays
   without saving rather than overwrite it). It is written after each level, each upgrade pick or
   reroll, each Research purchase and when Settings close, never on a tap.
+- **Research: 10 per cleared level plus 10 per full five levels; nine unlocks.** The seven
+  starter upgrades are always in the pool. Research buys, cheapest first: Contact Tracing 60,
+  Spare Reroll (one free reroll per run) 100, Ring Vaccination 150, Burnout 220, Head Start (a
+  random common upgrade at the start of every run) 300, Early Warning 380, Second Opinion 460,
+  Double Shift 560, Wider Choice (four upgrades per offer) 680: 2,910 in all, about 14 runs of a
+  simulated player. The first unlock is affordable after the first run for 98% of simulated
+  players.
+- **Balance, tuned with `npm run simulate:endless` (2026-10-15).** The bot is the greedy player
+  above with 10% of its moves made at random, picking its preferred upgrade 80% of the time;
+  minutes use the 2.2 s per tap and 10 s per level model. These are a model's numbers, not
+  players': the playtest decides.
+
+  | Measure                                          | Result                                      |
+  | ------------------------------------------------ | ------------------------------------------- |
+  | Level 1                                          | 5 taps (about 20 s), passed in 100% of runs |
+  | First run, levels cleared (p10 / median / p90)   | 10 / 13 / 15                                |
+  | First run, minutes (median)                      | 8.1                                         |
+  | Runs 1–12 of a career, minutes (median)          | 7.3–14.5                                    |
+  | Runs 13–20 of a career, minutes (median)         | 18.3–19.9                                   |
+  | Everything unlocked: levels (p10 / median / p90) | 10 / 23 / 25; 83% reach level 20            |
+  | First unlock before the second run               | 98% of players                              |
+
+  Each upgrade alone on level 10 (bot pass rate 4% without): Double Shift +60 points, Smaller
+  Outbreak +26, Rapid Response +10, Ring Vaccination +10, Early Warning +8, Extra Vaccine +6,
+  Burnout +6, Safety Margin +4, Natural Immunity +3, Contact Tracing +3, Masks +2, Outreach +2
+  (+10 points of saved share by level 20, where refusers are more common), Second Opinion 0 (the
+  bot never undoes). Runs end in a fairly narrow band where a run's pool of upgrades runs out
+  (about level 13 with the starters, 23–26 with everything); human mistakes should widen it, and
+  the playtest should check whether that ceiling feels like a wall. Veterans' runs last about
+  20 minutes, past the 8–15 minute goal; the first dozen runs are inside it. Double Shift is the
+  biggest single jump (runs 13+ in the career table are mostly it).
+
+- **Pass mark 50% at level 1, +1.5 points a level, at most 85%.** Rising by 1 kept runs longer
+  than the time goal once upgrades stacked; by 2 it felt steep early. Index patients start at 1
+  and add one every 2.5 levels (at most 14); vaccines start at 17% of the network and fall 0.5
+  points a level to 6%; contagiousness starts at 30% and rises 0.6 points a level to 60%.

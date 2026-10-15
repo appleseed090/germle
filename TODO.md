@@ -31,14 +31,15 @@ green and `dist/` byte-for-byte identical to `main` (`npm run compare:germle-com
 - [x] 2. Engine options in `src/engine/rules.ts`, off by default, proven equal to the classic
       engine on every locked puzzle.
 - [x] 3. Run loop in `src/endless/`: levels, pass/fail, scoring, upgrade choice, summary;
-      headless simulator `npm run simulate:endless` (`--calibrate` for per-level numbers). The
-      first curves are a placeholder: the bot cannot pass base levels from 14 on, and with
-      upgrades it never fails; stage 5 tunes them.
+      headless simulator `npm run simulate:endless` (`--calibrate`, `--upgrade-impact <level>`,
+      `--career <runs>`, `--mistakes <share>`).
 - [x] 4. Portal UI: 16:9 and portrait layouts, level 1 hints, transitions, run resume. Also
       brought forward from stages 5–6 so the build plays end to end: the save schema
       (`src/endless/save.ts`), Research catalog and profile transitions, the Research screen,
       and the platform layer (`src/portal/platform/`: local and CrazyGames implementations).
-- [ ] 5. Research and unlocks, starting bonuses, balance tuned with the simulator.
+- [x] 5. Research and unlocks, starting bonuses, balance tuned with the simulator (numbers in
+      `DECISIONS.md`). Open questions for the playtest: the ceiling where a run's upgrade pool
+      runs out, veterans' 20-minute runs, Double Shift's size.
 - [ ] 6. Platform layer (ads, saves, leaderboard) with local and CrazyGames implementations;
       portal Playwright tests.
 - [ ] 7. Covers, `npm run package:portal`, PR from `portal` to `main`.
