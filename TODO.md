@@ -40,8 +40,8 @@ green and `dist/` byte-for-byte identical to `main` (`npm run compare:germle-com
 - [x] 5. Research and unlocks, starting bonuses, balance tuned with the simulator (numbers in
       `DECISIONS.md`). Open questions for the playtest: the ceiling where a run's upgrade pool
       runs out, veterans' 20-minute runs, Double Shift's size.
-- [ ] 6. Platform layer (ads, saves, leaderboard) with local and CrazyGames implementations;
-      portal Playwright tests.
+- [x] 6. Platform layer (ads, saves, leaderboard) with local and CrazyGames implementations;
+      portal Playwright tests (`npm run e2e:portal`, also a CI job).
 - [ ] 7. Covers, `npm run package:portal`, PR from `portal` to `main`.
 - [ ] 8. Owner playtest; fix what they report; then the PR is ready to merge.
 
@@ -51,7 +51,10 @@ Constraints to remember:
   blocks `docs.crazygames.com` and `sdk.crazygames.com`); the rules used are from search-engine
   summaries and are marked unverified in `DECISIONS.md`. Re-check them against the live docs
   before submitting.
-- Leaderboards are invite-only on CrazyGames and need an encryption key from the Developer Portal.
+- **Leaderboards (needs the owner):** invite-only on CrazyGames and need an encryption key from the
+  Developer Portal. If CrazyGames enables one for the game, implement
+  `LeaderboardPlatform.submitLevelsCleared` in `src/portal/platform/crazygames.ts` from the docs
+  of that time (the key, the score encryption and `user.submitScore`) and set `available`.
 
 ## Needs the owner
 

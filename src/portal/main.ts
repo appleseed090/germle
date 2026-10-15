@@ -14,7 +14,9 @@ import type { Platform } from './platform/platform';
 // (Vite replaces `import.meta.env.DEV`, so the local platform is dropped from that bundle).
 const platform: Platform = import.meta.env.DEV
   ? createLocalPlatform()
-  : await createCrazyGamesPlatform();
+  : await createCrazyGamesPlatform(
+      (window as unknown as { CrazyGames?: { SDK?: unknown } }).CrazyGames?.SDK,
+    );
 platform.ads.loadingStart();
 startApp(requireElement('portal-app', HTMLElement), platform);
 platform.ads.loadingStop();

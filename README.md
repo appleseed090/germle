@@ -49,6 +49,7 @@ anonymously with everyone who played the same puzzle. See `TODO.md` for the back
 | `npm run dev:portal`         | Germle Endless dev server (local ads overlay and saves)                   |
 | `npm run build:portal`       | Germle Endless build into `dist-portal/`                                  |
 | `npm run preview:portal`     | Serve `dist-portal/` with the real CrazyGames SDK                         |
+| `npm run e2e:portal`         | Playwright tests against `dist-portal/` with a fake SDK (build first)     |
 | `npm run check:builds`       | Check `dist/` and `dist-portal/` against the product rules                |
 | `npm run compare:germle-com` | Prove `dist/` is byte-for-byte what `origin/main` builds                  |
 | `npm run simulate:endless`   | Play many Germle Endless runs with a bot and print balance numbers        |

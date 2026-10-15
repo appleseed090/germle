@@ -151,6 +151,10 @@ body.portal {
   gap: 4px 10px;
 }
 
+.hud-phase {
+  font-size: 14px;
+}
+
 .hud-counter {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -646,6 +650,7 @@ body.portal {
 
 .portal-toast {
   position: absolute;
+  pointer-events: none;
   bottom: 18px;
   left: calc((100% - var(--hud-width)) / 2);
   z-index: 6;
