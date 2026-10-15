@@ -43,6 +43,11 @@ const EFFECTS: Readonly<Record<SoundEffect, readonly Tone[]>> = {
 export function createSound(): Sound {
   const mutedBy = new Set<string>();
   let context: AudioContext | undefined;
+  // iOS suspends the context and lets it resume only inside a touch gesture (CrazyGames' advice).
+  document.addEventListener('touchend', () => {
+    if (context?.state === 'suspended' && mutedBy.size === 0)
+      void context.resume().catch(() => undefined);
+  });
 
   return {
     play(effect) {

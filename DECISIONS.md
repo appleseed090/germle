@@ -545,18 +545,50 @@ moves }`, rebuilds the puzzle with `createPuzzle(DAILY_PUZZLE_CONFIG, dailySeedK
   file, a string literal in `src/portal/` or `src/endless/` fails the check if it holds two words
   separated by a space or a single capitalised word; a line ending `// not-player-text` is
   exempt. The strings file itself is scanned for words outside a PEGI 12, general-audience tone.
-- **CrazyGames requirements were taken from search summaries, not the docs themselves**
-  (2026-10-15). The development container's network policy blocks `docs.crazygames.com`, so the
-  pages could not be opened. Used, and to be re-checked against the live docs: SDK v3 at
-  `https://sdk.crazygames.com/crazygames-sdk-v3.js` with `await SDK.init()`; midgame ads capped
-  by the SDK at one every 3 minutes (`adCooldown` error otherwise) and best not before level 3–4;
-  no midgame ad next to a rewarded "continue" offer; mute on `adStarted`, not on request; the
-  Data module (synchronous `getItem`/`setItem`/`removeItem`, 1 MB, batched writes) needs the
-  "Progress Save" toggle in the submission flow; leaderboards are invite-only and need an
-  encryption key; covers 1920×1080, 800×1200 and 800×800 with the title as the only text; at
-  most 1,500 files and an initial download of 20 MB for the mobile homepage (50 MB otherwise);
-  relative paths only; one click at most to gameplay; PEGI 12; no custom fullscreen; avoid
-  Escape.
+- **CrazyGames requirements, checked against the live docs and the real SDK (2026-10-15).** They
+  were first taken from search summaries while the container blocked CrazyGames; once unblocked,
+  every page of `docs.crazygames.com` was read and the SDK script (v3.8.0) inspected. Confirmed:
+  SDK v3 at `https://sdk.crazygames.com/crazygames-sdk-v3.js`, `await SDK.init()` before use,
+  environments `local`/`crazygames`/`disabled`; `ad.requestAd(type, { adStarted, adFinished,
+adError })` (callbacks only, no promise form) with error codes `unfilled`, `adblock`,
+  `adCooldown`, `adsDisabledBasicLaunch`, `other`; midgame ads at most one per 3 minutes, enforced
+  by the SDK, ideally from level 3–4; never a midgame ad next to a rewarded "keep playing" (a hard
+  rule); mute on `adStarted`; `game.settings.muteAudio` (required for Full Launch) and
+  `addSettingsChangeListener`; the Data module (synchronous, 1 MB, debounced writes, needs the
+  Progress Save toggle, read before write, no local saves alongside); covers 1920×1080, 800×1200
+  and 800×800 with the title as the only text; initial download ≤ 50 MB (≤ 20 MB for the mobile
+  homepage, which the build check enforces), total ≤ 250 MB, ≤ 1,500 files, relative paths; at
+  most one click to gameplay; PEGI 12, nothing aimed at children; no custom fullscreen; English.
+  Corrected by the docs, and changed here: input must be blocked from the ad _request_, not from
+  `adStarted`; rewarded buttons need a video icon, a non-ad alternative styled exactly like them,
+  and must not exist when ads cannot play (Basic Launch disables ads; ad blockers must not break
+  the game); "watch to revive" is limited to once per session; `loadingStop` comes before the
+  first `gameplayStart`; iOS needs the audio context resumed on `touchend`. Also required at
+  submission: two preview videos (below). Guidelines, not requirements: avoiding Escape and
+  Ctrl/Cmd+W (followed anyway), and the "no links" rule, which is really "no cross-promotion"
+  with exceptions (privacy policy, community links in menus, links within the same series); the
+  portal build has no links at all, which is stricter. Not documented anywhere: the covers' file
+  format, a zip layout (the game is served as `…/<slug>/<version>/index.html`, so `index.html`
+  goes at the root), and whether the Data module works in the `local` environment (it does: the
+  real SDK keeps it in `localStorage` there, checked in Chromium).
+- **The real SDK throws on any property but `init` until `init` resolves.** The first adapter
+  checked the SDK's shape before `init`, so against the real script the game never started; the
+  fake SDKs in the tests had not modelled this. The adapter now reads only `init` beforehand and
+  checks the rest after, and both fakes (unit and end-to-end) throw before `init` like the real
+  one. Checked against the real SDK in its `local` environment: a level played, saved through the
+  Data module, resumed after a reload, and a rewarded reroll's simulated ad paid out.
+- **Rewarded offers disappear when ads are off.** The ads platform reports
+  `rewardedAdsAvailable()`: false after `hasAdblock()` says so, or after an ad fails with
+  `adblock` or `adsDisabledBasicLaunch`; an `unfilled` ad does not count. Basic Launch has no
+  public flag, so on CrazyGames during Basic Launch the first rewarded tap shows "No video
+  available right now" and the rewarded buttons then disappear for the session; afterwards a
+  failed level offers only "End run" and the choice has no paid reroll.
+- **Preview videos: `npm run videos:portal`.** CrazyGames requires a 1080p landscape (16:9) and a
+  1080p portrait (2:3) video, 15–20 s, no sound, opening on the static cover. The script records
+  the real game in Chromium (dev build, ads off) while the simulator's bot plays a mid-run level
+  to a pass and picks an upgrade, at a 1280 × 720 (or 720 × 1080) viewport scaled 1.5× by ffmpeg,
+  puts one second of the cover in front and writes 19-second H.264 MP4s to `release/videos/`. It
+  needs `ffmpeg` with libx264 on the PATH, which is why it is separate from `package:portal`.
 - **The name is "Germle Endless".** A search of CrazyGames (through search engines; the site
   itself was blocked too) and the wider web found no game called Germle or Germle Endless; the
   nearest CrazyGames titles are "Germ War" (a shooter) and "Epidemica". No trademark search was
@@ -698,16 +730,17 @@ moves }`, rebuilds the puzzle with `createPuzzle(DAILY_PUZZLE_CONFIG, dailySeedK
   summary, from the third cleared level on, before the upgrade choice; never after a failure, so
   it is never next to the rewarded "Replay this level" offer. The SDK's own 3-minute cooldown
   decides whether one actually plays. Rewarded ads only on the player's tap: Second chance (once
-  per run) and Reroll (when no free reroll is left). Sound mutes on `adStarted`, input is blocked
-  for the whole request, and a failed or blocked ad gives no reward, just "No video available
-  right now."
+  per run, once per session) and Reroll (when no free reroll is left), each with a video icon.
+  Sound mutes on `adStarted`; the whole game is `inert` from the request until the ad finishes or
+  fails; a failed or blocked ad gives no reward, just "No video available right now."
 - **Gameplay events:** `loadingStart`/`loadingStop` around the first screen; `gameplayStart`
   when a level becomes playable and on leaving the menu; `gameplayStop` when a level ends and on
   opening the menu; `happytime` on a new best run. Not on tab or focus changes, which the
   platform handles.
-- **Leaderboards are off.** CrazyGames' leaderboard is invite-only and needs a per-game encryption
-  key from the Developer Portal, and the search summaries disagreed on the encryption scheme;
-  guessing it would ship code that silently fails. `LeaderboardPlatform.available` is `false` and
+- **Leaderboards are off.** CrazyGames' leaderboard is for invited games only and needs a per-game
+  encryption key from the Developer Portal; `user.submitScore({ encryptedScore, score })` takes
+  both the plain score and an AES-GCM-encrypted one (random 12-byte IV, base64). Without the key
+  it cannot be built. `LeaderboardPlatform.available` is `false` and
   the game never mentions a leaderboard; see `TODO.md`.
 - **The portal's end-to-end tests run the real build against a fake SDK** served at the SDK's
   URL, which records every call and plays or fails ads on request. The tests compute the bot's

@@ -24,7 +24,10 @@ const PORTAL_ALLOWED_URLS: ReadonlySet<string> = new Set([
   'http://www.w3.org/2000/svg',
 ]);
 
-/** CrazyGames' technical requirements (unverified copy; see DECISIONS.md "Germle Endless"). */
+/**
+ * CrazyGames' technical requirements: at most 1,500 files, and an initial download of at most
+ * 20 MB to qualify for the mobile homepage (50 MB is the hard limit). Checked 2026-10-15.
+ */
 export const PORTAL_LIMITS = Object.freeze({
   maximumFileCount: 1500,
   maximumInitialDownloadBytes: 20 * 1024 * 1024,

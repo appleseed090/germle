@@ -106,6 +106,7 @@ test('a midgame ad plays at the break after level 3, blocking the game while it 
 
   await page.getByRole('button', { name: 'Choose an upgrade' }).click();
   await expect(page.locator('.portal-app')).toHaveAttribute('data-ad', 'playing');
+  await expect(page.locator('.portal-app')).toHaveJSProperty('inert', true);
   await expect(page.getByRole('heading', { name: 'Choose an upgrade' })).toBeVisible();
   await expect(page.locator('.portal-app')).toHaveAttribute('data-ad', 'none');
   const calls = await sdkCalls(page);
@@ -132,7 +133,7 @@ test('a failed ad gives no second chance and no error; a watched one replays the
   await expect(page.getByRole('heading', { name: 'The outbreak spread' })).toBeVisible();
   await expect(page.getByText('So close: 3 points short')).toBeVisible();
 
-  await setAdMode(page, 'error');
+  await setAdMode(page, 'unfilled');
   await page.getByRole('button', { name: 'Replay this level (watch a video)' }).click();
   await expect(page.getByText('No video available right now.')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'The outbreak spread' })).toBeVisible();
@@ -143,6 +144,27 @@ test('a failed ad gives no second chance and no error; a watched one replays the
   await expect(page.locator('.hud-level')).toHaveText('Level 4');
   expect((await readSave(page)).run).toMatchObject({ phase: 'playing', secondChanceUsed: true });
   expect(await sdkCalls(page)).not.toContain('requestAd:midgame');
+});
+
+test('with ads off for the player, no rewarded offer is shown at all', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('fake-crazygames-ads', 'adblock');
+  });
+  const failedResult = {
+    level: 4,
+    counts: { vaccinated: 4, quarantined: 6, untouched: 4, infected: 7 },
+    savedPercent: 50,
+    passThresholdPercent: 70,
+    passed: false,
+    nearMiss: false,
+    moves: 10,
+  };
+  await seedSave(page, returningPlayer(runAt(4, { phase: 'failed', lastResult: failedResult })));
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Continue · level 4' }).click();
+  await expect(page.getByRole('heading', { name: 'The outbreak spread' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'End run' })).toBeVisible();
+  await expect(page.locator('.rewarded-button')).toHaveCount(0);
 });
 
 test('rerolling the upgrade choice takes a watched video and draws a new offer', async ({
@@ -170,6 +192,7 @@ test('rerolling the upgrade choice takes a watched video and draws a new offer',
       .locator('.upgrade-card')
       .evaluateAll((cards) => cards.map((card) => card.getAttribute('data-upgrade')));
   const before = await offer();
+  await expect(page.locator('.rewarded-button .rewarded-icon')).toBeVisible();
   await page.getByRole('button', { name: 'Reroll (watch a video)' }).click();
   await expect.poll(offer).not.toEqual(before);
   expect((await readSave(page)).run?.rerollsThisOffer).toBe(1);

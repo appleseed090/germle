@@ -133,21 +133,18 @@ export function summaryScreen(
   const actionsRow = result.passed
     ? [button(STRINGS.summary.continue, actions.onContinue, 'portal-button portal-button--primary')]
     : [
+        // CrazyGames: the way out must look exactly like the rewarded option beside it.
         canSecondChance
-          ? button(
+          ? rewardedAdButton(
               STRINGS.summary.secondChance,
               actions.onSecondChance,
               'portal-button portal-button--primary',
             )
           : null,
+        button(STRINGS.summary.endRun, actions.onEndRun, 'portal-button portal-button--primary'),
         canSecondChance
           ? element('p', { className: 'panel-note', text: STRINGS.summary.secondChanceNote })
           : null,
-        button(
-          STRINGS.summary.endRun,
-          actions.onEndRun,
-          canSecondChance ? 'portal-button' : 'portal-button portal-button--primary',
-        ),
       ];
   const section = panel(
     `summary summary--${result.passed ? 'passed' : 'failed'}`,
@@ -185,6 +182,7 @@ export interface ChoiceScreenActions {
 export function choiceScreen(
   run: RunState,
   offer: readonly UpgradeId[],
+  canReroll: boolean,
   actions: ChoiceScreenActions,
 ): HTMLElement {
   const owned = countUpgrades(run.picks);
@@ -220,13 +218,19 @@ export function choiceScreen(
     return card;
   });
   const reroll =
-    offer.length === 0
+    offer.length === 0 || !canReroll
       ? null
-      : button(
-          run.freeRerollsLeft > 0 ? STRINGS.choice.rerollFree : STRINGS.choice.rerollWithAd,
-          actions.onReroll,
-          'portal-button portal-button--secondary',
-        );
+      : run.freeRerollsLeft > 0
+        ? button(
+            STRINGS.choice.rerollFree,
+            actions.onReroll,
+            'portal-button portal-button--secondary',
+          )
+        : rewardedAdButton(
+            STRINGS.choice.rerollWithAd,
+            actions.onReroll,
+            'portal-button portal-button--secondary',
+          );
   return panel('choice', STRINGS.choice.heading, [
     offer.length === 0
       ? element('p', { className: 'panel-note', text: STRINGS.choice.nothingLeft })
@@ -235,6 +239,34 @@ export function choiceScreen(
       ? button(STRINGS.choice.skip, actions.onSkip, 'portal-button portal-button--primary')
       : reroll,
   ]);
+}
+
+/** A button that plays a rewarded ad, marked with a video icon as CrazyGames asks. */
+function rewardedAdButton(
+  label: string,
+  onClick: () => void,
+  className: string,
+): HTMLButtonElement {
+  const created = button(label, onClick, `${className} rewarded-button`);
+  const svgNamespace = 'http://www.w3.org/2000/svg';
+  const icon = document.createElementNS(svgNamespace, 'svg');
+  icon.setAttribute('viewBox', '0 0 24 24');
+  icon.setAttribute('aria-hidden', 'true');
+  icon.classList.add('rewarded-icon');
+  const screen = document.createElementNS(svgNamespace, 'rect');
+  for (const [name, value] of Object.entries({
+    x: '2',
+    y: '5',
+    width: '20',
+    height: '14',
+    rx: '3',
+  }))
+    screen.setAttribute(name, value);
+  const play = document.createElementNS(svgNamespace, 'path');
+  play.setAttribute('d', 'M10 9v6l5-3z');
+  icon.append(screen, play);
+  created.prepend(icon);
+  return created;
 }
 
 export interface RunOverScreenActions {

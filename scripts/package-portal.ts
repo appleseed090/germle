@@ -41,7 +41,9 @@ if (violations.length > 0) {
   process.exit(1);
 }
 
-rmSync(RELEASE, { recursive: true, force: true });
+// Only this script's outputs: `release/videos/` comes from `npm run videos:portal`.
+rmSync(ZIP_PATH, { force: true });
+rmSync(COVERS, { recursive: true, force: true });
 mkdirSync(COVERS, { recursive: true });
 const zip = createZip(files.map(({ path, bytes }) => ({ path, data: bytes })));
 writeFileSync(ZIP_PATH, zip);
