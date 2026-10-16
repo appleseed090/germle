@@ -39,6 +39,8 @@ export const STRINGS = Object.freeze({
       `${plural(count, 'quarantine', 'quarantines')} before the day passes`,
     infected: (count: number) => `${count} infected`,
     instructionVaccinate: 'Vaccinate people to break up the network',
+    instructionVaccinateWithRefusers:
+      'Vaccinate people to break up the network. Orange people refuse vaccines.',
     instructionQuarantine: 'Quarantine healthy people. Each quarantine passes a day.',
     instructionDone: 'The outbreak has nowhere left to go.',
     undo: (left: number) => `Undo (${left})`,
@@ -60,6 +62,7 @@ export const STRINGS = Object.freeze({
 
   toasts: {
     refuser: 'This person refuses vaccines.',
+    refusersArrive: 'New: orange people refuse vaccines.',
     alreadyInfected: 'Already infected. Quarantine a healthy person.',
     knownPatient: 'Patient zero is already carrying it. Vaccines won’t help.',
     adUnavailable: 'No video available right now.',

@@ -1,6 +1,6 @@
 import { countOutcomes, scorePercent, type GameState, type OutcomeCounts } from '../engine/game';
 import { LEVEL_BALANCE, UPGRADE_BALANCE } from './balance';
-import type { PreparedLevel } from './levels';
+import { baseLevelConfig, type PreparedLevel } from './levels';
 import { drawUpgradeOffer, offerRandom, type UpgradeId } from './upgrades';
 
 /**
@@ -136,7 +136,8 @@ export function finishLevel(run: RunState, result: LevelResult): RunState {
 
 /**
  * The upgrades offered while choosing. Derived from the seed, level and reroll count, so it is
- * the same after a reload and a reload never rerolls for free.
+ * the same after a reload and a reload never rerolls for free. Outreach is held back until the
+ * next level has refusers, so it is never a pick that does nothing.
  */
 export function currentOffer(
   run: RunState,
@@ -144,9 +145,10 @@ export function currentOffer(
   offerCount: number = UPGRADE_BALANCE.offerCount,
 ): UpgradeId[] {
   requirePhase(run, 'choosing');
+  const nextLevelHasRefusers = baseLevelConfig(run.level + 1).refuserCount > 0;
   return drawUpgradeOffer(
     run.picks,
-    unlocked,
+    nextLevelHasRefusers ? unlocked : new Set([...unlocked].filter((id) => id !== 'outreach')),
     offerCount,
     offerRandom(run.seed, run.level, run.rerollsThisOffer),
   );

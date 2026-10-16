@@ -48,6 +48,17 @@ green and `dist/` byte-for-byte identical to `main` (`npm run compare:germle-com
         the toast points at them.
   - [x] Masks, Safety Margin and Natural Immunity cards quoted stale numbers: card text now reads
         them from `src/endless/balance.ts`; Safety Margin reads "Lowers the Save target by 3%".
+  - [x] From level 31 no build without Safety Margin could pass (more index patients than the
+        85% pass mark allows): the pass mark now stays 5 points below the best possible score.
+  - [x] Refusers were never explained: the HUD says "Orange people refuse vaccines" on levels
+        that have them.
+  - [x] Outreach could be picked before any refuser existed (a pick that does nothing): it is
+        offered only once the next level has refusers.
+  - [x] Double-tapping an upgrade card threw an error (found by playing the real UI): the choice
+        is inert while the pick animates.
+  - [ ] Owner decision: make refusers matter (earlier, on better-connected people) and Outreach
+        halve them rather than remove them; rebalance Masks and the dominant Double Shift and
+        Smaller Outbreak. Numbers in DECISIONS.md.
   - [x] With every starter upgrade maxed, the choice said "You have every upgrade" though six were
         still locked: it now says to unlock more with Research, until everything is unlocked.
 

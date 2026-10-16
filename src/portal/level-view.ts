@@ -8,7 +8,7 @@ import {
   replayMovesWithRules,
   startGameWithRules,
 } from '../engine/rules';
-import type { PreparedLevel } from '../endless/levels';
+import { baseLevelConfig, type PreparedLevel } from '../endless/levels';
 import { createBoard } from '../ui/board';
 import type { Sound } from './audio';
 import { element } from './dom';
@@ -204,7 +204,13 @@ export function mountLevel(options: LevelViewOptions): LevelView {
     }, BANNER_MILLISECONDS);
   }
 
-  if (prepared.rules.naturallyImmuneCount > 0)
+  // The first level of a run with refusers says what the orange people are: the HUD line that
+  // also says so is hidden in portrait. It outranks the immunity toast, which comes every level.
+  const refusersArriveHere =
+    puzzle.config.refuserCount > 0 &&
+    (prepared.level === 1 || baseLevelConfig(prepared.level - 1).refuserCount === 0);
+  if (refusersArriveHere) options.showToast(STRINGS.toasts.refusersArrive);
+  else if (prepared.rules.naturallyImmuneCount > 0)
     options.showToast(STRINGS.toasts.naturallyImmune(prepared.rules.naturallyImmuneCount));
   if (state.indexPatients.length > 0) board.highlightIndexPatients(state.indexPatients);
   showState();
