@@ -3,6 +3,7 @@
  * requirement; `scripts/check-builds.ts` fails if player text appears in another portal file).
  * The tone stays PEGI 12 and general-audience: the outbreak is abstract, nobody is hurt.
  */
+import { UPGRADE_BALANCE } from '../endless/balance';
 import type { StartingBonusId } from '../endless/research';
 import type { UpgradeId, UpgradeRarity } from '../endless/upgrades';
 
@@ -63,7 +64,9 @@ export const STRINGS = Object.freeze({
     knownPatient: 'Patient zero is already carrying it. Vaccines won’t help.',
     adUnavailable: 'No video available right now.',
     naturallyImmune: (count: number) =>
-      `${plural(count, 'person is', 'people are')} naturally immune`,
+      count === 1
+        ? '1 person starts immune: the dashed circle'
+        : `${count} people start immune: the dashed circles`,
     undone: 'Move undone.',
   },
 
@@ -162,11 +165,17 @@ export const STRINGS = Object.freeze({
 
   upgrades: {
     'extra-vaccine': { name: 'Extra Vaccine', description: 'One more vaccine every level.' },
-    masks: { name: 'Masks', description: 'The outbreak spreads 15% less easily.' },
-    'safety-margin': { name: 'Safety Margin', description: 'Pass each level with 4% less saved.' },
+    masks: {
+      name: 'Masks',
+      description: `The outbreak spreads ${String(Math.round((1 - UPGRADE_BALANCE.transmissionMultiplierPerMask) * 100))}% less easily.`,
+    },
+    'safety-margin': {
+      name: 'Safety Margin',
+      description: `Lowers the Save target by ${String(UPGRADE_BALANCE.passThresholdPointsPerSafetyMargin)} points every level.`,
+    },
     'natural-immunity': {
       name: 'Natural Immunity',
-      description: 'Two random people start every level immune.',
+      description: `${plural(UPGRADE_BALANCE.immunePeoplePerStack, 'random person starts', 'random people start')} every level immune.`,
     },
     'rapid-response': {
       name: 'Rapid Response',

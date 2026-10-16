@@ -91,6 +91,27 @@ test('a new player lands in level 1, clears it, picks an upgrade and resumes aft
   expect(calls).not.toContain('requestAd:midgame');
 });
 
+test('naturally immune people stay on the board as dashed outlines, cut off from the network', async ({
+  page,
+}) => {
+  const picks: UpgradeId[] = ['natural-immunity', 'natural-immunity'];
+  await seedSave(page, returningPlayer(runAt(5, { picks })));
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Continue · level 5' }).click();
+  await expect(page.locator('.portal-toast')).toHaveText(
+    '2 people start immune: the dashed circles',
+  );
+  const immune = page.locator(`${board} .node--immune`);
+  await expect(immune).toHaveCount(2);
+  for (const person of await immune.all()) {
+    await expect(person).toBeVisible();
+    await expect(person).toHaveAttribute('data-status', 'vaccinated');
+    await expect(person).toHaveAttribute('data-tappable', 'false');
+    await expect(person.locator('.node-count')).toBeHidden();
+  }
+  await expect(page.locator(`${board} .node--removed:not(.node--immune)`)).toHaveCount(0);
+});
+
 test('a midgame ad plays at the break after level 3, blocking the game while it runs', async ({
   page,
 }) => {

@@ -316,6 +316,26 @@ body.portal {
   }
 }
 
+/* Naturally immune people stay on the board as dashed outlines so the upgrade's effect shows. Their
+   links stay hidden, as for anyone vaccinated: the outbreak cannot pass through them. */
+.portal-board .node--immune.node--removed {
+  display: inline;
+}
+
+.node--immune .node-disc {
+  fill: none;
+  stroke: var(--color-node-healthy-stroke);
+  stroke-width: 2;
+  stroke-dasharray: 4 3;
+}
+
+/* Specific enough to beat the "Show contact numbers" setting: an immune person has no contacts. */
+.portal-board .node--immune.node--removed .node-count,
+.portal-board .node--immune.node--removed .node-core,
+.portal-board .node--immune.node--removed .node-cross {
+  display: none;
+}
+
 .node--known-patient .node-halo {
   visibility: visible;
   stroke: var(--color-node-infected);
