@@ -6,6 +6,7 @@ import {
   LARGEST_LEVEL_NODE_COUNT,
   baseLevelConfig,
   basePassThresholdPercent,
+  bestPossibleSavedPercent,
   levelSeedKey,
   prepareLevel,
 } from './levels';
@@ -37,9 +38,23 @@ describe('baseLevelConfig', () => {
       expect(curveAt(LEVEL_BALANCE.vaccineShare, level)).toBeLessThanOrEqual(
         curveAt(LEVEL_BALANCE.vaccineShare, level - 1),
       );
-      expect(basePassThresholdPercent(level)).toBeGreaterThanOrEqual(
-        basePassThresholdPercent(level - 1),
-      );
+      // The pass mark only drops where the headroom cap holds it, as more index patients lower
+      // the best possible score.
+      if (basePassThresholdPercent(level) < basePassThresholdPercent(level - 1))
+        expect(basePassThresholdPercent(level)).toBe(
+          bestPossibleSavedPercent(current) - LEVEL_BALANCE.passThresholdHeadroomPoints,
+        );
+    }
+  });
+
+  it('keeps every pass mark winnable, with room to spare, with or without upgrades', () => {
+    for (let level = 1; level <= 200; level++) {
+      for (const picks of [[], EVERY_UPGRADE_MAXED]) {
+        const prepared = prepareLevel('headroom', level, picks);
+        expect(prepared.passThresholdPercent).toBeLessThanOrEqual(
+          bestPossibleSavedPercent(prepared.config) - LEVEL_BALANCE.passThresholdHeadroomPoints,
+        );
+      }
     }
   });
 

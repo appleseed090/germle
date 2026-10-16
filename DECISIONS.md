@@ -714,6 +714,19 @@ adError })` (callbacks only, no promise form) with error codes `unfilled`, `adbl
   than the time goal once upgrades stacked; by 2 it felt steep early. Index patients start at 1
   and add one every 2.5 levels (at most 14); vaccines start at 17% of the network and fall 0.5
   points a level to 6%; contagiousness starts at 30% and rises 0.6 points a level to 60%.
+- **No level is lost before the first tap (playtest, 2026-10-16).** Index patients always count
+  as infected, and past the 80-person cap they kept growing while the pass mark sat at 85%: from
+  level 31 the best possible score (everyone else saved) was below the pass mark, so those levels
+  were unwinnable before they started. The pass mark is now capped 5 points below that best
+  score (`passThresholdHeadroomPoints`); no upgrade lowers the best score, so the cap holds for
+  every build. The wall stays: with every upgrade maxed the bot passes 86% of level 25, 48% of
+  level 30 and 2–7% from level 35 on, where it used to be 1% and then 0%.
+- **Refusers are flavour more than obstacle (playtest, 2026-10-16).** Measured with the bot,
+  refusers change neither the pass rate nor the median score at any level, even at a quarter of
+  the network: vaccines are few (5–8), and a random refuser is rarely one the vaccines were for.
+  Refusers on the best-connected people do bite (level 6: 31% passes without refusers, 16% with
+  15% of the hubs refusing). Outreach is held back until the next level has refusers, so it is
+  never a pick that does nothing; how strong refusers and Outreach should be is open in TODO.md.
 - **Every platform call goes through `AdsPlatform`, `SavePlatform` and `LeaderboardPlatform`**
   (`src/portal/platform/platform.ts`). `main.ts` picks the implementation: `local.ts` under the dev
   server (ads are a two-second overlay, `?ads=fail` makes them fail; saves go to the dev

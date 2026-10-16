@@ -1,5 +1,5 @@
 import { judgeLevel, type RunState } from '../src/endless/run';
-import { prepareLevel } from '../src/endless/levels';
+import { baseLevelConfig, prepareLevel } from '../src/endless/levels';
 import { FRESH_SAVE, type EndlessSave } from '../src/endless/save';
 import { playLevelWithBot as simulateLevel } from '../src/endless/simulation';
 import type { UpgradeId } from '../src/endless/upgrades';
@@ -65,7 +65,8 @@ test('a new player lands in level 1, clears it, picks an upgrade and resumes aft
   const cards = page.locator('.upgrade-card');
   await expect(cards).toHaveCount(3);
   const chosen = await cards.first().getAttribute('data-upgrade');
-  await cards.first().click();
+  // A double tap picks once; the fixture fails the test on any page error.
+  await cards.first().dblclick();
   await expect(page.locator('.hud-level')).toHaveText('Level 2');
 
   const saved = await readSave(page);
@@ -110,6 +111,21 @@ test('naturally immune people stay on the board as dashed outlines, cut off from
     await expect(person.locator('.node-count')).toBeHidden();
   }
   await expect(page.locator(`${board} .node--removed:not(.node--immune)`)).toHaveCount(0);
+});
+
+test('the first level with refusers explains the orange people', async ({ page }, testInfo) => {
+  let firstRefuserLevel = 2;
+  while (baseLevelConfig(firstRefuserLevel).refuserCount === 0) firstRefuserLevel++;
+  await seedSave(page, returningPlayer(runAt(firstRefuserLevel, { picks: [] })));
+  await page.goto('/');
+  await page.getByRole('button', { name: `Continue · level ${String(firstRefuserLevel)}` }).click();
+  await expect(page.locator(`${board} .node--refuser`).first()).toBeVisible();
+  await expect(page.locator('.portal-toast')).toHaveText('New: orange people refuse vaccines.');
+  // Portrait hides the HUD's instruction line; elsewhere it says the same while vaccinating.
+  if (testInfo.project.name !== 'phone-portrait')
+    await expect(
+      page.getByText('Vaccinate people to break up the network. Orange people refuse vaccines.'),
+    ).toBeVisible();
 });
 
 test('a midgame ad plays at the break after level 3, blocking the game while it runs', async ({

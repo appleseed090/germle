@@ -19,9 +19,24 @@ export function baseLevelConfig(level: number): PuzzleConfig {
   });
 }
 
-/** The share of people (percent) a level must save to pass, before upgrades. */
+/**
+ * The share of people (percent) a level must save to pass, before upgrades: the pass-mark curve,
+ * capped {@link LEVEL_BALANCE.passThresholdHeadroomPoints} below {@link bestPossibleSavedPercent}.
+ * No upgrade lowers the best possible score, so the cap holds after upgrades too.
+ */
 export function basePassThresholdPercent(level: number): number {
-  return Math.round(curveAt(LEVEL_BALANCE.passThresholdPercent, level));
+  return Math.min(
+    Math.round(curveAt(LEVEL_BALANCE.passThresholdPercent, level)),
+    bestPossibleSavedPercent(baseLevelConfig(level)) - LEVEL_BALANCE.passThresholdHeadroomPoints,
+  );
+}
+
+/**
+ * The highest score (percent saved, rounded as the game rounds it) a config allows: the index
+ * patients are always infected, so at best everyone else is saved.
+ */
+export function bestPossibleSavedPercent(config: PuzzleConfig): number {
+  return Math.round((100 * (config.nodeCount - config.indexPatientCount)) / config.nodeCount);
 }
 
 /**

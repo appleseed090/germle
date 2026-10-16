@@ -40,8 +40,14 @@ export const LEVEL_BALANCE = Object.freeze({
   /** Refusers as a share of the network, rounded down. */
   refuserShare: { atLevelOne: 0, perLevel: 0.004, limit: 0.08 } satisfies LevelCurve,
   transmissionProbability: { atLevelOne: 0.3, perLevel: 0.006, limit: 0.6 } satisfies LevelCurve,
-  /** Share of people (percent) a level must save to pass. */
+  /** Share of people (percent) a level must save to pass, before the headroom cap below. */
   passThresholdPercent: { atLevelOne: 50, perLevel: 1.5, limit: 85 } satisfies LevelCurve,
+  /**
+   * The pass mark stays at least this many points below the best score a level allows (everyone
+   * but the index patients saved), so no level is lost before the first tap. Past the network's
+   * size cap, more index patients then lower the pass mark rather than make it unreachable.
+   */
+  passThresholdHeadroomPoints: 5,
   /** A finish within this many points of the pass mark counts as a near miss (either side). */
   nearMissPoints: 3,
 });

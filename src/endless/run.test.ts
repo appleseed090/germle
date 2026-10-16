@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { replayMovesWithRules } from '../engine/rules';
-import { prepareLevel } from './levels';
+import { baseLevelConfig, prepareLevel } from './levels';
 import {
   abandonRun,
   canUseSecondChance,
@@ -61,6 +61,16 @@ describe('a run', () => {
     const next = pickUpgrade(passed, offer[0] as (typeof offer)[number], offer);
     expect(next).toMatchObject({ phase: 'playing', level: 2, picks: [offer[0]] });
     expect(() => pickUpgrade(passed, 'burnout', ['masks'])).toThrow();
+  });
+
+  it('holds Outreach back until the next level has refusers', () => {
+    const onlyOutreach = new Set(['outreach'] as const);
+    const passedAt = (level: number): RunState =>
+      finishLevel({ ...startRun('abcd1234', NO_BONUSES), level }, result(level, true));
+    let firstRefuserLevel = 2;
+    while (baseLevelConfig(firstRefuserLevel).refuserCount === 0) firstRefuserLevel++;
+    expect(currentOffer(passedAt(firstRefuserLevel - 2), onlyOutreach)).toEqual([]);
+    expect(currentOffer(passedAt(firstRefuserLevel - 1), onlyOutreach)).toEqual(['outreach']);
   });
 
   it('draws a new offer on a reroll, spending free rerolls first', () => {

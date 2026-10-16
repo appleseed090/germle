@@ -69,7 +69,10 @@ export function createHud(actions: HudActions): Hud {
       if (state.phase === 'vaccinate') {
         phase.textContent = STRINGS.hud.vaccinate;
         counter.textContent = STRINGS.hud.vaccinesLeft(state.vaccinesRemaining);
-        instruction.textContent = STRINGS.hud.instructionVaccinate;
+        instruction.textContent =
+          prepared.puzzle.config.refuserCount > 0
+            ? STRINGS.hud.instructionVaccinateWithRefusers
+            : STRINGS.hud.instructionVaccinate;
       } else if (state.phase === 'quarantine') {
         phase.textContent = STRINGS.hud.quarantine;
         counter.textContent = STRINGS.hud.day(state.turnsElapsed + 1, state.quarantineCount);

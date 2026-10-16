@@ -368,12 +368,15 @@ export function startApp(root: HTMLElement, platform: Platform): void {
     offer: readonly UpgradeId[],
     card: HTMLElement,
   ): Promise<void> {
+    // The pick is final: a double tap or a reroll during the feedback must not reach the run.
+    overlay.inert = true;
     overlay.classList.add('overlay-layer--picked');
     card.classList.add('upgrade-card--chosen');
     sound.play('pick');
     setRun(pickUpgrade(currentRun(), upgrade, offer));
     await pause(PICK_FEEDBACK_MILLISECONDS, skipAnimations());
     overlay.classList.remove('overlay-layer--picked');
+    overlay.inert = false;
     playLevel();
   }
 
