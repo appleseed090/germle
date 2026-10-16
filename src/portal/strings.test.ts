@@ -6,8 +6,8 @@ describe('upgrade descriptions', () => {
   it('quote the numbers the balance actually applies', () => {
     const maskPercent = Math.round((1 - UPGRADE_BALANCE.transmissionMultiplierPerMask) * 100);
     expect(STRINGS.upgrades.masks.description).toContain(`${String(maskPercent)}% less`);
-    expect(STRINGS.upgrades['safety-margin'].description).toContain(
-      `by ${String(UPGRADE_BALANCE.passThresholdPointsPerSafetyMargin)} points`,
+    expect(STRINGS.upgrades['safety-margin'].description).toBe(
+      `Every level asks you to save ${String(UPGRADE_BALANCE.passThresholdPointsPerSafetyMargin)}% less: Save 60% becomes Save ${String(60 - UPGRADE_BALANCE.passThresholdPointsPerSafetyMargin)}%.`,
     );
     expect(STRINGS.upgrades['natural-immunity'].description).toMatch(
       new RegExp(`^${String(UPGRADE_BALANCE.immunePeoplePerStack)} random `),
