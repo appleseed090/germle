@@ -173,7 +173,7 @@ export const STRINGS = Object.freeze({
     },
     'safety-margin': {
       name: 'Safety Margin',
-      description: `Every level asks you to save ${String(UPGRADE_BALANCE.passThresholdPointsPerSafetyMargin)}% less: Save 60% becomes Save ${String(60 - UPGRADE_BALANCE.passThresholdPointsPerSafetyMargin)}%.`,
+      description: `Lowers the Save target by ${String(UPGRADE_BALANCE.passThresholdPointsPerSafetyMargin)}%.`,
     },
     'natural-immunity': {
       name: 'Natural Immunity',
