@@ -627,9 +627,9 @@ adError })` (callbacks only, no promise form) with error codes `unfilled`, `adbl
   network harder to cut. A ring of 6 was tried first and was a wall: the bot saved 17% on every
   level that had it, and even 20 vaccines at 80 people passed only 5% of the time.
 - **Thirteen upgrades** (rarity, stacks). Common: Extra Vaccine (+1 vaccine, ×3), Masks
-  (×0.9 contagiousness, ×2), Safety Margin (−3 points on the pass mark, ×2), Natural Immunity (1
+  (×0.85 contagiousness, ×2), Safety Margin (−3 points on the pass mark, ×2), Natural Immunity (1
   random person starts immune, ×3), Rapid Response (the first quarantine passes no day, ×1),
-  Outreach (no refusers, and as many people start immune, ×1). Uncommon: Contact Tracing (see who
+  Outreach (half the refusers, rounded up, start immune instead, ×1). Uncommon: Contact Tracing (see who
   the next day infects), Ring Vaccination (vaccinated people halve the contagiousness to their
   neighbours), Burnout (a day with no lucky contact infects nobody). Rare: Smaller Outbreak (one
   fewer index patient), Early Warning (see the index patients before vaccinating), Double Shift
@@ -725,8 +725,16 @@ adError })` (callbacks only, no promise form) with error codes `unfilled`, `adbl
   refusers change neither the pass rate nor the median score at any level, even at a quarter of
   the network: vaccines are few (5–8), and a random refuser is rarely one the vaccines were for.
   Refusers on the best-connected people do bite (level 6: 31% passes without refusers, 16% with
-  15% of the hubs refusing). Outreach is held back until the next level has refusers, so it is
-  never a pick that does nothing; how strong refusers and Outreach should be is open in TODO.md.
+  15% of the hubs refusing). The owner chose to keep them random. So they come early for variety
+  (the first at level 5, 8% of the network from level 11), Outreach turns half of them (rounded
+  up) into immune people instead of removing them all, so refusers stay on the board, and
+  Outreach is offered only once the next level has refusers. Outreach alone now lifts the bot's
+  level 6 pass rate from 30% to 52%, level with Natural Immunity; it was 30% (no refusers yet).
+- **Masks is the weakest common (playtest, 2026-10-16).** At 15% less contagiousness per stack
+  (it was 10%) one Masks lifts level 6 from 30% to 36%; matching the other commons (about 50%)
+  takes about 35%. Median runs did not move with the playtest changes: 13 levels on the starter
+  pool, 23 with everything unlocked. With every upgrade maxed the bot passes 74% of level 25,
+  28% of level 30 and 0–3% from level 35 (Outreach now keeps half the refusers).
 - **Every platform call goes through `AdsPlatform`, `SavePlatform` and `LeaderboardPlatform`**
   (`src/portal/platform/platform.ts`). `main.ts` picks the implementation: `local.ts` under the dev
   server (ads are a two-second overlay, `?ads=fail` makes them fail; saves go to the dev

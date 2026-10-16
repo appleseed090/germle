@@ -37,8 +37,12 @@ export const LEVEL_BALANCE = Object.freeze({
    * and the curves below keep the pressure rising, so stacked upgrades cannot outgrow it.
    */
   indexPatientCount: { atLevelOne: 1, perLevel: 0.4, limit: 14 } satisfies LevelCurve,
-  /** Refusers as a share of the network, rounded down. */
-  refuserShare: { atLevelOne: 0, perLevel: 0.004, limit: 0.08 } satisfies LevelCurve,
+  /**
+   * Refusers as a share of the network, rounded down: the first at level 5, the cap from level 11.
+   * Placed at random they hardly change the outcome (DECISIONS.md), so they come early for
+   * variety rather than as a difficulty lever.
+   */
+  refuserShare: { atLevelOne: 0.02, perLevel: 0.006, limit: 0.08 } satisfies LevelCurve,
   transmissionProbability: { atLevelOne: 0.3, perLevel: 0.006, limit: 0.6 } satisfies LevelCurve,
   /** Share of people (percent) a level must save to pass, before the headroom cap below. */
   passThresholdPercent: { atLevelOne: 50, perLevel: 1.5, limit: 85 } satisfies LevelCurve,
@@ -58,7 +62,7 @@ export const UPGRADE_BALANCE = Object.freeze({
   /** Relative odds of each rarity when an offer slot is filled. */
   rarityWeights: { common: 6, uncommon: 3, rare: 1 },
   extraVaccinesPerStack: 1,
-  transmissionMultiplierPerMask: 0.9,
+  transmissionMultiplierPerMask: 0.85,
   passThresholdPointsPerSafetyMargin: 3,
   immunePeoplePerStack: 1,
   freeQuarantinesPerStack: 1,

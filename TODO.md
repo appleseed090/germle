@@ -56,9 +56,9 @@ green and `dist/` byte-for-byte identical to `main` (`npm run compare:germle-com
         offered only once the next level has refusers.
   - [x] Double-tapping an upgrade card threw an error (found by playing the real UI): the choice
         is inert while the pick animates.
-  - [ ] Owner decision: make refusers matter (earlier, on better-connected people) and Outreach
-        halve them rather than remove them; rebalance Masks and the dominant Double Shift and
-        Smaller Outbreak. Numbers in DECISIONS.md.
+  - [x] Refusers from level 5 (random placement, the owner's call); Outreach halves them; Masks
+        15% per stack; Double Shift and Smaller Outbreak unchanged. Numbers in DECISIONS.md.
+  - [ ] Masks is still the weakest common at 15%; about 35% would match the others. Owner's call.
   - [x] With every starter upgrade maxed, the choice said "You have every upgrade" though six were
         still locked: it now says to unlock more with Research, until everything is unlocked.
 

@@ -96,9 +96,10 @@ test('naturally immune people stay on the board as dashed outlines, cut off from
   page,
 }) => {
   const picks: UpgradeId[] = ['natural-immunity', 'natural-immunity'];
-  await seedSave(page, returningPlayer(runAt(5, { picks })));
+  // Not the first level with refusers, whose toast would take precedence.
+  await seedSave(page, returningPlayer(runAt(6, { picks })));
   await page.goto('/');
-  await page.getByRole('button', { name: 'Continue · level 5' }).click();
+  await page.getByRole('button', { name: 'Continue · level 6' }).click();
   await expect(page.locator('.portal-toast')).toHaveText(
     '2 people start immune: the dashed circles',
   );
