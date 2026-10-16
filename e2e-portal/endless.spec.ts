@@ -220,6 +220,50 @@ test('rerolling the upgrade choice takes a watched video and draws a new offer',
   expect(await sdkCalls(page)).toContain('requestAd:rewarded');
 });
 
+test('with every unlocked upgrade maxed, the choice points to Research and moves on', async ({
+  page,
+}) => {
+  const everyStarterMaxed: UpgradeId[] = [
+    ...Array<UpgradeId>(3).fill('extra-vaccine'),
+    ...Array<UpgradeId>(2).fill('masks'),
+    ...Array<UpgradeId>(2).fill('safety-margin'),
+    ...Array<UpgradeId>(3).fill('natural-immunity'),
+    'rapid-response',
+    'outreach',
+    'smaller-outbreak',
+  ];
+  await seedSave(
+    page,
+    returningPlayer(
+      runAt(9, {
+        phase: 'choosing',
+        levelsCleared: 9,
+        picks: everyStarterMaxed,
+        lastResult: {
+          level: 9,
+          counts: { vaccinated: 8, quarantined: 6, untouched: 20, infected: 5 },
+          savedPercent: 87,
+          passThresholdPercent: 62,
+          passed: true,
+          nearMiss: false,
+          moves: 14,
+        },
+      }),
+    ),
+  );
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Continue · level 9' }).click();
+  await expect(
+    page.getByText(
+      'You have every upgrade you’ve unlocked. Spend Research between runs to unlock more.',
+    ),
+  ).toBeVisible();
+  await expect(page.locator('.upgrade-card')).toHaveCount(0);
+  await expect(page.locator('.rewarded-button')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Next level' }).click();
+  await expect(page.locator('.hud-level')).toHaveText('Level 10');
+});
+
 test('ending a run banks Research, records the best run and returns home', async ({ page }) => {
   await seedSave(page, returningPlayer(runAt(6)));
   await page.goto('/');

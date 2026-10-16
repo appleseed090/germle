@@ -32,7 +32,7 @@ import {
   type EndlessSave,
   type EndlessSettings,
 } from '../endless/save';
-import type { UpgradeId } from '../endless/upgrades';
+import { UPGRADE_IDS, type UpgradeId } from '../endless/upgrades';
 import { createSound, type Sound } from './audio';
 import { mountScene, outbreakScene } from './backdrop';
 import { element, pause } from './dom';
@@ -344,9 +344,11 @@ export function startApp(root: HTMLElement, platform: Platform): void {
     leaveLevel();
     root.dataset['screen'] = 'choice';
     const run = currentRun();
-    const offer = currentOffer(run, unlockedUpgrades(save.unlocks), offerCountFor(save));
+    const unlocked = unlockedUpgrades(save.unlocks);
+    const offer = currentOffer(run, unlocked, offerCountFor(save));
+    const canReroll = run.freeRerollsLeft > 0 || platform.ads.rewardedAdsAvailable();
     showOverlay(
-      choiceScreen(run, offer, run.freeRerollsLeft > 0 || platform.ads.rewardedAdsAvailable(), {
+      choiceScreen(run, offer, canReroll, unlocked.size < UPGRADE_IDS.length, {
         onPick: (upgrade, card) => {
           void pick(upgrade, offer, card);
         },

@@ -48,6 +48,8 @@ green and `dist/` byte-for-byte identical to `main` (`npm run compare:germle-com
         the toast points at them.
   - [x] Masks, Safety Margin and Natural Immunity cards quoted stale numbers: card text now reads
         them from `src/endless/balance.ts`; Safety Margin says it lowers the Save target.
+  - [x] With every starter upgrade maxed, the choice said "You have every upgrade" though six were
+        still locked: it now says to unlock more with Research, until everything is unlocked.
 
 Constraints to remember:
 

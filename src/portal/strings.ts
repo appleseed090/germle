@@ -96,6 +96,8 @@ export const STRINGS = Object.freeze({
     rerollWithAd: 'Reroll (watch a video)',
     owned: (count: number) => `You have ${count}`,
     nothingLeft: 'You have every upgrade. Onward!',
+    nothingUnlockedLeft:
+      'You have every upgrade you’ve unlocked. Spend Research between runs to unlock more.',
     skip: 'Next level',
     rarity: {
       common: 'Common',
