@@ -62,7 +62,7 @@ export const UPGRADE_BALANCE = Object.freeze({
   /** Relative odds of each rarity when an offer slot is filled. */
   rarityWeights: { common: 6, uncommon: 3, rare: 1 },
   extraVaccinesPerStack: 1,
-  transmissionMultiplierPerMask: 0.85,
+  transmissionMultiplierPerMask: 0.75,
   passThresholdPointsPerSafetyMargin: 3,
   immunePeoplePerStack: 1,
   freeQuarantinesPerStack: 1,

@@ -627,7 +627,7 @@ adError })` (callbacks only, no promise form) with error codes `unfilled`, `adbl
   network harder to cut. A ring of 6 was tried first and was a wall: the bot saved 17% on every
   level that had it, and even 20 vaccines at 80 people passed only 5% of the time.
 - **Thirteen upgrades** (rarity, stacks). Common: Extra Vaccine (+1 vaccine, ×3), Masks
-  (×0.85 contagiousness, ×2), Safety Margin (−3 points on the pass mark, ×2), Natural Immunity (1
+  (×0.75 contagiousness, ×2), Safety Margin (−3 points on the pass mark, ×2), Natural Immunity (1
   random person starts immune, ×3), Rapid Response (the first quarantine passes no day, ×1),
   Outreach (half the refusers, rounded up, start immune instead, ×1). Uncommon: Contact Tracing (see who
   the next day infects), Ring Vaccination (vaccinated people halve the contagiousness to their
@@ -730,11 +730,12 @@ adError })` (callbacks only, no promise form) with error codes `unfilled`, `adbl
   up) into immune people instead of removing them all, so refusers stay on the board, and
   Outreach is offered only once the next level has refusers. Outreach alone now lifts the bot's
   level 6 pass rate from 30% to 52%, level with Natural Immunity; it was 30% (no refusers yet).
-- **Masks is the weakest common (playtest, 2026-10-16).** At 15% less contagiousness per stack
-  (it was 10%) one Masks lifts level 6 from 30% to 36%; matching the other commons (about 50%)
-  takes about 35%. Median runs did not move with the playtest changes: 13 levels on the starter
-  pool, 23 with everything unlocked. With every upgrade maxed the bot passes 74% of level 25,
-  28% of level 30 and 0–3% from level 35 (Outreach now keeps half the refusers).
+- **Masks: 25% less contagiousness per stack (playtest, 2026-10-16; owner's call).** It was 10%,
+  the weakest common by far. One Masks lifts level 6 from 30% to 36% at 15%, 44% at 25% and 52%
+  at 35%; 25% leaves it a little below the other commons (about 50%) because it stacks twice.
+  After all the playtest changes, median runs are 14 levels on the starter pool (was 13) and 25
+  with everything unlocked (was 23). With every upgrade maxed the bot passes 92% of level 25, 63%
+  of level 30 and 4–14% from level 35 on.
 - **Every platform call goes through `AdsPlatform`, `SavePlatform` and `LeaderboardPlatform`**
   (`src/portal/platform/platform.ts`). `main.ts` picks the implementation: `local.ts` under the dev
   server (ads are a two-second overlay, `?ads=fail` makes them fail; saves go to the dev
