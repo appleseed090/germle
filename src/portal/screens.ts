@@ -183,6 +183,8 @@ export function choiceScreen(
   run: RunState,
   offer: readonly UpgradeId[],
   canReroll: boolean,
+  /** Whether Research can still unlock upgrades, for when the offer comes up empty. */
+  moreToUnlock: boolean,
   actions: ChoiceScreenActions,
 ): HTMLElement {
   const owned = countUpgrades(run.picks);
@@ -233,7 +235,10 @@ export function choiceScreen(
           );
   return panel('choice', STRINGS.choice.heading, [
     offer.length === 0
-      ? element('p', { className: 'panel-note', text: STRINGS.choice.nothingLeft })
+      ? element('p', {
+          className: 'panel-note',
+          text: moreToUnlock ? STRINGS.choice.nothingUnlockedLeft : STRINGS.choice.nothingLeft,
+        })
       : element('div', { className: 'upgrade-cards' }, cards),
     offer.length === 0
       ? button(STRINGS.choice.skip, actions.onSkip, 'portal-button portal-button--primary')
