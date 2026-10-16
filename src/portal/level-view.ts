@@ -85,14 +85,19 @@ export function mountLevel(options: LevelViewOptions): LevelView {
     },
     state,
   );
+  // Natural Immunity and Outreach: everyone already vaccinated before the first tap.
+  const naturallyImmune = new Set(
+    state.nodeStatuses.flatMap((status, node) => (status === 'vaccinated' ? [node] : [])),
+  );
   const nodeGroups = new Map<number, SVGGElement>();
   for (const group of boardContainer.querySelectorAll<SVGGElement>('[data-node-id]'))
     nodeGroups.set(Number(group.dataset['nodeId']), group);
 
   /**
-   * Marks what the classic board cannot know: known index patients (Early Warning) cannot be
-   * vaccinated, and Contact Tracing rings the people tomorrow's spread reaches. Runs after the
-   * board draws, since the board resets its own classes then.
+   * Marks what the classic board cannot know: naturally immune people stay visible (the classic
+   * board hides everyone vaccinated), known index patients (Early Warning) cannot be vaccinated,
+   * and Contact Tracing rings the people tomorrow's spread reaches. Runs after the board draws,
+   * since the board resets its own classes then.
    */
   function decorate(): void {
     const atRisk = new Set(
@@ -101,6 +106,7 @@ export function mountLevel(options: LevelViewOptions): LevelView {
     const knownPatients = new Set(state.phase === 'vaccinate' ? state.indexPatients : []);
     for (const [node, group] of nodeGroups) {
       const isKnownPatient = knownPatients.has(node);
+      group.classList.toggle('node--immune', naturallyImmune.has(node));
       group.classList.toggle('node--known-patient', isKnownPatient);
       group.classList.toggle('node--at-risk', atRisk.has(node));
       if (isKnownPatient) {
