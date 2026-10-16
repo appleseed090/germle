@@ -48,7 +48,7 @@ describe('applyUpgrades', () => {
       vaccineCount: DAILY_PUZZLE_CONFIG.vaccineCount + 2,
       transmissionProbability:
         DAILY_PUZZLE_CONFIG.transmissionProbability * UPGRADE_BALANCE.transmissionMultiplierPerMask,
-      refuserCount: 0,
+      refuserCount: Math.floor(DAILY_PUZZLE_CONFIG.refuserCount / 2),
       indexPatientCount: DAILY_PUZZLE_CONFIG.indexPatientCount - 1,
     });
     expect(upgraded.rules).toEqual({
@@ -56,7 +56,8 @@ describe('applyUpgrades', () => {
       quarantinesBeforeFirstSpread: 1,
       vaccinatedNeighbourTransmissionFactor: UPGRADE_BALANCE.ringVaccinationFactor,
       spreadCanFizzle: true,
-      naturallyImmuneCount: UPGRADE_BALANCE.immunePeoplePerStack + DAILY_PUZZLE_CONFIG.refuserCount,
+      naturallyImmuneCount:
+        UPGRADE_BALANCE.immunePeoplePerStack + Math.ceil(DAILY_PUZZLE_CONFIG.refuserCount / 2),
       indexPatientsKnownInAdvance: true,
     });
     expect(upgraded.passThresholdPercent).toBe(

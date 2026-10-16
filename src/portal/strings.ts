@@ -188,7 +188,7 @@ export const STRINGS = Object.freeze({
     },
     outreach: {
       name: 'Outreach',
-      description: 'Nobody refuses vaccines, and as many people start immune.',
+      description: 'Half the refusers change their minds and start immune.',
     },
     'smaller-outbreak': {
       name: 'Smaller Outbreak',

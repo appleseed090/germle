@@ -85,7 +85,9 @@ export function applyUpgrades(
   const stacks = (id: UpgradeId): number => counts.get(id) ?? 0;
   const balance = UPGRADE_BALANCE;
 
-  const refuserCount = stacks('outreach') > 0 ? 0 : baseConfig.refuserCount;
+  // Outreach: half the refusers (rounded up) change their minds and start immune.
+  const convincedRefusers = stacks('outreach') > 0 ? Math.ceil(baseConfig.refuserCount / 2) : 0;
+  const refuserCount = baseConfig.refuserCount - convincedRefusers;
   const indexPatientCount = Math.max(1, baseConfig.indexPatientCount - stacks('smaller-outbreak'));
   const vaccineCount = Math.min(
     baseConfig.vaccineCount + stacks('extra-vaccine') * balance.extraVaccinesPerStack,
@@ -106,10 +108,8 @@ export function applyUpgrades(
     vaccinatedNeighbourTransmissionFactor:
       stacks('ring-vaccination') > 0 ? balance.ringVaccinationFactor : 1,
     spreadCanFizzle: stacks('burnout') > 0,
-    // Outreach: the would-be refusers change their minds, so that many people start immune.
     naturallyImmuneCount:
-      stacks('natural-immunity') * balance.immunePeoplePerStack +
-      (stacks('outreach') > 0 ? baseConfig.refuserCount : 0),
+      stacks('natural-immunity') * balance.immunePeoplePerStack + convincedRefusers,
     indexPatientsKnownInAdvance: stacks('early-warning') > 0,
   };
   return {
