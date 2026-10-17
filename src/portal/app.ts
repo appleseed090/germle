@@ -228,8 +228,14 @@ export function startApp(root: HTMLElement, platform: Platform): void {
 
   function resumeRun(): void {
     const run = currentRun();
-    if (run.phase === 'playing') playLevel();
-    else if (run.phase === 'choosing') showChoice();
+    if (run.phase === 'playing') {
+      playLevel();
+      return;
+    }
+    // No level is on screen to fill the side panel, so it shows the finished one from the save.
+    if (run.lastResult !== null)
+      hud.showFinished(run, prepareLevel(run.seed, run.level, run.picks), run.lastResult);
+    if (run.phase === 'choosing') showChoice();
     else if (run.phase === 'failed' && run.lastResult !== null) showSummary(run.lastResult);
     else showHome();
   }

@@ -1,7 +1,7 @@
 import { countOutcomes, type GameState } from '../engine/game';
 import { quarantinesUntilNextDay } from '../engine/rules';
 import type { PreparedLevel } from '../endless/levels';
-import type { RunState } from '../endless/run';
+import type { LevelResult, RunState } from '../endless/run';
 import { countUpgrades } from '../endless/upgrades';
 import { button, element } from './dom';
 import { STRINGS } from './strings';
@@ -11,6 +11,11 @@ export interface Hud {
   readonly root: HTMLElement;
   /** Shows a level's state. */
   update(run: RunState, prepared: PreparedLevel, state: GameState, undoChargesLeft: number): void;
+  /**
+   * Shows a finished level from its saved result, as `update` shows it when it ends, for when a
+   * run resumes on its summary or upgrade choice and no level is on screen.
+   */
+  showFinished(run: RunState, prepared: PreparedLevel, result: LevelResult): void;
 }
 
 export interface HudActions {
@@ -50,30 +55,58 @@ export function createHud(actions: HudActions): Hud {
     element('section', { className: 'hud-upgrade-list' }, [upgradesHeading, upgrades]),
   ]);
 
+  function showGoal(run: RunState, prepared: PreparedLevel, infected: number): void {
+    const { nodeCount } = prepared.puzzle.config;
+    const savablePercent = Math.round((100 * (nodeCount - infected)) / nodeCount);
+    const goal = prepared.passThresholdPercent;
+    level.textContent = STRINGS.hud.level(run.level);
+    target.textContent = STRINGS.hud.target(goal);
+    meterFill.style.width = `${savablePercent}%`;
+    meterMark.style.left = `${goal}%`;
+    meter.classList.toggle('hud-meter--short', savablePercent < goal);
+    meterCaption.textContent = STRINGS.hud.stillHealthy(savablePercent, goal);
+  }
+
+  function showEnded(infected: number): void {
+    phase.dataset['phase'] = 'ended';
+    phase.textContent = STRINGS.hud.done;
+    counter.textContent = STRINGS.hud.infected(infected);
+    secondary.textContent = '';
+    instruction.textContent = STRINGS.hud.instructionDone;
+  }
+
+  function showUpgrades(run: RunState): void {
+    upgrades.replaceChildren(
+      ...[...countUpgrades(run.picks)].map(([id, count]) =>
+        element('li', {
+          className: 'hud-upgrade',
+          text: STRINGS.hud.stacks(STRINGS.upgrades[id].name, count),
+          attributes: { title: STRINGS.upgrades[id].description },
+        }),
+      ),
+    );
+    if (run.picks.length === 0)
+      upgrades.append(
+        element('li', { className: 'hud-upgrade-empty', text: STRINGS.hud.noUpgrades }),
+      );
+  }
+
   return {
     root,
     update(run, prepared, state, undoChargesLeft) {
-      const { nodeCount } = prepared.puzzle.config;
       const { infected } = countOutcomes(state);
-      const savablePercent = Math.round((100 * (nodeCount - infected)) / nodeCount);
-      const goal = prepared.passThresholdPercent;
-      level.textContent = STRINGS.hud.level(run.level);
-      target.textContent = STRINGS.hud.target(goal);
-      meterFill.style.width = `${savablePercent}%`;
-      meterMark.style.left = `${goal}%`;
-      meter.classList.toggle('hud-meter--short', savablePercent < goal);
-      meterCaption.textContent = STRINGS.hud.stillHealthy(savablePercent, goal);
-
-      phase.dataset['phase'] = state.phase;
-      secondary.textContent = '';
+      showGoal(run, prepared, infected);
       if (state.phase === 'vaccinate') {
+        phase.dataset['phase'] = state.phase;
         phase.textContent = STRINGS.hud.vaccinate;
         counter.textContent = STRINGS.hud.vaccinesLeft(state.vaccinesRemaining);
+        secondary.textContent = '';
         instruction.textContent =
           prepared.puzzle.config.refuserCount > 0
             ? STRINGS.hud.instructionVaccinateWithRefusers
             : STRINGS.hud.instructionVaccinate;
       } else if (state.phase === 'quarantine') {
+        phase.dataset['phase'] = state.phase;
         phase.textContent = STRINGS.hud.quarantine;
         counter.textContent = STRINGS.hud.day(state.turnsElapsed + 1, state.quarantineCount);
         const leftToday = quarantinesUntilNextDay(prepared.rules, state);
@@ -83,28 +116,19 @@ export function createHud(actions: HudActions): Hud {
             : STRINGS.hud.infected(infected);
         instruction.textContent = STRINGS.hud.instructionQuarantine;
       } else {
-        phase.textContent = STRINGS.hud.done;
-        counter.textContent = STRINGS.hud.infected(infected);
-        instruction.textContent = STRINGS.hud.instructionDone;
+        showEnded(infected);
       }
 
       undo.hidden = prepared.undoCharges === 0;
       undo.textContent = STRINGS.hud.undo(undoChargesLeft);
       undo.disabled = undoChargesLeft === 0 || state.moves.length === 0 || state.phase === 'ended';
-
-      upgrades.replaceChildren(
-        ...[...countUpgrades(run.picks)].map(([id, count]) =>
-          element('li', {
-            className: 'hud-upgrade',
-            text: STRINGS.hud.stacks(STRINGS.upgrades[id].name, count),
-            attributes: { title: STRINGS.upgrades[id].description },
-          }),
-        ),
-      );
-      if (run.picks.length === 0)
-        upgrades.append(
-          element('li', { className: 'hud-upgrade-empty', text: STRINGS.hud.noUpgrades }),
-        );
+      showUpgrades(run);
+    },
+    showFinished(run, prepared, result) {
+      showGoal(run, prepared, result.counts.infected);
+      showEnded(result.counts.infected);
+      undo.hidden = true;
+      showUpgrades(run);
     },
   };
 }

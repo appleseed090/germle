@@ -57,8 +57,8 @@ green and `dist/` byte-for-byte identical to `main` (`npm run compare:germle-com
   - [x] Basic Launch: rewarded buttons did nothing on the first tap (CrazyGames rejects that).
         The default build now never requests an ad; a Full Launch build ships ads later.
   - [x] Ad blockers: rewarded options show disabled with a notice instead of disappearing.
-  - [ ] Resuming a saved run straight into a summary or the upgrade choice leaves the side panel
-        empty behind the overlay (no level is mounted). Cosmetic; seen 2026-10-17.
+  - [x] Resuming a saved run straight into a summary or the upgrade choice left the side panel
+        empty behind the overlay: it now shows the finished level from the save.
   - [x] Double-tapping an upgrade card threw an error (found by playing the real UI): the choice
         is inert while the pick animates.
   - [x] Refusers from level 5 (random placement, the owner's call); Outreach halves them; Double
