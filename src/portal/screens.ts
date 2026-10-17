@@ -100,9 +100,18 @@ export interface SummaryScreenActions {
 }
 
 /** After a level: passed or not, by how much, and what comes next. */
+/**
+ * A rewarded option on a screen: playable (`video`), shown disabled with a notice because the
+ * player's ad blocker stops it (`blocked`), or left out because ads are off (`none`).
+ */
+export type RewardedOption = 'video' | 'blocked' | 'none';
+
+/** The reroll on the upgrade choice: a free one, a rewarded one, or none. */
+export type RerollOption = 'free' | RewardedOption;
+
 export function summaryScreen(
   result: LevelResult,
-  canSecondChance: boolean,
+  secondChance: RewardedOption,
   actions: SummaryScreenActions,
 ): HTMLElement {
   const { counts } = result;
@@ -134,17 +143,24 @@ export function summaryScreen(
     ? [button(STRINGS.summary.continue, actions.onContinue, 'portal-button portal-button--primary')]
     : [
         // CrazyGames: the way out must look exactly like the rewarded option beside it.
-        canSecondChance
-          ? rewardedAdButton(
+        secondChance === 'none'
+          ? null
+          : rewardedAdButton(
               STRINGS.summary.secondChance,
               actions.onSecondChance,
               'portal-button portal-button--primary',
-            )
-          : null,
+              secondChance === 'blocked',
+            ),
         button(STRINGS.summary.endRun, actions.onEndRun, 'portal-button portal-button--primary'),
-        canSecondChance
-          ? element('p', { className: 'panel-note', text: STRINGS.summary.secondChanceNote })
-          : null,
+        secondChance === 'none'
+          ? null
+          : element('p', {
+              className: 'panel-note',
+              text:
+                secondChance === 'blocked'
+                  ? STRINGS.ads.blockedByAdblock
+                  : STRINGS.summary.secondChanceNote,
+            }),
       ];
   const section = panel(
     `summary summary--${result.passed ? 'passed' : 'failed'}`,
@@ -182,7 +198,7 @@ export interface ChoiceScreenActions {
 export function choiceScreen(
   run: RunState,
   offer: readonly UpgradeId[],
-  canReroll: boolean,
+  reroll: RerollOption,
   /** Whether Research can still unlock upgrades, for when the offer comes up empty. */
   moreToUnlock: boolean,
   actions: ChoiceScreenActions,
@@ -219,10 +235,10 @@ export function choiceScreen(
     });
     return card;
   });
-  const reroll =
-    offer.length === 0 || !canReroll
+  const rerollButton =
+    offer.length === 0 || reroll === 'none'
       ? null
-      : run.freeRerollsLeft > 0
+      : reroll === 'free'
         ? button(
             STRINGS.choice.rerollFree,
             actions.onReroll,
@@ -232,6 +248,7 @@ export function choiceScreen(
             STRINGS.choice.rerollWithAd,
             actions.onReroll,
             'portal-button portal-button--secondary',
+            reroll === 'blocked',
           );
   return panel('choice', STRINGS.choice.heading, [
     offer.length === 0
@@ -242,17 +259,25 @@ export function choiceScreen(
       : element('div', { className: 'upgrade-cards' }, cards),
     offer.length === 0
       ? button(STRINGS.choice.skip, actions.onSkip, 'portal-button portal-button--primary')
-      : reroll,
+      : rerollButton,
+    rerollButton !== null && reroll === 'blocked'
+      ? element('p', { className: 'panel-note', text: STRINGS.ads.blockedByAdblock })
+      : null,
   ]);
 }
 
-/** A button that plays a rewarded ad, marked with a video icon as CrazyGames asks. */
+/**
+ * A button that plays a rewarded ad, marked with a video icon as CrazyGames asks. Disabled when an
+ * ad blocker stops the ad; the screen then shows a notice saying so.
+ */
 function rewardedAdButton(
   label: string,
   onClick: () => void,
   className: string,
+  blockedByAdblock: boolean,
 ): HTMLButtonElement {
   const created = button(label, onClick, `${className} rewarded-button`);
+  created.disabled = blockedByAdblock;
   const svgNamespace = 'http://www.w3.org/2000/svg';
   const icon = document.createElementNS(svgNamespace, 'svg');
   icon.setAttribute('viewBox', '0 0 24 24');

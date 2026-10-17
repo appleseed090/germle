@@ -49,6 +49,8 @@ import {
   runOverScreen,
   settingsScreen,
   summaryScreen,
+  type RerollOption,
+  type RewardedOption,
 } from './screens';
 import { STRINGS } from './strings';
 
@@ -291,7 +293,7 @@ export function startApp(root: HTMLElement, platform: Platform): void {
   function showSummary(result: LevelResult): void {
     root.dataset['screen'] = 'summary';
     showOverlay(
-      summaryScreen(result, canOfferSecondChance(), {
+      summaryScreen(result, secondChanceOption(), {
         onContinue: () => {
           void continueAfterPass();
         },
@@ -314,16 +316,26 @@ export function startApp(root: HTMLElement, platform: Platform): void {
     showChoice();
   }
 
+  /** How a rewarded option shows: playable, disabled by an ad blocker, or not at all. */
+  function rewardedOption(): RewardedOption {
+    switch (platform.ads.rewardedAds()) {
+      case 'available':
+        return 'video';
+      case 'blocked-by-adblock':
+        return 'blocked';
+      case 'unavailable':
+        return 'none';
+    }
+  }
+
   /**
    * Second chance is a rewarded "keep playing": once per run, at most once per session (the
    * CrazyGames monetisation guide's limit for revives), and never offered when ads are off.
    */
-  function canOfferSecondChance(): boolean {
-    return (
-      canUseSecondChance(currentRun()) &&
-      !secondChanceTakenThisSession &&
-      platform.ads.rewardedAdsAvailable()
-    );
+  function secondChanceOption(): RewardedOption {
+    return canUseSecondChance(currentRun()) && !secondChanceTakenThisSession
+      ? rewardedOption()
+      : 'none';
   }
 
   async function takeSecondChance(): Promise<void> {
@@ -346,9 +358,9 @@ export function startApp(root: HTMLElement, platform: Platform): void {
     const run = currentRun();
     const unlocked = unlockedUpgrades(save.unlocks);
     const offer = currentOffer(run, unlocked, offerCountFor(save));
-    const canReroll = run.freeRerollsLeft > 0 || platform.ads.rewardedAdsAvailable();
+    const rerollOption: RerollOption = run.freeRerollsLeft > 0 ? 'free' : rewardedOption();
     showOverlay(
-      choiceScreen(run, offer, canReroll, unlocked.size < UPGRADE_IDS.length, {
+      choiceScreen(run, offer, rerollOption, unlocked.size < UPGRADE_IDS.length, {
         onPick: (upgrade, card) => {
           void pick(upgrade, offer, card);
         },

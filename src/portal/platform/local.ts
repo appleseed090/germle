@@ -1,6 +1,7 @@
 import { AD_BALANCE } from '../../endless/balance';
 import { STRINGS } from '../strings';
-import type { AdHooks, Platform } from './platform';
+import { adsWithoutAdRequests, type GameplayEvents, type LaunchStage } from './launch-stage';
+import type { AdHooks, AdsPlatform, Platform, RewardedAdsState } from './platform';
 
 const SIMULATED_AD_MILLISECONDS = 2000;
 const STORAGE_PREFIX = 'germle-endless-dev:';
@@ -11,17 +12,22 @@ const STORAGE_PREFIX = 'germle-endless-dev:';
  * `import.meta.env.DEV` branch in `main.ts` drops it, and `scripts/check-builds.ts` fails if
  * browser storage appears in `dist-portal/`).
  *
- * Add `?ads=fail` to the dev URL to make every ad fail (the no-reward path), or `?ads=off` to play
- * as if ads were off for this player (an ad blocker or Basic Launch: no rewarded buttons).
+ * In the Full Launch build (`npm run dev:portal:full`), add `?ads=fail` to the dev URL to make
+ * every ad fail (the no-reward path), `?ads=adblock` to play as a player with an ad blocker
+ * (rewarded options disabled, with a notice), or `?ads=off` to play without any ads (the same as
+ * the Basic Launch build).
+ *
+ * @param launchStage - In Basic Launch no ad is simulated and no rewarded option is shown.
  */
-export function createLocalPlatform(): Platform {
+export function createLocalPlatform(launchStage: LaunchStage): Platform {
   const adsMode = new URLSearchParams(window.location.search).get('ads');
   const adsFail = adsMode === 'fail';
-  const adsOff = adsMode === 'off';
+  const rewardedAds: RewardedAdsState =
+    adsMode === 'off' ? 'unavailable' : adsMode === 'adblock' ? 'blocked-by-adblock' : 'available';
   let lastMidgameAt = -Infinity;
 
   const playSimulatedAd = (label: string, hooks: AdHooks): Promise<boolean> => {
-    if (adsFail || adsOff) return Promise.resolve(false);
+    if (adsFail || rewardedAds !== 'available') return Promise.resolve(false);
     hooks.onAdStarted();
     const overlay = document.createElement('div');
     overlay.className = 'simulated-ad';
@@ -39,35 +45,40 @@ export function createLocalPlatform(): Platform {
     console.debug(`[local platform] ${event}`); // not-player-text
   };
 
-  return {
-    ads: {
-      async showMidgameAd(hooks) {
-        const now = performance.now();
-        if (now - lastMidgameAt < AD_BALANCE.localMidgameCooldownSeconds * 1000) {
-          log('midgame ad skipped (cooldown)'); // not-player-text
-          return;
-        }
-        lastMidgameAt = now;
-        await playSimulatedAd(STRINGS.ads.simulatedMidgame, hooks);
-      },
-      showRewardedAd: (hooks) => playSimulatedAd(STRINGS.ads.simulatedRewarded, hooks),
-      rewardedAdsAvailable: () => !adsOff,
-      gameplayStart: () => {
-        log('gameplayStart');
-      },
-      gameplayStop: () => {
-        log('gameplayStop');
-      },
-      loadingStart: () => {
-        log('loadingStart');
-      },
-      loadingStop: () => {
-        log('loadingStop');
-      },
-      happyTime: () => {
-        log('happytime');
-      },
+  const events: GameplayEvents = {
+    gameplayStart: () => {
+      log('gameplayStart');
     },
+    gameplayStop: () => {
+      log('gameplayStop');
+    },
+    loadingStart: () => {
+      log('loadingStart');
+    },
+    loadingStop: () => {
+      log('loadingStop');
+    },
+    happyTime: () => {
+      log('happytime');
+    },
+  };
+  const simulatedAds: AdsPlatform = {
+    ...events,
+    async showMidgameAd(hooks) {
+      const now = performance.now();
+      if (now - lastMidgameAt < AD_BALANCE.localMidgameCooldownSeconds * 1000) {
+        log('midgame ad skipped (cooldown)'); // not-player-text
+        return;
+      }
+      lastMidgameAt = now;
+      await playSimulatedAd(STRINGS.ads.simulatedMidgame, hooks);
+    },
+    showRewardedAd: (hooks) => playSimulatedAd(STRINGS.ads.simulatedRewarded, hooks),
+    rewardedAds: () => rewardedAds,
+  };
+
+  return {
+    ads: launchStage === 'full' ? simulatedAds : adsWithoutAdRequests(events),
     saves: {
       getItem: (key) => {
         try {

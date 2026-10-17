@@ -18,7 +18,10 @@ This repo builds two separate products from one engine; `CLAUDE.md` is the map.
   `npm run build` into `dist/` and deployed from `main`.
 - **Germle Endless**, a roguelite endless mode for the CrazyGames web portal: `portal/`,
   `src/portal/` and `src/endless/`, built by `npm run build:portal` into `dist-portal/` and
-  packaged by hand for upload. Developed on the `portal` branch; it never changes `dist/`.
+  packaged by hand for upload. Developed on the `portal` branch; it never changes `dist/`. It
+  builds for one of CrazyGames' two launch stages: **Basic Launch** (the default, no ads, what a
+  new game is uploaded as) or **Full Launch** (with ads, the `:full` commands below, uploaded once
+  CrazyGames moves the game there).
 
 ## Status
 
@@ -46,13 +49,15 @@ anonymously with everyone who played the same puzzle. See `TODO.md` for the back
 | `npm run format`             | Rewrite files with Prettier                                                    |
 | `npm run e2e`                | Playwright tests against `dist/` (build first)                                 |
 | `npm run generate:images`    | Re-render favicons, app icons and `og.png` into `public/`                      |
-| `npm run dev:portal`         | Germle Endless dev server (local ads overlay and saves)                        |
-| `npm run build:portal`       | Germle Endless build into `dist-portal/`                                       |
-| `npm run preview:portal`     | Serve `dist-portal/` with the real CrazyGames SDK                              |
-| `npm run package:portal`     | Build, check and zip Germle Endless, and render its covers into `release/`     |
+| `npm run dev:portal`         | Germle Endless dev server, Basic Launch (no ads; saves in the browser)         |
+| `npm run dev:portal:full`    | The same for Full Launch, with a simulated ad overlay                          |
+| `npm run build:portal`       | Germle Endless Basic Launch build into `dist-portal/`                          |
+| `npm run build:portal:full`  | Germle Endless Full Launch build into `dist-portal-full/`                      |
+| `npm run preview:portal`     | Serve `dist-portal/` with the real CrazyGames SDK (`:full` for the other)      |
+| `npm run package:portal`     | Build, check and zip both launch stages, and render the covers into `release/` |
 | `npm run videos:portal`      | Record the two CrazyGames preview videos into `release/videos/` (needs ffmpeg) |
-| `npm run e2e:portal`         | Playwright tests against `dist-portal/` with a fake SDK (build first)          |
-| `npm run check:builds`       | Check `dist/` and `dist-portal/` against the product rules                     |
+| `npm run e2e:portal`         | Playwright tests against both portal builds with a fake SDK (build first)      |
+| `npm run check:builds`       | Check `dist/` and both portal builds against the product rules                 |
 | `npm run compare:germle-com` | Prove `dist/` is byte-for-byte what `origin/main` builds                       |
 | `npm run simulate:endless`   | Play many Germle Endless runs with a bot and print balance numbers             |
 

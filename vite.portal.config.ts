@@ -1,4 +1,5 @@
 import { defineConfig, type Plugin } from 'vite';
+import type { LaunchStage } from './src/portal/platform/launch-stage.ts';
 import { CRAZYGAMES_SDK_URL } from './scripts/build-rules.ts';
 
 /*
@@ -26,18 +27,50 @@ function crazyGamesSdkScript(): Plugin {
   };
 }
 
-export default defineConfig({
-  root: 'portal',
-  base: './',
-  publicDir: false,
-  plugins: [crazyGamesSdkScript()],
-  server: { port: 5174, fs: { allow: ['..'] } },
-  preview: { port: 4174 },
-  build: {
-    outDir: '../dist-portal',
-    emptyOutDir: true,
-    rollupOptions: {
-      output: { chunkFileNames: 'assets/shared-[hash].js' },
+/**
+ * The Vite mode that builds for CrazyGames' Full Launch, with ads; every other build is for Basic
+ * Launch, where the game never requests an ad (see `src/portal/platform/launch-stage.ts`).
+ * `npm run build:portal:full`, `dev:portal:full` and `preview:portal:full` pass it.
+ */
+export const FULL_LAUNCH_MODE = 'full-launch';
+
+/** Vite's own modes, which build for Basic Launch. */
+const BASIC_LAUNCH_MODES: ReadonlySet<string> = new Set(['production', 'development']);
+
+/**
+ * The launch stage a Vite mode builds for. Fails the build at once on any other mode, so a typo
+ * never ships a build for the wrong stage.
+ */
+function launchStageFor(mode: string): LaunchStage {
+  if (mode === FULL_LAUNCH_MODE) return 'full';
+  if (BASIC_LAUNCH_MODES.has(mode)) return 'basic';
+  throw new Error(
+    `Unknown mode "${mode}" for the portal build: use the default or --mode ${FULL_LAUNCH_MODE}`,
+  );
+}
+
+/** Each launch stage builds into its own folder, so both can be checked and zipped. */
+export const PORTAL_OUT_DIRS: Readonly<Record<LaunchStage, string>> = {
+  basic: 'dist-portal',
+  full: 'dist-portal-full',
+};
+
+export default defineConfig(({ mode }) => {
+  const launchStage = launchStageFor(mode);
+  return {
+    root: 'portal',
+    base: './',
+    publicDir: false,
+    plugins: [crazyGamesSdkScript()],
+    define: { __GERMLE_LAUNCH_STAGE__: JSON.stringify(launchStage) },
+    server: { port: 5174, fs: { allow: ['..'] } },
+    preview: { port: 4174 },
+    build: {
+      outDir: `../${PORTAL_OUT_DIRS[launchStage]}`,
+      emptyOutDir: true,
+      rollupOptions: {
+        output: { chunkFileNames: 'assets/shared-[hash].js' },
+      },
     },
-  },
+  };
 });

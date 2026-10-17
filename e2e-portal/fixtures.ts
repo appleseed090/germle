@@ -3,8 +3,10 @@ import { CRAZYGAMES_SDK_URL } from '../scripts/build-rules.ts';
 import type { GameState } from '../src/engine/game';
 import { applyTapWithRules, startGameWithRules } from '../src/engine/rules';
 import { prepareLevel } from '../src/endless/levels';
-import { SAVE_KEY, parseSave, type EndlessSave } from '../src/endless/save';
-import { chooseBotMove } from '../src/endless/simulation';
+import { judgeLevel, type RunState } from '../src/endless/run';
+import { FRESH_SAVE, SAVE_KEY, parseSave, type EndlessSave } from '../src/endless/save';
+import { chooseBotMove, playLevelWithBot as simulateLevel } from '../src/endless/simulation';
+import type { UpgradeId } from '../src/endless/upgrades';
 
 /** Where the fake SDK keeps the Data module's values in the page's own storage. */
 const FAKE_DATA_PREFIX = 'fake-crazygames-data:';
@@ -158,4 +160,40 @@ export async function playLevelWithBot(page: Page): Promise<GameState> {
     state = applyTapWithRules(prepared.puzzle, prepared.rules, state, node).state;
   }
   return state;
+}
+
+/** Upgrades with which the bot passes most early levels. */
+export const STRONG_PICKS: UpgradeId[] = ['double-shift', 'smaller-outbreak', 'extra-vaccine'];
+
+/** A run in progress at `level`, as a save would hold it. */
+export function runAt(level: number, overrides: Partial<RunState> = {}): RunState {
+  return {
+    seed: 'abcd1234',
+    level,
+    picks: STRONG_PICKS,
+    levelsCleared: level - 1,
+    peopleSaved: 40 * (level - 1),
+    movesPlayed: 0,
+    secondChanceUsed: false,
+    rerollsThisOffer: 0,
+    freeRerollsLeft: 0,
+    phase: 'playing',
+    lastResult: null,
+    ...overrides,
+  };
+}
+
+/** The save of a player past the tutorial, with `run` under way (or none). */
+export function returningPlayer(run: RunState | null): EndlessSave {
+  return { ...FRESH_SAVE, runsFinished: 2, tutorialDone: true, run };
+}
+
+/** A run seed on which the bot passes `level` with `picks`, so a test can rely on a pass. */
+export function seedTheBotPasses(level: number, picks: readonly UpgradeId[]): string {
+  for (let index = 0; index < 500; index++) {
+    const seed = `e2e${String(index).padStart(5, '0')}`;
+    const prepared = prepareLevel(seed, level, picks);
+    if (judgeLevel(prepared, simulateLevel(prepared)).passed) return seed;
+  }
+  throw new Error(`No seed where the bot passes level ${level}`);
 }

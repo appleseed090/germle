@@ -142,6 +142,22 @@ export function portalBuildViolations(files: readonly CheckedFile[]): string[] {
   return violations;
 }
 
+/** A call that asks the CrazyGames SDK for an ad, or whether the player blocks ads. */
+const AD_REQUEST_CALL = /\brequestAd\(|\bhasAdblock\b/;
+
+/**
+ * Violations of CrazyGames' Basic Launch rules in the Basic Launch build (`dist-portal/`): ads are
+ * disabled then, and the review rejects rewarded buttons without effect, so that build must not
+ * contain any code that requests an ad (`src/portal/platform/launch-stage.ts`).
+ *
+ * @returns One message per violation; empty when the output is clean.
+ */
+export function basicLaunchBuildViolations(files: readonly CheckedFile[]): string[] {
+  return files
+    .filter((file) => file.text !== undefined && AD_REQUEST_CALL.test(file.text))
+    .map((file) => `dist-portal/${file.path}: requests ads, which Basic Launch disables`);
+}
+
 /** Words a PEGI 12 game for a general (not child) audience should not show here. */
 const CONTENT_FORBIDDEN =
   /\b(kill\w*|dead|death\w*|die|dies|died|dying|corpses?|blood\w*|gore|murder\w*|weapons?|guns?|bombs?|alcohol|drugs?|gambl\w*|casino|kids?|child|children|toddlers?|preschool\w*)\b/i;

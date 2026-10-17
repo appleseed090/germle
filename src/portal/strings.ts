@@ -65,7 +65,7 @@ export const STRINGS = Object.freeze({
     refusersArrive: 'New: orange people refuse vaccines.',
     alreadyInfected: 'Already infected. Quarantine a healthy person.',
     knownPatient: 'Patient zero is already carrying it. Vaccines won’t help.',
-    adUnavailable: 'No video available right now.',
+    adUnavailable: 'No video available right now. Try again later.',
     naturallyImmune: (count: number) =>
       count === 1
         ? '1 person starts immune: the dashed circle'
@@ -152,6 +152,7 @@ export const STRINGS = Object.freeze({
   },
 
   ads: {
+    blockedByAdblock: 'Videos are blocked by an ad blocker.',
     simulatedMidgame: 'Ad break (simulated)',
     simulatedRewarded: 'Video ad (simulated)',
   },

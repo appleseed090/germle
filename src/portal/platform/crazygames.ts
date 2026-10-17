@@ -1,11 +1,12 @@
-import type { AdHooks, AdsPlatform, Platform, SavePlatform } from './platform';
+import { adsWithoutAdRequests, type GameplayEvents } from './launch-stage';
+import type { AdHooks, AdsPlatform, Platform, RewardedAdsState, SavePlatform } from './platform';
 
 /**
  * The CrazyGames HTML5 SDK v3, as far as Germle Endless uses it, hand-written from the docs and
  * checked against SDK 3.8.0. Every call is guarded: the SDK is external code that may be missing
  * (a blocked script), uninitialised (its modules throw until `init` resolves), or changed.
  */
-interface CrazyGamesSdk {
+export interface CrazyGamesSdk {
   init(): Promise<void>;
   readonly environment: string;
   readonly ad: {
@@ -35,6 +36,15 @@ interface CrazyGamesSdk {
   };
 }
 
+/** How the platform gets its ads from the initialised SDK: one implementation per launch stage. */
+export type CrazyGamesAds = (sdk: CrazyGamesSdk) => AdsPlatform;
+
+/** Full Launch: midgame and rewarded ads through the SDK. */
+export const fullLaunchAds: CrazyGamesAds = (sdk) => sdkAds(sdk);
+
+/** Basic Launch: no ad is ever requested; gameplay and loading events still reach the SDK. */
+export const basicLaunchAds: CrazyGamesAds = (sdk) => adsWithoutAdRequests(sdkEvents(sdk));
+
 const INIT_TIMEOUT_MILLISECONDS = 8000;
 /** An ad that has not started by now is treated as failed, so the game never hangs. */
 const AD_START_TIMEOUT_MILLISECONDS = 15_000;
@@ -47,8 +57,14 @@ const AD_START_TIMEOUT_MILLISECONDS = 15_000;
  *
  * @param sdkCandidate - `window.CrazyGames?.SDK`, untrusted: only `init` is read before it resolves
  *   (the real SDK throws on any other property until then), the methods used are checked after.
+ * @param adsFor - {@link fullLaunchAds} or {@link basicLaunchAds}, for the build's launch stage
+ *   (`launch-stage.ts`). `main.ts` picks one with a build-time constant, so the Basic Launch build
+ *   does not even contain the code that requests ads.
  */
-export async function createCrazyGamesPlatform(sdkCandidate: unknown): Promise<Platform> {
+export async function createCrazyGamesPlatform(
+  sdkCandidate: unknown,
+  adsFor: CrazyGamesAds,
+): Promise<Platform> {
   const initialise = initialiser(sdkCandidate);
   if (initialise === undefined) return offlinePlatform();
   try {
@@ -68,7 +84,7 @@ export async function createCrazyGamesPlatform(sdkCandidate: unknown): Promise<P
   });
 
   return {
-    ads: sdkAds(sdk),
+    ads: adsFor(sdk),
     saves: sdkSaves(sdk),
     leaderboard: {
       // Invite-only on CrazyGames and needs an encryption key from the Developer Portal; see
@@ -105,20 +121,46 @@ function asInitialisedSdk(candidate: unknown): CrazyGamesSdk | undefined {
   return looksUsable ? (sdk as CrazyGamesSdk) : undefined;
 }
 
-/** Ad error codes meaning no ad will ever play for this player in this session. */
-const ADS_OFF_CODES: ReadonlySet<string> = new Set(['adblock', 'adsDisabledBasicLaunch']);
-
-function adsAreOffFor(error: unknown): boolean {
+/**
+ * What an ad error code means for every later rewarded ad this session; `undefined` for errors
+ * that are about this request only (`unfilled`, `adCooldown`, `other`).
+ */
+function rewardedAdsStateAfter(error: unknown): RewardedAdsState | undefined {
   const code =
     typeof error === 'object' && error !== null ? (error as { code?: unknown }).code : undefined;
-  return typeof code === 'string' && ADS_OFF_CODES.has(code);
+  if (code === 'adblock') return 'blocked-by-adblock';
+  if (code === 'adsDisabledBasicLaunch') return 'unavailable';
+  return undefined;
+}
+
+function sdkEvents(sdk: CrazyGamesSdk): GameplayEvents {
+  const call = (action: () => void) => () => {
+    safely(action);
+  };
+  return {
+    gameplayStart: call(() => {
+      sdk.game.gameplayStart();
+    }),
+    gameplayStop: call(() => {
+      sdk.game.gameplayStop();
+    }),
+    loadingStart: call(() => {
+      sdk.game.loadingStart();
+    }),
+    loadingStop: call(() => {
+      sdk.game.loadingStop();
+    }),
+    happyTime: call(() => {
+      sdk.game.happytime();
+    }),
+  };
 }
 
 function sdkAds(sdk: CrazyGamesSdk): AdsPlatform {
-  let adsOff = false;
+  let rewardedAds: RewardedAdsState = 'available';
   void safely(() => sdk.ad.hasAdblock?.())
     ?.then((blocked) => {
-      if (blocked) adsOff = true;
+      if (blocked && rewardedAds === 'available') rewardedAds = 'blocked-by-adblock';
     })
     .catch(() => undefined);
   const requestAd = (type: 'midgame' | 'rewarded', hooks: AdHooks): Promise<boolean> =>
@@ -143,7 +185,7 @@ function sdkAds(sdk: CrazyGamesSdk): AdsPlatform {
             settle(true);
           },
           adError: (error: unknown) => {
-            if (adsAreOffFor(error)) adsOff = true;
+            rewardedAds = rewardedAdsStateAfter(error) ?? rewardedAds;
             settle(false);
           },
         });
@@ -151,30 +193,13 @@ function sdkAds(sdk: CrazyGamesSdk): AdsPlatform {
       });
       if (requested !== true) settle(false);
     });
-  const call = (action: () => void) => () => {
-    safely(action);
-  };
   return {
+    ...sdkEvents(sdk),
     showMidgameAd: async (hooks) => {
       await requestAd('midgame', hooks);
     },
     showRewardedAd: (hooks) => requestAd('rewarded', hooks),
-    rewardedAdsAvailable: () => !adsOff,
-    gameplayStart: call(() => {
-      sdk.game.gameplayStart();
-    }),
-    gameplayStop: call(() => {
-      sdk.game.gameplayStop();
-    }),
-    loadingStart: call(() => {
-      sdk.game.loadingStart();
-    }),
-    loadingStop: call(() => {
-      sdk.game.loadingStop();
-    }),
-    happyTime: call(() => {
-      sdk.game.happytime();
-    }),
+    rewardedAds: () => rewardedAds,
   };
 }
 
@@ -222,7 +247,7 @@ function offlinePlatform(): Platform {
     ads: {
       showMidgameAd: () => Promise.resolve(),
       showRewardedAd: () => Promise.resolve(false),
-      rewardedAdsAvailable: () => false,
+      rewardedAds: () => 'unavailable',
       gameplayStart: () => undefined,
       gameplayStop: () => undefined,
       loadingStart: () => undefined,
