@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   CRAZYGAMES_SDK_URL,
+  basicLaunchBuildViolations,
   germleComBuildViolations,
   isTextPath,
   portalBuildViolations,
@@ -138,5 +139,28 @@ describe('portalSourceViolations', () => {
         textFile('src/portal/strings.ts', "export const A = 'Nobody died';"),
       ]),
     ).toHaveLength(1);
+  });
+});
+
+describe('basicLaunchBuildViolations', () => {
+  it('passes a build that only checks the SDK has an ad module', () => {
+    expect(
+      basicLaunchBuildViolations([
+        CLEAN_PORTAL_INDEX,
+        textFile('assets/index.js', 'typeof sdk.ad?.requestAd==`function`&&start()'),
+      ]),
+    ).toEqual([]);
+  });
+
+  it('fails a build that requests ads or asks about ad blockers', () => {
+    expect(
+      basicLaunchBuildViolations([
+        textFile('assets/a.js', 'sdk.ad.requestAd("rewarded",{})'),
+        textFile('assets/b.js', 'await sdk.ad.hasAdblock()'),
+      ]),
+    ).toEqual([
+      'dist-portal/assets/a.js: requests ads, which Basic Launch disables',
+      'dist-portal/assets/b.js: requests ads, which Basic Launch disables',
+    ]);
   });
 });

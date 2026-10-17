@@ -1,50 +1,18 @@
-import { judgeLevel, type RunState } from '../src/endless/run';
-import { baseLevelConfig, prepareLevel } from '../src/endless/levels';
-import { FRESH_SAVE, type EndlessSave } from '../src/endless/save';
-import { playLevelWithBot as simulateLevel } from '../src/endless/simulation';
+import { baseLevelConfig } from '../src/endless/levels';
 import type { UpgradeId } from '../src/endless/upgrades';
 import {
+  STRONG_PICKS,
   expect,
   playLevelWithBot,
   readSave,
+  returningPlayer,
+  runAt,
   sdkCalls,
   seedSave,
+  seedTheBotPasses,
   setAdMode,
   test,
 } from './fixtures';
-
-const STRONG_PICKS: UpgradeId[] = ['double-shift', 'smaller-outbreak', 'extra-vaccine'];
-
-function runAt(level: number, overrides: Partial<RunState> = {}): RunState {
-  return {
-    seed: 'abcd1234',
-    level,
-    picks: STRONG_PICKS,
-    levelsCleared: level - 1,
-    peopleSaved: 40 * (level - 1),
-    movesPlayed: 0,
-    secondChanceUsed: false,
-    rerollsThisOffer: 0,
-    freeRerollsLeft: 0,
-    phase: 'playing',
-    lastResult: null,
-    ...overrides,
-  };
-}
-
-function returningPlayer(run: RunState | null): EndlessSave {
-  return { ...FRESH_SAVE, runsFinished: 2, tutorialDone: true, run };
-}
-
-/** A run seed on which the bot passes `level` with `picks`, so a test can rely on a pass. */
-function seedTheBotPasses(level: number, picks: readonly UpgradeId[]): string {
-  for (let index = 0; index < 500; index++) {
-    const seed = `e2e${String(index).padStart(5, '0')}`;
-    const prepared = prepareLevel(seed, level, picks);
-    if (judgeLevel(prepared, simulateLevel(prepared)).passed) return seed;
-  }
-  throw new Error(`No seed where the bot passes level ${level}`);
-}
 
 const board = '.portal-board:not(.portal-backdrop)';
 
@@ -173,7 +141,7 @@ test('a failed ad gives no second chance and no error; a watched one replays the
 
   await setAdMode(page, 'unfilled');
   await page.getByRole('button', { name: 'Replay this level (watch a video)' }).click();
-  await expect(page.getByText('No video available right now.')).toBeVisible();
+  await expect(page.getByText('No video available right now. Try again later.')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'The outbreak spread' })).toBeVisible();
   expect((await readSave(page)).run).toMatchObject({ phase: 'failed', secondChanceUsed: false });
 
@@ -184,7 +152,9 @@ test('a failed ad gives no second chance and no error; a watched one replays the
   expect(await sdkCalls(page)).not.toContain('requestAd:midgame');
 });
 
-test('with ads off for the player, no rewarded offer is shown at all', async ({ page }) => {
+test('with an ad blocker, rewarded options show disabled with a notice, never clickable', async ({
+  page,
+}) => {
   await page.addInitScript(() => {
     localStorage.setItem('fake-crazygames-ads', 'adblock');
   });
@@ -201,8 +171,12 @@ test('with ads off for the player, no rewarded offer is shown at all', async ({ 
   await page.goto('/');
   await page.getByRole('button', { name: 'Continue · level 4' }).click();
   await expect(page.getByRole('heading', { name: 'The outbreak spread' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'End run' })).toBeVisible();
-  await expect(page.locator('.rewarded-button')).toHaveCount(0);
+  await expect(
+    page.getByRole('button', { name: 'Replay this level (watch a video)' }),
+  ).toBeDisabled();
+  await expect(page.getByText('Videos are blocked by an ad blocker.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'End run' })).toBeEnabled();
+  expect(await sdkCalls(page)).not.toContain('requestAd:rewarded');
 });
 
 test('rerolling the upgrade choice takes a watched video and draws a new offer', async ({

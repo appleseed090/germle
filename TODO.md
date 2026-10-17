@@ -54,6 +54,11 @@ green and `dist/` byte-for-byte identical to `main` (`npm run compare:germle-com
         that have them.
   - [x] Outreach could be picked before any refuser existed (a pick that does nothing): it is
         offered only once the next level has refusers.
+  - [x] Basic Launch: rewarded buttons did nothing on the first tap (CrazyGames rejects that).
+        The default build now never requests an ad; a Full Launch build ships ads later.
+  - [x] Ad blockers: rewarded options show disabled with a notice instead of disappearing.
+  - [ ] Resuming a saved run straight into a summary or the upgrade choice leaves the side panel
+        empty behind the overlay (no level is mounted). Cosmetic; seen 2026-10-17.
   - [x] Double-tapping an upgrade card threw an error (found by playing the real UI): the choice
         is inert while the pick animates.
   - [x] Refusers from level 5 (random placement, the owner's call); Outreach halves them; Double
@@ -65,9 +70,10 @@ green and `dist/` byte-for-byte identical to `main` (`npm run compare:germle-com
 Constraints to remember:
 
 - The CrazyGames requirements were checked against the live docs and the real SDK on 2026-10-15
-  (`DECISIONS.md`). At submission the owner must also: turn on the Progress Save toggle, upload
-  the three covers and the two preview videos (`npm run videos:portal`), and set both
-  orientations as supported.
+  (`DECISIONS.md`). At submission the owner uploads `release/germle-endless-basic-launch.zip`
+  (no ads), and must also: turn on the Progress Save toggle, upload the three covers and the two
+  preview videos (`npm run videos:portal`), and set both orientations as supported. When
+  CrazyGames moves the game to Full Launch, upload `release/germle-endless-full-launch.zip`.
 - **Leaderboards (needs the owner):** invite-only on CrazyGames and need an encryption key from the
   Developer Portal. If CrazyGames enables one for the game, implement
   `LeaderboardPlatform.submitLevelsCleared` in `src/portal/platform/crazygames.ts` from the docs

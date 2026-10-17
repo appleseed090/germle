@@ -8,6 +8,7 @@ export default defineConfig(
     ignores: [
       'dist',
       'dist-portal',
+      'dist-portal-full',
       'release',
       'coverage',
       'playwright-report',

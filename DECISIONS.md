@@ -577,12 +577,26 @@ adError })` (callbacks only, no promise form) with error codes `unfilled`, `adbl
   checks the rest after, and both fakes (unit and end-to-end) throw before `init` like the real
   one. Checked against the real SDK in its `local` environment: a level played, saved through the
   Data module, resumed after a reload, and a rewarded reroll's simulated ad paid out.
-- **Rewarded offers disappear when ads are off.** The ads platform reports
-  `rewardedAdsAvailable()`: false after `hasAdblock()` says so, or after an ad fails with
-  `adblock` or `adsDisabledBasicLaunch`; an `unfilled` ad does not count. Basic Launch has no
-  public flag, so on CrazyGames during Basic Launch the first rewarded tap shows "No video
-  available right now" and the rewarded buttons then disappear for the session; afterwards a
-  failed level offers only "End run" and the choice has no paid reroll.
+- **Two builds, one per launch stage (2026-10-17).** Every new game starts in Basic Launch with
+  ads disabled, and the ads requirements say the review checks the game "runs smoothly while ads
+  are disabled. The game will be rejected if it does not … There should not be rewarded ad
+  buttons without effect." The SDK has no Basic Launch flag: it reports `adsDisabledBasicLaunch`
+  only after an ad request fails, so before this a reviewer's first rewarded tap only showed "No
+  video available". So the default build (`dist-portal/`, `npm run build:portal`) is for Basic
+  Launch and never requests an ad: no midgame ads, no rewarded offers, gameplay events and saves
+  through the SDK as before. `main.ts` picks the ads with a build-time constant, so that build does
+  not even contain the code that requests ads, and `scripts/check-builds.ts` fails if it does. The
+  Full Launch build (`--mode full-launch`, `dist-portal-full/`) is uploaded when CrazyGames moves
+  the game to Full Launch. Raised by the session that took Tumblegons through CrazyGames review;
+  checked against docs.crazygames.com/requirements/ads/ and /sdk/video-ads/.
+- **With an ad blocker, rewarded options show disabled with a notice.** The same page: "You can
+  block certain features … make sure to show a notice on such functions that they are blocked
+  because of the AdBlocker usage" and "Do not keep the rewarded ads clickable but without
+  effect". The ads platform reports `rewardedAds()`: `blocked-by-adblock` after `hasAdblock()`
+  says so or an ad fails with `adblock` (the replay and reroll buttons then show disabled, with
+  "Videos are blocked by an ad blocker."), `unavailable` after `adsDisabledBasicLaunch` (no
+  rewarded options), and `available` otherwise; an `unfilled` ad changes nothing and says "No
+  video available right now. Try again later.", as the page also asks.
 - **Preview videos: `npm run videos:portal`.** CrazyGames requires a 1080p landscape (16:9) and a
   1080p portrait (2:3) video, 15–20 s, no sound, opening on the static cover. The script records
   the real game in Chromium (dev build, ads off) while the simulator's bot plays a mid-run level
@@ -770,9 +784,10 @@ adError })` (callbacks only, no promise form) with error codes `unfilled`, `adbl
   they fail on any page error or any request to a site other than localhost and the SDK. Three
   viewports: 1280 × 720, a phone in landscape and a phone in portrait; the legibility test also
   shrinks to 800 × 450.
-- **`npm run package:portal` writes `release/germle-endless.zip` and `release/covers/`, both
-  gitignored.** It builds `dist-portal/`, refuses to package if any portal rule fails, zips it with
-  `index.html` at the archive root (a small ZIP writer in `scripts/zip.ts`, deflate with fixed
+- **`npm run package:portal` writes `release/germle-endless-basic-launch.zip`,
+  `release/germle-endless-full-launch.zip` and `release/covers/`, all gitignored.** It builds both
+  launch stages, refuses to package if any portal rule fails (or the Basic Launch build requests
+  ads), zips each with `index.html` at the archive root (a small ZIP writer in `scripts/zip.ts`, deflate with fixed
   timestamps, so no `zip` binary or dependency is needed and the same build gives the same
   archive), and screenshots `portal/cover.html` at 1920 × 1080, 800 × 1200 and 800 × 800 into PNGs.
   The cover page is development-only (the build's only input is `index.html`) and draws a real

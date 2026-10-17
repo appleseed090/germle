@@ -3,10 +3,10 @@
  * Preview video): 1080p landscape (1920 × 1080) and 1080p portrait (1080 × 1620, 2:3), at most
  * 20 seconds, no sound, opening on the static cover.
  *
- * It serves the portal with the dev server (local platform: no SDK, no ads), seeds a save so the
- * game opens on a mid-run level, and has the simulator's bot play it in real time in Chromium
- * while Playwright records; then ffmpeg puts a one-second still of the cover in front, trims and
- * encodes H.264 MP4s into `release/videos/`.
+ * It serves the portal with the dev server (local platform, Basic Launch: no SDK, no ads), seeds
+ * a save so the game opens on a mid-run level, and has the simulator's bot play it in real time
+ * in Chromium while Playwright records; then ffmpeg puts a one-second still of the cover in front,
+ * trims and encodes H.264 MP4s into `release/videos/`.
  *
  * Usage: `npm run videos:portal`. Needs `ffmpeg` (with libx264) on the PATH and the Playwright
  * Chromium the end-to-end tests use. Playwright records at real time with modest quality; if
@@ -139,9 +139,8 @@ try {
       },
       [DEV_SAVE_KEY, seededSave] as const,
     );
-    // `?ads=off`: the local platform skips the simulated ad break the level's summary would
-    // otherwise lead to (see src/portal/platform/local.ts).
-    await page.goto(new URL('?ads=off', address).href);
+    // The dev server builds for Basic Launch, so no simulated ad break interrupts the video.
+    await page.goto(address);
     await page.getByRole('button', { name: /Continue/ }).click();
     const gameplayStartsAt = (Date.now() - recordingStarted) / 1000;
     await page.waitForTimeout(1300);

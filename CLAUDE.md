@@ -7,18 +7,18 @@ lands.
 
 ## The two products
 
-|                          | **germle.com** (the daily puzzle)                                            | **Germle Endless** (CrazyGames portal build)                                 |
-| ------------------------ | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| What it is               | Daily puzzle, archive, practice, About                                       | Roguelite endless mode for the CrazyGames web portal                         |
-| Pages                    | `index.html`, `archive.html`, `practice.html`, `about.html`                  | `portal/index.html`                                                          |
-| Code only it uses        | `src/pages/`, `src/ui/` (except the board), `src/*.ts`, `worker/`, `public/` | `src/portal/` (UI, platform layer, strings), `src/endless/` (pure run logic) |
-| Shared, read-only for it | —                                                                            | `src/engine/`, `src/ui/board.ts` and its helpers, `src/styles/main.css`      |
-| Vite config              | `vite.config.ts`                                                             | `vite.portal.config.ts`                                                      |
-| Dev server               | `npm run dev`                                                                | `npm run dev:portal` (local ads overlay and saves)                           |
-| Build                    | `npm run build` → `dist/`                                                    | `npm run build:portal` → `dist-portal/`                                      |
-| Preview build            | `npm run preview`                                                            | `npm run preview:portal` (real SDK, `local` environment)                     |
-| End-to-end tests         | `npm run e2e` (`e2e/`, `playwright.config.ts`)                               | `npm run e2e:portal` (`e2e-portal/`, `playwright.portal.config.ts`)          |
-| Ships by                 | Push to `main`; Cloudflare Workers Builds deploys                            | `npm run package:portal` → zip the owner uploads by hand                     |
+|                          | **germle.com** (the daily puzzle)                                            | **Germle Endless** (CrazyGames portal build)                                       |
+| ------------------------ | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| What it is               | Daily puzzle, archive, practice, About                                       | Roguelite endless mode for the CrazyGames web portal                               |
+| Pages                    | `index.html`, `archive.html`, `practice.html`, `about.html`                  | `portal/index.html`                                                                |
+| Code only it uses        | `src/pages/`, `src/ui/` (except the board), `src/*.ts`, `worker/`, `public/` | `src/portal/` (UI, platform layer, strings), `src/endless/` (pure run logic)       |
+| Shared, read-only for it | —                                                                            | `src/engine/`, `src/ui/board.ts` and its helpers, `src/styles/main.css`            |
+| Vite config              | `vite.config.ts`                                                             | `vite.portal.config.ts`                                                            |
+| Dev server               | `npm run dev`                                                                | `npm run dev:portal` (Basic Launch; `dev:portal:full` with simulated ads)          |
+| Build                    | `npm run build` → `dist/`                                                    | `build:portal` → `dist-portal/` (Basic), `build:portal:full` → `dist-portal-full/` |
+| Preview build            | `npm run preview`                                                            | `npm run preview:portal` / `preview:portal:full` (real SDK, `local` environment)   |
+| End-to-end tests         | `npm run e2e` (`e2e/`, `playwright.config.ts`)                               | `npm run e2e:portal` (`e2e-portal/`, `playwright.portal.config.ts`)                |
+| Ships by                 | Push to `main`; Cloudflare Workers Builds deploys                            | `npm run package:portal` → Basic and Full Launch zips the owner uploads by hand    |
 
 `npm run check` gates both: typecheck, lint, unit tests, both builds and `scripts/check-builds.ts`.
 
@@ -42,7 +42,10 @@ lands.
    no other portal's branding, no custom fullscreen button, no external ads, no Escape or
    Ctrl/Cmd+W controls (so no modal `<dialog>`), saves only through the SDK Data module, English
    text with every player-facing string in `src/portal/strings.ts`, PEGI 12-safe and not aimed
-   at children, relative paths only.
+   at children, relative paths only. The Basic Launch build (`dist-portal/`, what a new game is
+   uploaded as) never requests an ad, since ads are disabled then and a rewarded button without
+   effect gets the game rejected; ads live only in the Full Launch build (`dist-portal-full/`).
+   With an ad blocker, rewarded options show disabled with a notice, never clickable.
 
 ## Where things go
 
