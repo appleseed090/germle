@@ -147,7 +147,8 @@ test('a failed ad gives no second chance and no error; a watched one replays the
 
   await setAdMode(page, 'finish');
   await page.getByRole('button', { name: 'Replay this level (watch a video)' }).click();
-  await expect(page.locator('.hud-level')).toHaveText('Level 4');
+  // The side panel already shows level 4 on the summary; the replay is the vaccination phase.
+  await expect(page.locator('.hud-phase')).toHaveText('Vaccinate');
   expect((await readSave(page)).run).toMatchObject({ phase: 'playing', secondChanceUsed: true });
   expect(await sdkCalls(page)).not.toContain('requestAd:midgame');
 });
@@ -253,6 +254,50 @@ test('with every unlocked upgrade maxed, the choice points to Research and moves
   await expect(page.locator('.rewarded-button')).toHaveCount(0);
   await page.getByRole('button', { name: 'Next level' }).click();
   await expect(page.locator('.hud-level')).toHaveText('Level 10');
+});
+
+test('resuming on a failed level shows that level in the side panel', async ({ page }) => {
+  const failedResult = {
+    level: 4,
+    counts: { vaccinated: 4, quarantined: 6, untouched: 4, infected: 7 },
+    savedPercent: 67,
+    passThresholdPercent: 70,
+    passed: false,
+    nearMiss: true,
+    moves: 10,
+  };
+  await seedSave(page, returningPlayer(runAt(4, { phase: 'failed', lastResult: failedResult })));
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Continue · level 4' }).click();
+  await expect(page.getByRole('heading', { name: 'The outbreak spread' })).toBeVisible();
+  await expect(page.locator('.hud-level')).toHaveText('Level 4');
+  await expect(page.locator('.hud-target')).toHaveText(/^Save \d+%$/);
+  await expect(page.locator('.hud-phase')).toHaveText('Done');
+  await expect(page.locator('.hud-counter')).toHaveText('7 infected');
+});
+
+test('resuming on the upgrade choice shows the level just cleared in the side panel', async ({
+  page,
+}) => {
+  const passedResult = {
+    level: 2,
+    counts: { vaccinated: 3, quarantined: 4, untouched: 10, infected: 1 },
+    savedPercent: 94,
+    passThresholdPercent: 52,
+    passed: true,
+    nearMiss: false,
+    moves: 7,
+  };
+  await seedSave(
+    page,
+    returningPlayer(runAt(2, { phase: 'choosing', levelsCleared: 2, lastResult: passedResult })),
+  );
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Continue · level 2' }).click();
+  await expect(page.getByRole('heading', { name: 'Choose an upgrade' })).toBeVisible();
+  await expect(page.locator('.hud-level')).toHaveText('Level 2');
+  await expect(page.locator('.hud-phase')).toHaveText('Done');
+  await expect(page.locator('.hud-counter')).toHaveText('1 infected');
 });
 
 test('ending a run banks Research, records the best run and returns home', async ({ page }) => {
