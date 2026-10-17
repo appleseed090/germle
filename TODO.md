@@ -43,7 +43,7 @@ green and `dist/` byte-for-byte identical to `main` (`npm run compare:germle-com
 - [x] 6. Platform layer (ads, saves, leaderboard) with local and CrazyGames implementations;
       portal Playwright tests (`npm run e2e:portal`, also a CI job).
 - [x] 7. Covers, `npm run package:portal`, PR from `portal` to `main`.
-- [ ] 8. Owner playtest; fix what they report; then the PR is ready to merge.
+- [x] 8. Owner playtest; fix what they report; then the PR is ready to merge (2026-10-17).
   - [x] Immune people were invisible (removed like anyone vaccinated): now dashed outlines, and
         the toast points at them.
   - [x] Masks, Safety Margin and Natural Immunity cards quoted stale numbers: card text now reads
