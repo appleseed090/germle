@@ -25,6 +25,18 @@ export interface LevelViewOptions {
   readonly sound: Sound;
   readonly showToast: (message: string) => void;
   readonly announce: (message: string) => void;
+  /**
+   * Taps already made on this level (from the save), replayed at mount so a reload resumes the
+   * level where it was. Taps that are not legal for this level start it afresh.
+   */
+  readonly resumeMoves: readonly number[];
+  /** Undo charges already spent on this level. */
+  readonly undoChargesUsed: number;
+  /**
+   * Called as soon as a tap or undo changes the level, before any animation, with every tap so
+   * far: saving here means a reload mid-animation cannot take a tap back.
+   */
+  readonly onProgress: (moves: readonly number[], undoChargesUsed: number) => void;
   /** Called after every move's animation, and after an undo, with what is now shown. */
   readonly onStateShown: (state: GameState, undoChargesLeft: number) => void;
   /** Called once, after the final move's animation. */
@@ -51,8 +63,17 @@ const BANNER_MILLISECONDS = 1800;
 export function mountLevel(options: LevelViewOptions): LevelView {
   const { stage, prepared, sound } = options;
   const { puzzle, rules } = prepared;
-  let state = startGameWithRules(puzzle, rules).state;
-  let undoCharges = prepared.undoCharges;
+  const resumed =
+    options.resumeMoves.length > 0
+      ? replayMovesWithRules(puzzle, rules, options.resumeMoves)
+      : undefined;
+  let state = resumed ?? startGameWithRules(puzzle, rules).state;
+  let undoCharges = Math.max(0, prepared.undoCharges - options.undoChargesUsed);
+  const reportProgress = (): void => {
+    options.onProgress(state.moves, prepared.undoCharges - undoCharges);
+  };
+  // Saved taps this level rejects (an edited or stale save) are dropped from the save too.
+  if (options.resumeMoves.length > 0 && resumed === undefined) reportProgress();
   let inputBlocked = false;
   let ended = false;
   let bannerTimer: number | undefined;
@@ -143,6 +164,7 @@ export function mountLevel(options: LevelViewOptions): LevelView {
     }
     const step = applyTapWithRules(puzzle, rules, state, node);
     state = step.state;
+    reportProgress();
     playSounds(step);
     hint.hidden = true;
     await board.animateStep(step);
@@ -228,6 +250,7 @@ export function mountLevel(options: LevelViewOptions): LevelView {
       if (previous === undefined) return;
       undoCharges -= 1;
       state = previous;
+      reportProgress();
       board.render(state);
       showState();
       options.showToast(STRINGS.toasts.undone);

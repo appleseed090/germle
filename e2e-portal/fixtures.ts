@@ -179,6 +179,8 @@ export function runAt(level: number, overrides: Partial<RunState> = {}): RunStat
     freeRerollsLeft: 0,
     phase: 'playing',
     lastResult: null,
+    levelMoves: [],
+    levelUndosUsed: 0,
     ...overrides,
   };
 }

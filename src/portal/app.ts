@@ -19,6 +19,7 @@ import {
   finishLevel,
   judgeLevel,
   pickUpgrade,
+  recordLevelProgress,
   rerollOffer,
   skipOffer,
   useSecondChance,
@@ -63,9 +64,10 @@ const COUNT_UP_MILLISECONDS = 650;
 
 /**
  * Germle Endless: the flow between home, levels, summaries, upgrade choices, the run summary and
- * Research. Owns the save and writes it through the platform at the end of each level and at
- * each decision, never on every tap. Ends the platform's loading phase (`loadingStop`) just before
- * the first screen, so it always comes before the first `gameplayStart`.
+ * Research. Owns the save and writes it through the platform after every tap (so a reload resumes
+ * a level rather than restarting it) and at each decision. Ends the platform's loading phase
+ * (`loadingStop`) just before the first screen, so it always comes before the first
+ * `gameplayStart`.
  *
  * @param root - The page's `#portal-app` element; the app fills it.
  */
@@ -263,6 +265,11 @@ export function startApp(root: HTMLElement, platform: Platform): void {
       sound,
       showToast,
       announce,
+      resumeMoves: run.levelMoves,
+      undoChargesUsed: run.levelUndosUsed,
+      onProgress: (moves, undoChargesUsed) => {
+        setRun(recordLevelProgress(currentRun(), moves, undoChargesUsed));
+      },
       onStateShown: (state, undoChargesLeft) => {
         hud.update(currentRun(), prepared, state, undoChargesLeft);
       },
