@@ -1,3 +1,4 @@
+import { LARGEST_LEVEL_NODE_COUNT } from './levels';
 import { isRunSeed, type LevelResult, type RunPhase, type RunScore, type RunState } from './run';
 import { isUnlockId, type UnlockId } from './research';
 import { countUpgrades, isUpgradeId, UPGRADES, type UpgradeId } from './upgrades';
@@ -27,11 +28,12 @@ export interface EndlessSave {
   /** Set once level 1 has been cleared; the first-run hints stop then. */
   readonly tutorialDone: boolean;
   readonly settings: EndlessSettings;
-  /** The run in progress, saved after each level; `null` between runs. */
+  /** The run in progress, saved after every tap and decision; `null` between runs. */
   readonly run: RunState | null;
 }
 
-export const SAVE_VERSION = 1;
+/** 2: the run keeps the current level's taps (`levelMoves`, `levelUndosUsed`). */
+export const SAVE_VERSION = 2;
 
 /** The key the save is stored under, in whatever store the platform provides. */
 export const SAVE_KEY = 'germle-endless-save';
@@ -86,8 +88,10 @@ export function parseSave(text: string | null): ParsedSave {
   if (!isRecord(value) || !isWholeNumber(value['version']))
     return { save: FRESH_SAVE, source: 'reset' };
   if (value['version'] > SAVE_VERSION) return { save: FRESH_SAVE, source: 'newer' };
+  // Version 1 had no level progress; its runs resume at the start of their level.
+  if (value['version'] === 1) return parseCurrentVersion({ ...value, version: SAVE_VERSION }, 1);
   if (value['version'] !== SAVE_VERSION) return { save: FRESH_SAVE, source: 'reset' };
-  return parseVersionOne(value);
+  return parseCurrentVersion(value, SAVE_VERSION);
 }
 
 /** The text to store for a save. */
@@ -95,7 +99,7 @@ export function serialiseSave(save: EndlessSave): string {
   return JSON.stringify(save);
 }
 
-function parseVersionOne(value: Record<string, unknown>): ParsedSave {
+function parseCurrentVersion(value: Record<string, unknown>, storedVersion: number): ParsedSave {
   let repaired = false;
   const field = <Field>(parsed: Field | undefined, fallback: Field): Field => {
     if (parsed === undefined) {
@@ -109,7 +113,7 @@ function parseVersionOne(value: Record<string, unknown>): ParsedSave {
     : undefined;
   if (unlocks !== undefined && unlocks.length !== (value['unlocks'] as unknown[]).length)
     repaired = true;
-  const run = value['run'] === null ? null : parseRun(value['run']);
+  const run = value['run'] === null ? null : parseRun(value['run'], storedVersion);
   const save: EndlessSave = {
     version: SAVE_VERSION,
     research: field(wholeNumberOrUndefined(value['research']), 0),
@@ -144,7 +148,22 @@ function parseScore(value: unknown): RunScore | undefined {
 
 const RUN_PHASES: readonly RunPhase[] = ['playing', 'choosing', 'failed', 'over'];
 
-function parseRun(value: unknown): RunState | undefined {
+/** The most taps a stored level may claim: twice the largest network, far above any real level. */
+const MAXIMUM_STORED_LEVEL_MOVES = 2 * LARGEST_LEVEL_NODE_COUNT;
+
+/**
+ * The current level's taps, structurally checked. Whether they are legal for the level is only
+ * known with its puzzle, so the level checks that when it replays them (`level-view.ts`).
+ */
+function parseLevelMoves(value: unknown): number[] | undefined {
+  if (!Array.isArray(value) || value.length > MAXIMUM_STORED_LEVEL_MOVES) return undefined;
+  const moves: unknown[] = value;
+  return moves.every((node) => isWholeNumber(node) && node < LARGEST_LEVEL_NODE_COUNT)
+    ? (moves as number[])
+    : undefined;
+}
+
+function parseRun(value: unknown, storedVersion: number): RunState | undefined {
   if (!isRecord(value)) return undefined;
   const { seed, level, picks, phase } = value;
   if (!isRunSeed(seed)) return undefined;
@@ -176,6 +195,11 @@ function parseRun(value: unknown): RunState | undefined {
   const runPhase = phase as RunPhase;
   if ((runPhase === 'choosing' || runPhase === 'failed') && lastResult?.level !== level)
     return undefined;
+  // A version 1 run has no level progress; a bad one restarts the level rather than the run.
+  const storedMoves = storedVersion === 1 ? [] : parseLevelMoves(value['levelMoves']);
+  const storedUndos = storedVersion === 1 ? 0 : wholeNumberOrUndefined(value['levelUndosUsed']);
+  const progressIsValid =
+    runPhase === 'playing' && storedMoves !== undefined && storedUndos !== undefined;
   return {
     seed,
     level,
@@ -188,6 +212,8 @@ function parseRun(value: unknown): RunState | undefined {
     freeRerollsLeft,
     phase: runPhase,
     lastResult,
+    levelMoves: progressIsValid ? storedMoves : [],
+    levelUndosUsed: progressIsValid ? storedUndos : 0,
   };
 }
 

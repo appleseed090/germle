@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { beginRun, buyUnlock, finishRun, recordRun } from './profile';
 import { unlockCost } from './research';
-import { finishLevel, type LevelResult } from './run';
+import { finishLevel, recordLevelProgress, type LevelResult } from './run';
 import { FRESH_SAVE, SAVE_VERSION, parseSave, serialiseSave, type EndlessSave } from './save';
 
 const PASSED_LEVEL_ONE: LevelResult = {
@@ -57,6 +57,48 @@ describe('parseSave', () => {
     expect(save.unlocks).toEqual(['contact-tracing']);
     expect(save.settings).toEqual(FRESH_SAVE.settings);
     expect(save.run?.levelsCleared).toBe(1);
+  });
+
+  it('keeps the taps of the level being played, so a reload resumes it', () => {
+    const started = beginRun(FRESH_SAVE, 'abcd1234');
+    if (started.run === null) throw new Error('No run');
+    const save = recordRun(started, recordLevelProgress(started.run, [3, 7, 1], 1));
+    const { save: parsed, source } = parseSave(serialiseSave(save));
+    expect(source).toBe('loaded');
+    expect(parsed.run).toMatchObject({ levelMoves: [3, 7, 1], levelUndosUsed: 1 });
+  });
+
+  it('migrates a version 1 save: its run resumes at the start of its level', () => {
+    const current = savedMidRun();
+    const versionOne = JSON.parse(serialiseSave(current)) as {
+      version: number;
+      run: Record<string, unknown>;
+    };
+    versionOne.version = 1;
+    delete versionOne.run['levelMoves'];
+    delete versionOne.run['levelUndosUsed'];
+    const { save, source } = parseSave(JSON.stringify(versionOne));
+    expect(source).toBe('loaded');
+    expect(save.version).toBe(SAVE_VERSION);
+    expect(save.run).toEqual(current.run);
+  });
+
+  it.each([
+    ['not a list', 'tap'],
+    ['negative taps', [2, -1]],
+    ['taps beyond any network', [2, 999]],
+    ['fractions', [2.5]],
+  ])('restarts the level, keeping the run, when its taps are %s', (_, levelMoves) => {
+    const started = beginRun(FRESH_SAVE, 'abcd1234');
+    const stored = { ...started, run: { ...started.run, levelMoves, levelUndosUsed: 1 } };
+    const { save } = parseSave(JSON.stringify(stored));
+    expect(save.run).toMatchObject({ level: 1, levelMoves: [], levelUndosUsed: 0 });
+  });
+
+  it('ignores level taps on a run that is not playing a level', () => {
+    const current = savedMidRun();
+    const stored = { ...current, run: { ...current.run, levelMoves: [1, 2] } };
+    expect(parseSave(JSON.stringify(stored)).save.run?.levelMoves).toEqual([]);
   });
 
   it('drops a run that is not internally consistent', () => {

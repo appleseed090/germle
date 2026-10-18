@@ -23,8 +23,8 @@ export interface LevelResult {
 }
 
 /**
- * A whole run, JSON-serialisable: saved after every level so closing the tab loses at most the
- * level being played. Never mutated; every transition returns a new one.
+ * A whole run, JSON-serialisable: saved after every tap, so closing the tab loses nothing and a
+ * reload cannot replay a level. Never mutated; every transition returns a new one.
  */
 export interface RunState {
   /** Seeds every level and offer, so a run is reproducible. */
@@ -45,6 +45,14 @@ export interface RunState {
   readonly freeRerollsLeft: number;
   readonly phase: RunPhase;
   readonly lastResult: LevelResult | null;
+  /**
+   * The current level's taps so far, in order, while `playing`; empty otherwise. A resumed level
+   * replays them, so reloading neither loses the level nor restarts it (the outbreak is seeded,
+   * so a restart would be a free retry).
+   */
+  readonly levelMoves: readonly number[];
+  /** Undo charges (Second Opinion) spent on the current level, so a reload does not refill them. */
+  readonly levelUndosUsed: number;
 }
 
 /** A run's score: levels cleared, then people saved. */
@@ -79,6 +87,12 @@ export function isRunSeed(value: unknown): value is string {
   return typeof value === 'string' && /^[a-z0-9]{8}$/.test(value);
 }
 
+/** A level not yet touched. */
+const NO_LEVEL_PROGRESS = { levelMoves: [], levelUndosUsed: 0 } as const satisfies Pick<
+  RunState,
+  'levelMoves' | 'levelUndosUsed'
+>;
+
 /** A fresh run at level 1. */
 export function startRun(seed: string, options: RunStartOptions): RunState {
   return {
@@ -93,7 +107,22 @@ export function startRun(seed: string, options: RunStartOptions): RunState {
     freeRerollsLeft: options.freeRerolls,
     phase: 'playing',
     lastResult: null,
+    ...NO_LEVEL_PROGRESS,
   };
+}
+
+/**
+ * Records the current level's taps and spent undo charges, after every tap and undo.
+ *
+ * @throws Error unless the run is `playing`.
+ */
+export function recordLevelProgress(
+  run: RunState,
+  levelMoves: readonly number[],
+  levelUndosUsed: number,
+): RunState {
+  requirePhase(run, 'playing');
+  return { ...run, levelMoves: [...levelMoves], levelUndosUsed };
 }
 
 /** Judges a finished level against its pass mark. */
@@ -131,6 +160,7 @@ export function finishLevel(run: RunState, result: LevelResult): RunState {
     rerollsThisOffer: 0,
     phase: result.passed ? 'choosing' : 'failed',
     lastResult: result,
+    ...NO_LEVEL_PROGRESS,
   };
 }
 
@@ -201,7 +231,7 @@ export function canUseSecondChance(run: RunState): boolean {
  */
 export function useSecondChance(run: RunState): RunState {
   if (!canUseSecondChance(run)) throw new Error('No second chance available');
-  return { ...run, secondChanceUsed: true, phase: 'playing' };
+  return { ...run, secondChanceUsed: true, phase: 'playing', ...NO_LEVEL_PROGRESS };
 }
 
 /** Ends a failed run. */
@@ -225,8 +255,10 @@ export function compareRunScores(a: RunScore, b: RunScore): number {
   return a.levelsCleared - b.levelsCleared || a.peopleSaved - b.peopleSaved;
 }
 
-function nextLevel(run: RunState): Pick<RunState, 'level' | 'phase' | 'rerollsThisOffer'> {
-  return { level: run.level + 1, phase: 'playing', rerollsThisOffer: 0 };
+function nextLevel(
+  run: RunState,
+): Pick<RunState, 'level' | 'phase' | 'rerollsThisOffer' | 'levelMoves' | 'levelUndosUsed'> {
+  return { level: run.level + 1, phase: 'playing', rerollsThisOffer: 0, ...NO_LEVEL_PROGRESS };
 }
 
 function requirePhase(run: RunState, phase: RunPhase): void {

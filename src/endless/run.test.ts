@@ -12,6 +12,7 @@ import {
   isRunSeed,
   judgeLevel,
   pickUpgrade,
+  recordLevelProgress,
   rerollOffer,
   runScore,
   skipOffer,
@@ -71,6 +72,18 @@ describe('a run', () => {
     while (baseLevelConfig(firstRefuserLevel).refuserCount === 0) firstRefuserLevel++;
     expect(currentOffer(passedAt(firstRefuserLevel - 2), onlyOutreach)).toEqual([]);
     expect(currentOffer(passedAt(firstRefuserLevel - 1), onlyOutreach)).toEqual(['outreach']);
+  });
+
+  it('records the level being played, and starts every new level untouched', () => {
+    const playing = recordLevelProgress(startRun('abcd1234', NO_BONUSES), [4, 2], 1);
+    expect(playing).toMatchObject({ levelMoves: [4, 2], levelUndosUsed: 1 });
+    const passed = finishLevel(playing, result(1, true));
+    expect(passed).toMatchObject({ levelMoves: [], levelUndosUsed: 0 });
+    expect(() => recordLevelProgress(passed, [1], 0)).toThrow();
+    const offer = currentOffer(passed, EVERYTHING);
+    expect(pickUpgrade(passed, offer[0] as (typeof offer)[number], offer).levelMoves).toEqual([]);
+    const failed = finishLevel(recordLevelProgress(playing, [4, 2, 9], 0), result(1, false));
+    expect(useSecondChance(failed)).toMatchObject({ levelMoves: [], levelUndosUsed: 0 });
   });
 
   it('draws a new offer on a reroll, spending free rerolls first', () => {

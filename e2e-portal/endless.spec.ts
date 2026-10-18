@@ -1,4 +1,6 @@
-import { baseLevelConfig } from '../src/endless/levels';
+import { applyTapWithRules, startGameWithRules } from '../src/engine/rules';
+import { baseLevelConfig, prepareLevel } from '../src/endless/levels';
+import { chooseBotMove } from '../src/endless/simulation';
 import type { UpgradeId } from '../src/endless/upgrades';
 import {
   STRONG_PICKS,
@@ -298,6 +300,49 @@ test('resuming on the upgrade choice shows the level just cleared in the side pa
   await expect(page.locator('.hud-level')).toHaveText('Level 2');
   await expect(page.locator('.hud-phase')).toHaveText('Done');
   await expect(page.locator('.hud-counter')).toHaveText('1 infected');
+});
+
+test('a reload resumes the level exactly where it was, even mid-animation', async ({ page }) => {
+  const run = runAt(3);
+  await seedSave(page, returningPlayer(run));
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Continue · level 3' }).click();
+
+  // Play until one quarantine is made, then reload at once, before its animation ends.
+  const prepared = prepareLevel(run.seed, run.level, run.picks);
+  let state = startGameWithRules(prepared.puzzle, prepared.rules).state;
+  while (state.phase === 'vaccinate' || state.quarantineCount === 0) {
+    const node = chooseBotMove(prepared, state);
+    await expect(page.locator(board)).toHaveAttribute('data-animating', 'false');
+    await page.locator(`${board} .node[data-node-id="${String(node)}"]`).click();
+    state = applyTapWithRules(prepared.puzzle, prepared.rules, state, node).state;
+  }
+  await page.reload();
+  await page.getByRole('button', { name: 'Continue · level 3' }).click();
+  await expect(page.locator('.hud-phase')).toHaveText('Quarantine');
+  const shown = await page
+    .locator(`${board} .node`)
+    .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-status')));
+  expect(shown).toEqual(state.nodeStatuses);
+  expect((await readSave(page)).run?.levelMoves).toEqual(state.moves);
+});
+
+test('saved taps that are not legal for the level start it afresh, without an error', async ({
+  page,
+}) => {
+  const run = runAt(3);
+  const prepared = prepareLevel(run.seed, run.level, run.picks);
+  const firstTap = chooseBotMove(
+    prepared,
+    startGameWithRules(prepared.puzzle, prepared.rules).state,
+  );
+  // The same person twice: the second tap is illegal (they are already vaccinated).
+  await seedSave(page, returningPlayer({ ...run, levelMoves: [firstTap, firstTap] }));
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Continue · level 3' }).click();
+  await expect(page.locator('.hud-phase')).toHaveText('Vaccinate');
+  await expect(page.locator(`${board} .node[data-status="vaccinated"]`)).toHaveCount(0);
+  await expect.poll(async () => (await readSave(page)).run?.levelMoves).toEqual([]);
 });
 
 test('ending a run banks Research, records the best run and returns home', async ({ page }) => {

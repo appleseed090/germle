@@ -628,9 +628,9 @@ adError })` (callbacks only, no promise form) with error codes `unfilled`, `adbl
   each upgrade offer draws from its own stream keyed by seed, level and reroll count, so
   reloading during a choice shows the same offer and never rerolls for free.
 - **The run is a small state machine** (`playing`, `choosing`, `failed`, `over`) of plain JSON,
-  saved whole after each level. The score is levels cleared, then people saved over cleared
-  levels. A failed level may be replayed once per run (Second chance): the same network and
-  outbreak, which the player has now seen.
+  saved whole after every tap and decision. The score is levels cleared, then people saved over
+  cleared levels. A failed level may be replayed once per run (Second chance): the same network
+  and outbreak, which the player has now seen.
 - **Networks stop growing at 80 people,** the practice maximum and the most a 360 px phone can
   show with tappable people (DECISIONS "Contact counts": 21 px discs). Past that, more index
   patients, fewer vaccines per person, higher contagiousness and a higher pass mark keep the
@@ -690,8 +690,16 @@ adError })` (callbacks only, no promise form) with error codes `unfilled`, `adbl
   run, runs finished, tutorial flag, settings and the run in progress. Every field is validated
   on load; a bad field falls back to its default, an inconsistent run is dropped, unreadable data
   gives a fresh save, and a save from a newer version is left untouched (the game then plays
-  without saving rather than overwrite it). It is written after each level, each upgrade pick or
-  reroll, each Research purchase and when Settings close, never on a tap.
+  without saving rather than overwrite it). It is written after every tap and undo, each level
+  end, each upgrade pick or reroll, each Research purchase and when Settings close.
+- **A reload resumes the level where it was (save version 2, owner's playtest 2026-10-18).**
+  Version 1 saved only at level ends, so a reload restarted the level, and since every level is
+  seeded the player could replay it knowing where the outbreak starts: a free, unlimited retry.
+  The run now keeps the level's taps (`levelMoves`) and spent undo charges (`levelUndosUsed`),
+  saved as soon as a tap or undo applies, before its animation, so a reload mid-animation cannot
+  take a tap back either. A resumed level replays the taps through the engine; taps that are not
+  legal for the level (an edited save) start it afresh and are dropped from the save. Version 1
+  saves migrate with no level progress.
 - **Research: 10 per cleared level plus 10 per full five levels; nine unlocks.** The seven
   starter upgrades are always in the pool. Research buys, cheapest first: Contact Tracing 60,
   Spare Reroll (one free reroll per run) 100, Ring Vaccination 150, Burnout 220, Head Start (a
